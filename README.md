@@ -99,7 +99,7 @@ short version:
 | Variable | Required | What it is |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | yes | Your project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | The publishable key. Safe in the browser — every request it makes is constrained by Row Level Security |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | yes | The browser-safe key (`sb_publishable_…`). Safe to expose — every request it makes is constrained by Row Level Security. The legacy name `NEXT_PUBLIC_SUPABASE_ANON_KEY` is still accepted |
 | `NEXT_PUBLIC_SITE_URL` | yes | Canonical origin, no trailing slash. Canonical tags, Open Graph URLs and `sitemap.xml` are built from it |
 | `SUPABASE_SERVICE_ROLE_KEY` | strongly recommended | **Secret.** Bypasses RLS. Needed for the contact form, QR scan counters, analytics and granting CMS access |
 | `ADMIN_SETUP_TOKEN` | once | A random string used to claim the site. Delete it after setup |
@@ -124,10 +124,12 @@ but there is no reason to ship it).
 1. Create a project at [supabase.com](https://supabase.com). Pick the region
    closest to your customers — it is the single biggest factor in how fast
    pages feel.
-2. **Project Settings → Data API**: copy the URL and the `anon` key into
-   `.env.local`.
-3. **Project Settings → API Keys**: copy the `service_role` key into
-   `SUPABASE_SERVICE_ROLE_KEY`.
+2. **Project Settings → Data API**: copy the project URL into
+   `NEXT_PUBLIC_SUPABASE_URL`.
+3. **Project Settings → API Keys**: copy the **publishable** key
+   (`sb_publishable_…`) into `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and the
+   **secret** key (`sb_secret_…`, shown as `service_role` on older projects)
+   into `SUPABASE_SERVICE_ROLE_KEY`.
 4. Run the migrations (below). They create the schema, the security policies,
    the storage bucket and the demo content.
 5. **Authentication → Users → Add user**: create your own account with a strong
@@ -284,7 +286,7 @@ Set the secrets (they are never committed):
 ```bash
 npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
 npx wrangler secret put NEXT_PUBLIC_SUPABASE_URL
-npx wrangler secret put NEXT_PUBLIC_SUPABASE_ANON_KEY
+npx wrangler secret put NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 npx wrangler secret put NEXT_PUBLIC_SITE_URL
 ```
 
@@ -440,7 +442,7 @@ You can also check from the outside, with nothing but your public anon key:
 
 ```bash
 curl "$NEXT_PUBLIC_SUPABASE_URL/rest/v1/contact_messages?select=*" \
-  -H "apikey: $NEXT_PUBLIC_SUPABASE_ANON_KEY"
+  -H "apikey: $NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
 # -> permission denied for table contact_messages
 ```
 
@@ -525,8 +527,8 @@ Ways this app stays inside them:
 ## Troubleshooting
 
 **"Connect your Supabase project" on every page.**
-`NEXT_PUBLIC_SUPABASE_URL` or `NEXT_PUBLIC_SUPABASE_ANON_KEY` is missing or
-malformed. They are read at build time, so restart the dev server after editing
+`NEXT_PUBLIC_SUPABASE_URL` or `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` is missing
+or malformed. They are read at build time, so restart the dev server after editing
 `.env.local`.
 
 **Signed in, but "this account does not have CMS access yet".**

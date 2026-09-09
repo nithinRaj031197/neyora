@@ -31,10 +31,33 @@ const publicSchema = z.object({
 
 export type PublicEnv = z.infer<typeof publicSchema>
 
+/**
+ * The browser-safe Supabase key.
+ *
+ * Newer Supabase projects issue `sb_publishable_…` keys and the dashboard
+ * names the variable `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Older projects
+ * issue a JWT under `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Both authenticate as the
+ * `anon` role and are equally safe in the browser — everything they can do is
+ * bounded by Row Level Security — so both names are accepted and the newer one
+ * wins.
+ *
+ * Both are written as literal `process.env.X` expressions on purpose: Next.js
+ * only inlines a `NEXT_PUBLIC_*` value into the client bundle when it can see
+ * the whole name statically. A computed lookup would compile to `undefined` in
+ * the browser and fail only at runtime.
+ */
+function readPublishableKey(): string {
+  return (
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+    ''
+  )
+}
+
 function readPublicEnv(): PublicEnv {
   const raw = {
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-    supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
+    supabaseAnonKey: readPublishableKey(),
     siteUrl: (process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000').replace(/\/+$/, ''),
     mediaBucket: process.env.NEXT_PUBLIC_SUPABASE_MEDIA_BUCKET ?? 'media',
     analyticsProvider: process.env.NEXT_PUBLIC_ANALYTICS_PROVIDER ?? 'none',
@@ -69,8 +92,7 @@ export function publicEnv(): PublicEnv {
  */
 export function isSupabaseConfigured(): boolean {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
-  return URL_PATTERN.test(url) && key.length >= 20
+  return URL_PATTERN.test(url) && readPublishableKey().length >= 20
 }
 
 /**
@@ -80,6 +102,9 @@ export function isSupabaseConfigured(): boolean {
  * this, it is about to make a database request that cannot succeed without
  * them. Callers that must degrade gracefully check `isSupabaseConfigured()`
  * first.
+ *
+ * `supabaseAnonKey` carries whichever browser-safe key the project issued —
+ * see `readPublishableKey()`.
  */
 export function supabaseEnv(): { supabaseUrl: string; supabaseAnonKey: string } {
   const { supabaseUrl, supabaseAnonKey } = publicEnv()
@@ -87,7 +112,7 @@ export function supabaseEnv(): { supabaseUrl: string; supabaseAnonKey: string } 
   if (!URL_PATTERN.test(supabaseUrl) || supabaseAnonKey.length < 20) {
     throw new Error(
       'Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and ' +
-        'NEXT_PUBLIC_SUPABASE_ANON_KEY (copy .env.example to .env.local), then restart.',
+        'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (copy .env.example to .env.local), then restart.',
     )
   }
 

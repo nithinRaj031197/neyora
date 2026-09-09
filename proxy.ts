@@ -25,7 +25,11 @@ export default async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request })
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  // Newer projects issue NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY; older ones use
+  // NEXT_PUBLIC_SUPABASE_ANON_KEY. Both are accepted, newer wins. Written as
+  // literal expressions so Next.js can inline them (see lib/env.ts).
+  const key =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   // Not configured yet (fresh clone): let the app render its setup guidance.
   if (!url || !key) return response
