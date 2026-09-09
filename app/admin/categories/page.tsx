@@ -211,9 +211,9 @@ export default async function AdminCategoriesPage({
                       <p className="mt-0.5 flex flex-wrap items-center gap-2 font-mono text-[0.6875rem] text-earth-muted">
                         /{category.slug}
                         <StatusBadge
-            status={category.status}
-            isLive={isPublicationLive(category.status, category.scheduled_at)}
-          />
+                          status={category.status}
+                          isLive={isPublicationLive(category.status, category.scheduled_at)}
+                        />
                         {category.is_demo ? <Badge tone="golden">Demo</Badge> : null}
                       </p>
                     </div>

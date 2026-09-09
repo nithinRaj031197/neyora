@@ -33,9 +33,9 @@ export default async function EditPagePage({
         actions={
           <div className="flex items-center gap-2">
             <StatusBadge
-            status={page.status}
-            isLive={isPublicationLive(page.status, page.scheduled_at)}
-          />
+              status={page.status}
+              isLive={isPublicationLive(page.status, page.scheduled_at)}
+            />
             {page.is_demo ? <Badge tone="golden">Demo copy</Badge> : null}
           </div>
         }

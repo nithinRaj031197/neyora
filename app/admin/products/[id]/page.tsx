@@ -36,9 +36,9 @@ export default async function EditProductPage({
         actions={
           <div className="flex items-center gap-2">
             <StatusBadge
-            status={product.status}
-            isLive={isPublicationLive(product.status, product.scheduled_at)}
-          />
+              status={product.status}
+              isLive={isPublicationLive(product.status, product.scheduled_at)}
+            />
             {product.is_demo ? <Badge tone="golden">Demo content</Badge> : null}
           </div>
         }

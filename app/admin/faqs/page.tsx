@@ -164,9 +164,9 @@ export default async function AdminFaqsPage({
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge tone="outline">{faq.category}</Badge>
                       <StatusBadge
-            status={faq.status}
-            isLive={isPublicationLive(faq.status, faq.scheduled_at)}
-          />
+                        status={faq.status}
+                        isLive={isPublicationLive(faq.status, faq.scheduled_at)}
+                      />
                       {faq.is_demo ? <Badge tone="golden">Demo</Badge> : null}
                     </div>
                     <p className="mt-2 text-[0.9375rem] font-medium text-earth">{faq.question}</p>

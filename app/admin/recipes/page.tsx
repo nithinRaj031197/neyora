@@ -46,10 +46,12 @@ export default async function AdminRecipesPage({
     {
       key: 'status',
       header: 'Status',
-      render: (row) => <StatusBadge
-            status={row.status}
-            isLive={isPublicationLive(row.status, row.scheduled_at)}
-          />,
+      render: (row) => (
+        <StatusBadge
+          status={row.status}
+          isLive={isPublicationLive(row.status, row.scheduled_at)}
+        />
+      ),
     },
     {
       key: 'category',

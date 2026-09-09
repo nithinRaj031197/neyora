@@ -43,9 +43,9 @@ export default async function EditRecipePage({
         actions={
           <div className="flex items-center gap-2">
             <StatusBadge
-            status={recipe.status}
-            isLive={isPublicationLive(recipe.status, recipe.scheduled_at)}
-          />
+              status={recipe.status}
+              isLive={isPublicationLive(recipe.status, recipe.scheduled_at)}
+            />
             {recipe.is_demo ? <Badge tone="golden">Demo content</Badge> : null}
           </div>
         }

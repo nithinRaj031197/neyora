@@ -166,9 +166,9 @@ export default async function AdminTestimonialsPage({
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <StatusBadge
-            status={testimonial.status}
-            isLive={isPublicationLive(testimonial.status, testimonial.scheduled_at)}
-          />
+                        status={testimonial.status}
+                        isLive={isPublicationLive(testimonial.status, testimonial.scheduled_at)}
+                      />
                       {testimonial.featured ? <Badge tone="leaf">Homepage</Badge> : null}
                       {testimonial.is_demo ? <Badge tone="golden">Demo</Badge> : null}
                     </div>
