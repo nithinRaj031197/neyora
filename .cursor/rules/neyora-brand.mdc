@@ -1,0 +1,87 @@
+---
+description: NEYORA brand and visual design system — read before any UI or visual decision
+alwaysApply: true
+---
+
+# NEYORA Brand Rules
+
+NEYORA is a premium natural-food brand. Tagline: **GROWN FOR LIFE.**
+
+The first product is fresh oyster mushrooms, but NEYORA is a natural-food
+company, not a mushroom company. Never hardcode mushroom-specific assumptions
+into schema, routes, components or copy.
+
+Full reference: `docs/BRAND_GUIDELINES.md`. Read it before making visual choices.
+
+## Brand personality
+
+Natural · Premium · Warm · Modern · Trustworthy · Healthy · Earth-connected
+
+Not: rustic, cute, techy, corporate, clinical, hippie.
+
+## Colours (use the CSS tokens, never raw hex in components)
+
+| Token | Hex | CSS var |
+| --- | --- | --- |
+| Deep Forest Green | `#123C2A` | `--color-forest` |
+| Botanical Green | `#3F7D3A` | `--color-botanical` |
+| Fresh Leaf | `#8BAF35` | `--color-leaf` |
+| Golden Green | `#C6B83A` | `--color-golden` |
+| Warm Ivory | `#F6F0E3` | `--color-ivory` |
+| Mushroom Beige | `#D8C9B5` | `--color-beige` |
+| Earth | `#2B2923` | `--color-earth` |
+
+Use Tailwind utilities generated from these (`bg-forest`, `text-earth`,
+`border-beige`, …). Do not invent new colours.
+
+## Never use
+
+- Blue, cyan, aqua, teal, indigo, violet
+- Neon / fluorescent green
+- Generic SaaS gradients (purple→blue, blue→cyan, aurora meshes)
+- Generic AI imagery, flat vector farms, leaf doodles
+- Cheap stock-photo aesthetic
+- Pure `#000` or `#FFF` as a large field
+
+## Colour proportion — 70/20/8/2
+
+70% ivory/beige · 20% photography · 8% forest green · 2% leaf + golden.
+**If a screenshot reads as "green", it is wrong.**
+
+## The gradient
+
+`#123C2A → #3F7D3A → #8BAF35 → #C6B83A`, left to right. Allowed in exactly
+three places: the wordmark, a hairline section rule, and rarely one short piece
+of display text. Never on buttons, cards, backgrounds, icons or sections.
+
+## Typography
+
+- Display: **Fraunces** (`font-display`), large and tight (`-0.02em`).
+- Body/UI: **Inter** (`font-sans`).
+- Eyebrow: Inter 12px, uppercase, `0.18em` tracking, botanical green, once per section.
+- Body measure ≤ 68ch.
+
+## Design principles
+
+Use: generous whitespace (96–160px section padding), asymmetry, hairline
+`1px` beige borders instead of shadows, small radii (2–6px), editorial image
+captions, one clear action per section, restrained motion (fade + 8–16px
+translate, 200–500ms, honour `prefers-reduced-motion`).
+
+Avoid: rounded-2xl shadowed cards in 3-up grids, glassmorphism, frosted
+navbars, icon-in-coloured-circle feature rows, emoji icons, parallax,
+scroll-jacking, animated counters, template-like SaaS layouts.
+
+## Accessibility
+
+WCAG 2.2 AA. Leaf (`#8BAF35`) and Golden (`#C6B83A`) **fail AA on ivory for
+body text** — use them only for ≥24px display type, borders or focus rings.
+Focus ring: 2px leaf, 2px offset, always visible. Real alt text everywhere.
+
+## Engineering rules that protect the brand
+
+- Marketing copy lives in Supabase, never in JSX. If you find yourself typing a
+  headline into a component, move it to the CMS and read it from the database.
+- Server components by default; `'use client'` only where interaction requires it.
+- Public site and `/admin` are visually different systems. The admin is a clean,
+  dense, neutral CMS — it does not use the marketing hero styling.

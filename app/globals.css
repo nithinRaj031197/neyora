@@ -1,0 +1,443 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   NEYORA design tokens
+   Tailwind v4 reads @theme and generates utilities from it, so `bg-forest`,
+   `text-earth` and `border-beige` all exist without a config file.
+   Source of truth for values: docs/BRAND_GUIDELINES.md
+   ========================================================================== */
+@theme {
+  /* Brand palette — no blue, no cyan, no neon. */
+  --color-forest: #123c2a;
+  --color-botanical: #3f7d3a;
+  --color-leaf: #8baf35;
+  --color-golden: #c6b83a;
+  --color-ivory: #f6f0e3;
+  --color-beige: #d8c9b5;
+  --color-earth: #2b2923;
+
+  /* Derived tints. Kept few on purpose — a wide ramp invites green sprawl. */
+  --color-ivory-soft: #fbf8f1;
+  --color-beige-soft: #e9dfd0;
+  --color-forest-soft: #1b4f38;
+  --color-earth-soft: #4a463c;
+  --color-earth-muted: #6f6a5e;
+
+  /* Semantic — admin only. Warm-toned so nothing reads as a stock UI kit. */
+  --color-success: #3f7d3a;
+  --color-warning: #b07d1f;
+  --color-danger: #9b3a2c;
+  --color-info: #4a463c;
+
+  /* Type */
+  --font-display: var(--font-fraunces), 'Fraunces', 'Times New Roman', Georgia, serif;
+  --font-sans: var(--font-inter), 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+
+  /* Editorial scale. clamp() so a hero is large on desktop without being
+     absurd on a 360px phone. */
+  --text-eyebrow: 0.75rem;
+  --text-display-xl: clamp(2.75rem, 9vw, 6.5rem);
+  --text-display-lg: clamp(2.25rem, 6vw, 4.25rem);
+  --text-display-md: clamp(1.75rem, 4vw, 2.75rem);
+  --text-display-sm: clamp(1.375rem, 2.6vw, 1.875rem);
+
+  /* Section rhythm */
+  --spacing-section: clamp(4.5rem, 10vw, 10rem);
+  --spacing-section-sm: clamp(3rem, 6vw, 5.5rem);
+
+  /* Small radii only. Pill-shaped everything is the template look. */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 6px;
+
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+@layer base {
+  :root {
+    color-scheme: light;
+    --focus-ring: var(--color-leaf);
+  }
+
+  * {
+    border-color: var(--color-beige);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-ivory);
+    color: var(--color-earth);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    text-wrap: balance;
+    color: var(--color-forest);
+  }
+
+  p { text-wrap: pretty; }
+
+  /* Visible focus on keyboard navigation only, never on a mouse click. */
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+  }
+  :focus:not(:focus-visible) { outline: none; }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-leaf) 32%, transparent);
+    color: var(--color-forest);
+  }
+
+  /* Numbers in tables and admin lists should align in columns. */
+  table { font-variant-numeric: tabular-nums; }
+
+  img, video { max-width: 100%; height: auto; }
+
+  [hidden] { display: none !important; }
+
+  /* Honour the OS setting. Nothing in the brand depends on movement. */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ==========================================================================
+   Brand components
+   ========================================================================== */
+@layer components {
+  /* The wordmark gradient. Guidelines §2: the wordmark, a hairline rule, and
+     occasionally one short display phrase. Nowhere else. */
+  .neyora-gradient-text {
+    background-image: linear-gradient(
+      100deg,
+      var(--color-forest) 0%,
+      var(--color-botanical) 42%,
+      var(--color-leaf) 74%,
+      var(--color-golden) 100%
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    /* Falls back to a solid colour if background-clip:text is unsupported. */
+    @supports not (background-clip: text) {
+      color: var(--color-forest);
+      background-image: none;
+    }
+  }
+
+  .neyora-gradient-text-light {
+    background-image: linear-gradient(
+      100deg,
+      var(--color-ivory) 0%,
+      var(--color-beige) 40%,
+      var(--color-leaf) 76%,
+      var(--color-golden) 100%
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    @supports not (background-clip: text) {
+      color: var(--color-ivory);
+      background-image: none;
+    }
+  }
+
+  /* Hairline section divider — the second sanctioned gradient use. */
+  .neyora-rule {
+    height: 1px;
+    border: 0;
+    background-image: linear-gradient(
+      90deg,
+      var(--color-forest) 0%,
+      var(--color-botanical) 30%,
+      var(--color-leaf) 62%,
+      var(--color-golden) 88%,
+      transparent 100%
+    );
+    opacity: 0.5;
+  }
+
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: var(--text-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-botanical);
+  }
+
+  /* Skip link: off-screen until focused. */
+  .skip-link {
+    position: absolute;
+    left: 1rem;
+    top: -4rem;
+    z-index: 100;
+    padding: 0.75rem 1.25rem;
+    background: var(--color-forest);
+    color: var(--color-ivory);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    transition: top 160ms var(--ease-out-soft);
+  }
+  .skip-link:focus { top: 1rem; }
+}
+
+/* ==========================================================================
+   Markdown rendering — .prose-neyora
+   Hand-written rather than @tailwindcss/typography: one dependency fewer, and
+   these are editorial choices (serif headings, hairline tables, no shadows)
+   that a generic prose plugin would fight.
+   ========================================================================== */
+@layer components {
+  .prose-neyora {
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    color: var(--color-earth);
+    max-width: 68ch;
+  }
+
+  .prose-neyora > * + * { margin-top: 1.25em; }
+
+  .prose-neyora h1,
+  .prose-neyora h2,
+  .prose-neyora h3,
+  .prose-neyora h4 {
+    color: var(--color-forest);
+    margin-top: 2.25em;
+    margin-bottom: 0.6em;
+    scroll-margin-top: 6rem;
+  }
+  .prose-neyora > :first-child { margin-top: 0; }
+
+  .prose-neyora h1 { font-size: 2.125rem; letter-spacing: -0.025em; }
+  .prose-neyora h2 {
+    font-size: 1.625rem;
+    padding-bottom: 0.35em;
+    border-bottom: 1px solid var(--color-beige);
+  }
+  .prose-neyora h3 { font-size: 1.3125rem; }
+  .prose-neyora h4 {
+    font-size: 1rem;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--color-earth-soft);
+  }
+
+  .prose-neyora strong { font-weight: 600; color: var(--color-forest); }
+  .prose-neyora em { font-style: italic; }
+
+  .prose-neyora a {
+    color: var(--color-botanical);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    transition: color 150ms var(--ease-out-soft);
+  }
+  .prose-neyora a:hover { color: var(--color-forest); }
+
+  .prose-neyora ul,
+  .prose-neyora ol { padding-left: 1.4em; }
+  .prose-neyora ul { list-style: none; padding-left: 1.1em; }
+  .prose-neyora ul > li { position: relative; padding-left: 0.35em; }
+  /* A small leaf-green square, not a bullet glyph. */
+  .prose-neyora ul > li::before {
+    content: '';
+    position: absolute;
+    left: -0.85em;
+    top: 0.72em;
+    width: 4px;
+    height: 4px;
+    background-color: var(--color-leaf);
+  }
+  .prose-neyora ol { list-style: decimal; }
+  .prose-neyora ol > li::marker {
+    color: var(--color-botanical);
+    font-family: var(--font-display);
+    font-weight: 500;
+  }
+  .prose-neyora li + li { margin-top: 0.5em; }
+  .prose-neyora li > ul,
+  .prose-neyora li > ol { margin-top: 0.5em; }
+
+  .prose-neyora blockquote {
+    border-left: 2px solid var(--color-leaf);
+    padding: 0.1em 0 0.1em 1.25em;
+    font-family: var(--font-display);
+    font-size: 1.1875rem;
+    font-style: normal;
+    line-height: 1.5;
+    color: var(--color-forest);
+  }
+  .prose-neyora blockquote p + p { margin-top: 0.6em; }
+
+  .prose-neyora hr {
+    border: 0;
+    height: 1px;
+    background-color: var(--color-beige);
+    margin: 2.5em 0;
+  }
+
+  .prose-neyora code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    background-color: var(--color-beige-soft);
+    padding: 0.15em 0.4em;
+    border-radius: var(--radius-xs);
+    color: var(--color-forest);
+  }
+  .prose-neyora pre {
+    background-color: var(--color-earth);
+    color: var(--color-ivory);
+    padding: 1.15rem 1.25rem;
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+  .prose-neyora pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+    font-size: inherit;
+  }
+
+  /* Tables scroll inside their own container so the page body never does. */
+  .prose-neyora .md-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--color-beige);
+    border-radius: var(--radius-sm);
+  }
+  .prose-neyora table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+    min-width: 30rem;
+  }
+  .prose-neyora thead { background-color: var(--color-ivory-soft); }
+  .prose-neyora th {
+    text-align: left;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-earth-soft);
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--color-beige);
+  }
+  .prose-neyora td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--color-beige-soft);
+    vertical-align: top;
+  }
+  .prose-neyora tbody tr:last-child td { border-bottom: 0; }
+
+  .prose-neyora figure { margin: 2em 0; }
+  .prose-neyora img { border-radius: var(--radius-sm); }
+  .prose-neyora figcaption {
+    margin-top: 0.6em;
+    font-size: 0.8125rem;
+    color: var(--color-earth-muted);
+    line-height: 1.5;
+  }
+
+  .prose-neyora .contains-task-list { padding-left: 0; }
+  .prose-neyora .task-list-item { padding-left: 0; }
+  .prose-neyora .task-list-item::before { display: none; }
+  .prose-neyora input[type='checkbox'] {
+    accent-color: var(--color-botanical);
+    margin-right: 0.5em;
+  }
+
+  /* On dark sections. */
+  .prose-neyora.prose-invert { color: color-mix(in oklab, var(--color-ivory) 88%, transparent); }
+  .prose-neyora.prose-invert h1,
+  .prose-neyora.prose-invert h2,
+  .prose-neyora.prose-invert h3,
+  .prose-neyora.prose-invert strong,
+  .prose-neyora.prose-invert blockquote { color: var(--color-ivory); }
+  .prose-neyora.prose-invert h2 { border-bottom-color: color-mix(in oklab, var(--color-ivory) 20%, transparent); }
+  .prose-neyora.prose-invert h4 { color: var(--color-beige); }
+  .prose-neyora.prose-invert a { color: var(--color-golden); }
+  .prose-neyora.prose-invert a:hover { color: var(--color-leaf); }
+  .prose-neyora.prose-invert code { background-color: rgb(255 255 255 / 0.1); color: var(--color-beige); }
+  .prose-neyora.prose-invert hr,
+  .prose-neyora.prose-invert td { border-color: color-mix(in oklab, var(--color-ivory) 18%, transparent); }
+
+  /* Compact variant for FAQ answers and cards. */
+  .prose-neyora.prose-compact { font-size: 0.9375rem; line-height: 1.65; max-width: none; }
+  .prose-neyora.prose-compact > * + * { margin-top: 0.85em; }
+  .prose-neyora.prose-compact h2 { font-size: 1.125rem; border-bottom: 0; padding-bottom: 0; margin-top: 1.4em; }
+  .prose-neyora.prose-compact h3 { font-size: 1rem; margin-top: 1.4em; }
+}
+
+/* ==========================================================================
+   Motion — one entrance animation, used sparingly (guidelines §4)
+   ========================================================================== */
+@layer utilities {
+  @keyframes neyora-rise {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: none; }
+  }
+  .animate-rise {
+    animation: neyora-rise 560ms var(--ease-out-soft) both;
+  }
+  .animate-rise-delay-1 { animation-delay: 90ms; }
+  .animate-rise-delay-2 { animation-delay: 180ms; }
+  .animate-rise-delay-3 { animation-delay: 270ms; }
+
+  /* Screen-reader-only, but focusable. */
+  .sr-only-focusable:not(:focus):not(:focus-within) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .text-balance { text-wrap: balance; }
+  .text-pretty { text-wrap: pretty; }
+
+  /* Subtle paper grain. Guidelines §4: textures, not shadows. */
+  .neyora-grain {
+    position: relative;
+  }
+  .neyora-grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}

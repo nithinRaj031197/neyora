@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200" role="img" aria-label="GARLIC BUTTER — demo placeholder">
+  <defs>
+    <radialGradient id="a138415371" cx="18%" cy="22%" r="78%">
+      <stop offset="0%" stop-color="#C6B83A" stop-opacity="0.92"/>
+      <stop offset="100%" stop-color="#C6B83A" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="b138415371" cx="84%" cy="88%" r="72%">
+      <stop offset="0%" stop-color="#3F7D3A" stop-opacity="0.78"/>
+      <stop offset="100%" stop-color="#3F7D3A" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="g138415371" x="-6%" y="-6%" width="112%" height="112%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="57"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <rect width="1600" height="1200" fill="#2B2923"/>
+  <rect width="1600" height="1200" fill="url(#a138415371)"/>
+  <rect width="1600" height="1200" fill="url(#b138415371)"/>
+  <rect width="1600" height="1200" filter="url(#g138415371)" opacity="0.9"/>
+  <g font-family="Fraunces, Georgia, serif" text-anchor="middle">
+    <text x="50%" y="600" font-size="62" font-weight="500"
+          fill="#F6F0E3" opacity="0.9" letter-spacing="3.7199999999999998">GARLIC BUTTER</text>
+  </g>
+  <text x="50%" y="693" text-anchor="middle"
+        font-family="Inter, system-ui, sans-serif" font-size="26" font-weight="500"
+        fill="#F6F0E3" opacity="0.55" letter-spacing="5.72">DEMO PLACEHOLDER</text>
+</svg>

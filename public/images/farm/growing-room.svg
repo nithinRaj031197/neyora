@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200" role="img" aria-label="OUR FARM — demo placeholder">
+  <defs>
+    <radialGradient id="a983478705" cx="18%" cy="22%" r="78%">
+      <stop offset="0%" stop-color="#3F7D3A" stop-opacity="0.92"/>
+      <stop offset="100%" stop-color="#3F7D3A" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="b983478705" cx="84%" cy="88%" r="72%">
+      <stop offset="0%" stop-color="#D8C9B5" stop-opacity="0.78"/>
+      <stop offset="100%" stop-color="#D8C9B5" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="g983478705" x="-6%" y="-6%" width="112%" height="112%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="70"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <rect width="1600" height="1200" fill="#2B2923"/>
+  <rect width="1600" height="1200" fill="url(#a983478705)"/>
+  <rect width="1600" height="1200" fill="url(#b983478705)"/>
+  <rect width="1600" height="1200" filter="url(#g983478705)" opacity="0.9"/>
+  <g font-family="Fraunces, Georgia, serif" text-anchor="middle">
+    <text x="50%" y="600" font-size="62" font-weight="500"
+          fill="#F6F0E3" opacity="0.9" letter-spacing="3.7199999999999998">OUR FARM</text>
+  </g>
+  <text x="50%" y="693" text-anchor="middle"
+        font-family="Inter, system-ui, sans-serif" font-size="26" font-weight="500"
+        fill="#F6F0E3" opacity="0.55" letter-spacing="5.72">DEMO PLACEHOLDER</text>
+</svg>

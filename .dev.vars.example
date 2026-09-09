@@ -1,0 +1,13 @@
+# Secrets for `npm run cf:preview` (local workerd).
+#
+# Wrangler reads .dev.vars, not .env.local. Copy this to `.dev.vars` and fill
+# it in if you want to preview the Cloudflare build locally.
+#
+# .dev.vars is gitignored. For production, use `wrangler secret put NAME`
+# or the Cloudflare dashboard — never commit secrets.
+
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_SITE_URL=http://localhost:8787
+SUPABASE_SERVICE_ROLE_KEY=
+ADMIN_SETUP_TOKEN=
