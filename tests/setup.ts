@@ -5,14 +5,11 @@ import { afterEach, vi } from 'vitest'
 /**
  * Test environment.
  *
- * Public env vars are stubbed here so modules that call `publicEnv()` at import
- * time work under test without a real Supabase project.
+ * The site has no credentials, so this is only the canonical origin — which
+ * the SEO builders need in order to produce absolute URLs.
  */
-process.env.NEXT_PUBLIC_SUPABASE_URL ??= 'https://test-project.supabase.co'
-process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??= 'test-anon-key-that-is-long-enough-to-pass'
 process.env.NEXT_PUBLIC_SITE_URL ??= 'https://neyora.test'
-process.env.NEXT_PUBLIC_SUPABASE_MEDIA_BUCKET ??= 'media'
-process.env.NEXT_PUBLIC_ANALYTICS_PROVIDER ??= 'internal'
+process.env.NEXT_PUBLIC_ANALYTICS_PROVIDER ??= 'none'
 
 afterEach(() => {
   cleanup()

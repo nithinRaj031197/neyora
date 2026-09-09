@@ -5,33 +5,29 @@ import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer'
 import { JsonLd } from '@/components/ui/JsonLd'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ButtonLink } from '@/components/ui/Button'
-import { getFaqs, getPageBySlug, groupFaqs } from '@/lib/content/pages'
-import { getSiteSettings } from '@/lib/content/site'
+import { getFaqs, getPageBySlug, getSiteSettings, groupFaqs } from '@/lib/content'
 import { buildMetadata } from '@/lib/seo/metadata'
 import { breadcrumbJsonLd, faqJsonLd } from '@/lib/seo/jsonld'
-
-export const revalidate = 600
 
 const TRAIL = [
   { name: 'Home', path: '/' },
   { name: 'FAQ', path: '/faq' },
 ]
 
-export async function generateMetadata(): Promise<Metadata> {
-  const [settings, page] = await Promise.all([getSiteSettings(), getPageBySlug('faq-intro')])
+export function generateMetadata(): Metadata {
+  const page = getPageBySlug('faq-intro')
   return buildMetadata({
-    title: page?.seo_title || page?.title || 'Frequently Asked Questions',
-    description:
-      page?.seo_description ||
-      page?.subtitle ||
-      'Answers about freshness, storage, cooking and how we grow.',
+    title: page?.title || 'Frequently Asked Questions',
+    description: page?.subtitle || 'Answers about freshness, storage, cooking and how we grow.',
     path: '/faq',
-    settings,
+    seo: page?.seo,
+    settings: getSiteSettings(),
   })
 }
 
-export default async function FaqPage() {
-  const [page, faqs] = await Promise.all([getPageBySlug('faq-intro'), getFaqs()])
+export default function FaqPage() {
+  const page = getPageBySlug('faq-intro')
+  const faqs = getFaqs()
 
   const groups = groupFaqs(faqs)
 
@@ -56,7 +52,7 @@ export default async function FaqPage() {
         {faqs.length === 0 ? (
           <EmptyState
             title="No questions published yet"
-            description="Add them in Admin → FAQs and they will appear here."
+            description="Add them to content/faqs.yml and they will appear here."
             actionLabel="Contact us instead"
             actionHref="/contact"
           />
@@ -115,7 +111,7 @@ export default async function FaqPage() {
                   */}
                   <div className="mt-6 border-t border-beige">
                     {group.items.map((faq) => (
-                      <details key={faq.id} className="group border-b border-beige">
+                      <details key={faq.question} className="group border-b border-beige">
                         <summary className="flex cursor-pointer list-none items-start justify-between gap-5 py-5 [&::-webkit-details-marker]:hidden">
                           <h3 className="font-sans text-[1.0625rem] font-medium text-forest">
                             {faq.question}

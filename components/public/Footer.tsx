@@ -2,22 +2,24 @@ import Link from 'next/link'
 import { Container } from '@/components/ui/Container'
 import { Wordmark } from '@/components/ui/Wordmark'
 import { Icon, socialIconName } from '@/components/ui/Icon'
-import { TrackedLink } from './TrackedLink'
 import { FOOTER_NAV } from './nav-links'
-import { formattedAddress, getSiteSettings, getSocialLinks, whatsappLink } from '@/lib/content/site'
+import { formattedAddress, getSiteSettings, getSocialLinks, whatsappLink } from '@/lib/content'
 
 /**
  * Footer.
  *
  * Every string here — tagline, contact details, social links, copyright
- * holder — is read from `site_settings` and `social_links`. Changing the
- * Instagram URL is an admin edit, not a deploy.
+ * holder — comes from content/site.yml. Changing the Instagram URL is a
+ * one-line edit, not a code change.
  */
-export async function Footer() {
-  const [settings, socials] = await Promise.all([getSiteSettings(), getSocialLinks()])
-  const whatsapp = whatsappLink(settings)
-  const address = formattedAddress(settings)
+export function Footer() {
+  const settings = getSiteSettings()
+  const socials = getSocialLinks()
+  const whatsapp = whatsappLink()
+  const address = formattedAddress()
   const year = new Date().getFullYear()
+
+  const linkClass = 'transition-colors hover:text-ivory'
 
   return (
     <footer className="mt-auto border-t border-forest-soft bg-forest text-ivory">
@@ -25,36 +27,36 @@ export async function Footer() {
         <div className="grid gap-12 lg:grid-cols-[1.4fr_2fr]">
           <div>
             <Wordmark
-              brandName={settings.brand_name}
+              brandName={settings.brandName}
               tagline={settings.tagline}
               invert
               showTagline
               className="text-3xl"
             />
-            {settings.footer_tagline ? (
+            {settings.footerTagline ? (
               <p className="mt-7 max-w-[34ch] font-display text-xl leading-snug text-ivory/90">
-                {settings.footer_tagline}
+                {settings.footerTagline}
               </p>
             ) : null}
-            {settings.footer_note ? (
+            {settings.footerNote ? (
               <p className="mt-4 max-w-[46ch] text-[0.9375rem] leading-relaxed text-ivory/60">
-                {settings.footer_note}
+                {settings.footerNote}
               </p>
             ) : null}
 
             {socials.length > 0 ? (
               <ul className="mt-8 flex flex-wrap gap-2.5">
                 {socials.map((social) => (
-                  <li key={social.id}>
-                    <TrackedLink
+                  <li key={social.platform}>
+                    <a
                       href={social.url}
-                      event="social_click"
-                      props={{ platform: social.platform }}
-                      ariaLabel={`${settings.brand_name} on ${social.label}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${settings.brandName} on ${social.label}`}
                       className="inline-flex h-11 w-11 items-center justify-center rounded-xs border border-ivory/25 text-ivory/80 transition-colors hover:border-ivory/70 hover:text-ivory"
                     >
                       <Icon name={socialIconName(social.platform)} size={19} />
-                    </TrackedLink>
+                    </a>
                   </li>
                 ))}
               </ul>
@@ -92,41 +94,37 @@ export async function Footer() {
               <ul className="mt-5 flex flex-col gap-3 text-[0.9375rem] text-ivory/70">
                 {whatsapp ? (
                   <li>
-                    <TrackedLink
+                    <a
                       href={whatsapp.href}
-                      event="whatsapp_click"
-                      props={{ location: 'footer' }}
-                      className="inline-flex items-center gap-2 transition-colors hover:text-ivory"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`inline-flex items-center gap-2 ${linkClass}`}
                     >
                       <Icon name="whatsapp" size={17} />
                       WhatsApp
-                    </TrackedLink>
+                    </a>
                   </li>
                 ) : null}
-                {settings.contact_email ? (
+                {settings.contactEmail ? (
                   <li>
-                    <TrackedLink
-                      href={`mailto:${settings.contact_email}`}
-                      event="contact_click"
-                      props={{ method: 'email', location: 'footer' }}
-                      className="inline-flex items-center gap-2 break-all transition-colors hover:text-ivory"
+                    <a
+                      href={`mailto:${settings.contactEmail}`}
+                      className={`inline-flex items-center gap-2 break-all ${linkClass}`}
                     >
                       <Icon name="mail" size={17} />
-                      {settings.contact_email}
-                    </TrackedLink>
+                      {settings.contactEmail}
+                    </a>
                   </li>
                 ) : null}
-                {settings.contact_phone ? (
+                {settings.contactPhone ? (
                   <li>
-                    <TrackedLink
-                      href={`tel:${settings.contact_phone.replace(/\s/g, '')}`}
-                      event="contact_click"
-                      props={{ method: 'phone', location: 'footer' }}
-                      className="inline-flex items-center gap-2 transition-colors hover:text-ivory"
+                    <a
+                      href={`tel:${settings.contactPhone.replace(/\s/g, '')}`}
+                      className={`inline-flex items-center gap-2 ${linkClass}`}
                     >
                       <Icon name="phone" size={17} />
-                      {settings.contact_phone}
-                    </TrackedLink>
+                      {settings.contactPhone}
+                    </a>
                   </li>
                 ) : null}
                 {address.length > 0 ? (
@@ -141,10 +139,10 @@ export async function Footer() {
                     </address>
                   </li>
                 ) : null}
-                {settings.business_hours ? (
+                {settings.businessHours ? (
                   <li className="flex items-start gap-2">
                     <Icon name="clock" size={17} className="mt-1" />
-                    <span>{settings.business_hours}</span>
+                    <span>{settings.businessHours}</span>
                   </li>
                 ) : null}
               </ul>
@@ -156,11 +154,9 @@ export async function Footer() {
 
         <div className="mt-7 flex flex-col gap-3 text-[0.8125rem] text-ivory/50 sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © {year} {settings.copyright_holder || settings.brand_name}. All rights reserved.
+            © {year} {settings.copyrightHolder || settings.brandName}. All rights reserved.
           </p>
-          <p className="flex items-center gap-1.5">
-            <span>{settings.tagline}</span>
-          </p>
+          <p>{settings.tagline}</p>
         </div>
       </Container>
     </footer>

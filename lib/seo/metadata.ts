@@ -3,34 +3,31 @@ import 'server-only'
 /**
  * Metadata construction, all in one place.
  *
- * Every field falls back through: page value -> site default -> hardcoded
- * safety net. That means an editor who leaves an SEO field blank still gets a
- * correct, non-empty tag rather than a missing one.
+ * Every field falls through: page value → site default → hardcoded safety net.
+ * An author who leaves an SEO field blank still gets a correct tag rather than
+ * a missing one.
  */
 import type { Metadata } from 'next'
 import { absoluteUrl, publicEnv } from '@/lib/env'
 import { excerptFromMarkdown, truncate } from '@/lib/markdown/plain'
-import { bestFallbackSrc, type MediaLike } from '@/lib/media'
-import type { MediaRow, SiteSettingsRow } from '@/types/database'
+import type { Image, Seo, SiteSettings } from '@/types/content'
 
 export const OG_IMAGE_WIDTH = 1200
 export const OG_IMAGE_HEIGHT = 630
 
 export interface BuildMetadataArgs {
   title: string
-  description?: string | null
+  description?: string
   /** Markdown to derive a description from when none is supplied. */
-  descriptionSource?: string | null
+  descriptionSource?: string
   path: string
-  canonicalOverride?: string | null
-  image?: MediaLike | MediaRow | null
-  imageAlt?: string | null
-  noindex?: boolean
+  image?: Image | null
+  seo?: Seo
   type?: 'website' | 'article'
-  publishedTime?: string | null
-  modifiedTime?: string | null
-  settings: SiteSettingsRow
-  /** Appends " — NEYORA". Off for the homepage, which is already the brand. */
+  publishedTime?: string
+  modifiedTime?: string
+  settings: SiteSettings
+  /** Appends " — NEYORA". Off for the homepage, already the brand. */
   appendBrand?: boolean
 }
 
@@ -39,43 +36,37 @@ export function buildMetadata({
   description,
   descriptionSource,
   path,
-  canonicalOverride,
   image,
-  imageAlt,
-  noindex = false,
+  seo,
   type = 'website',
   publishedTime,
   modifiedTime,
   settings,
   appendBrand = true,
 }: BuildMetadataArgs): Metadata {
-  const brand = settings.brand_name || 'NEYORA'
+  const brand = settings.brandName || 'NEYORA'
 
-  const resolvedTitle = appendBrand && !title.includes(brand) ? `${title} — ${brand}` : title
+  const resolvedTitle = seo?.title ?? (appendBrand && !title.includes(brand) ? `${title} — ${brand}` : title)
 
   const resolvedDescription = truncate(
-    description?.trim() ||
+    seo?.description ||
+      description?.trim() ||
       (descriptionSource ? excerptFromMarkdown(descriptionSource, 300) : '') ||
-      settings.default_seo_description ||
+      settings.seo.defaultDescription ||
       'NEYORA grows fresh, natural food with care.',
     300,
   )
 
-  const canonical = canonicalOverride?.trim() || absoluteUrl(path)
-  const ogImage = image ? bestFallbackSrc(image) : null
-  const absoluteOgImage = ogImage
-    ? ogImage.startsWith('http')
-      ? ogImage
-      : absoluteUrl(ogImage)
-    : null
+  const canonical = seo?.canonicalUrl || absoluteUrl(path)
 
-  const images = absoluteOgImage
+  const ogSrc = seo?.ogImage ?? image?.src ?? settings.seo.defaultOgImage
+  const images = ogSrc
     ? [
         {
-          url: absoluteOgImage,
+          url: ogSrc.startsWith('http') ? ogSrc : absoluteUrl(ogSrc),
           width: image?.width ?? OG_IMAGE_WIDTH,
           height: image?.height ?? OG_IMAGE_HEIGHT,
-          alt: imageAlt ?? image?.alt ?? resolvedTitle,
+          alt: image?.alt ?? resolvedTitle,
         },
       ]
     : undefined
@@ -84,7 +75,7 @@ export function buildMetadata({
     title: resolvedTitle,
     description: resolvedDescription,
     alternates: { canonical },
-    robots: noindex
+    robots: seo?.noindex
       ? { index: false, follow: false, nocache: true }
       : {
           index: true,
@@ -99,33 +90,29 @@ export function buildMetadata({
       siteName: brand,
       locale: 'en_IN',
       images,
-      ...(type === 'article'
-        ? {
-            publishedTime: publishedTime ?? undefined,
-            modifiedTime: modifiedTime ?? undefined,
-          }
-        : {}),
+      ...(type === 'article' ? { publishedTime, modifiedTime } : {}),
     },
     twitter: {
       card: images ? 'summary_large_image' : 'summary',
       title: resolvedTitle,
       description: resolvedDescription,
-      images: absoluteOgImage ? [absoluteOgImage] : undefined,
+      images: images?.map((i) => i.url),
     },
   }
 }
 
-/** Root metadata: title template, verification, icons, and the OG fallback. */
-export function buildRootMetadata(settings: SiteSettingsRow, ogImage: MediaRow | null): Metadata {
+/** Root metadata: title, verification, icons and the Open Graph fallback. */
+export function buildRootMetadata(settings: SiteSettings): Metadata {
   const env = publicEnv()
-  const brand = settings.brand_name || 'NEYORA'
-  const title = settings.default_seo_title || `${brand} — Fresh Natural Food`
+  const brand = settings.brandName || 'NEYORA'
+  const title = settings.seo.defaultTitle || `${brand} — Fresh Natural Food`
   const description =
-    settings.default_seo_description || 'NEYORA grows fresh, natural food with care.'
+    settings.seo.defaultDescription || 'NEYORA grows fresh, natural food with care.'
+  const ogImage = settings.seo.defaultOgImage
 
   return {
     metadataBase: new URL(env.siteUrl),
-    title: { default: title, template: `%s` },
+    title: { default: title, template: '%s' },
     description,
     applicationName: brand,
     referrer: 'strict-origin-when-cross-origin',
@@ -136,14 +123,11 @@ export function buildRootMetadata(settings: SiteSettingsRow, ogImage: MediaRow |
       'farm fresh produce',
       'oyster mushroom recipes',
     ],
-    authors: [{ name: settings.organization_legal_name || brand }],
+    authors: [{ name: settings.seo.organizationLegalName || brand }],
     creator: brand,
-    publisher: settings.organization_legal_name || brand,
+    publisher: settings.seo.organizationLegalName || brand,
     formatDetection: { telephone: false, address: false, email: false },
-    icons: {
-      icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],
-      apple: [{ url: '/icon.svg' }],
-    },
+    icons: { icon: [{ url: '/icon.svg', type: 'image/svg+xml' }], apple: [{ url: '/icon.svg' }] },
     openGraph: {
       type: 'website',
       siteName: brand,
@@ -151,22 +135,9 @@ export function buildRootMetadata(settings: SiteSettingsRow, ogImage: MediaRow |
       description,
       url: env.siteUrl,
       locale: 'en_IN',
-      images: ogImage
-        ? [
-            {
-              url: bestFallbackSrc(ogImage).startsWith('http')
-                ? bestFallbackSrc(ogImage)
-                : absoluteUrl(bestFallbackSrc(ogImage)),
-              width: ogImage.width ?? OG_IMAGE_WIDTH,
-              height: ogImage.height ?? OG_IMAGE_HEIGHT,
-              alt: ogImage.alt ?? title,
-            },
-          ]
-        : undefined,
+      images: ogImage ? [{ url: absoluteUrl(ogImage), width: 1200, height: 630, alt: title }] : undefined,
     },
     twitter: { card: 'summary_large_image', title, description },
-    verification: env.googleSiteVerification
-      ? { google: env.googleSiteVerification }
-      : undefined,
+    verification: env.googleSiteVerification ? { google: env.googleSiteVerification } : undefined,
   }
 }

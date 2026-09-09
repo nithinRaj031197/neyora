@@ -2,20 +2,22 @@
  * Pack-size scaling for recipe ingredients.
  *
  * Resolution order for a requested pack size:
- *   1. A hand-tuned `recipe_pack_variants` row, if the editor wrote one.
- *      Seasoning does not scale linearly, so a human override always wins.
- *   2. Arithmetic scaling of the base list, multiplying only the lines flagged
+ *   1. A hand-written variant from the recipe's frontmatter, if the author
+ *      wrote one. Seasoning does not scale linearly, so a human override
+ *      always wins.
+ *   2. Arithmetic scaling of the base list, multiplying only the lines marked
  *      `scalable`. Unmeasured lines ("salt, to taste") pass through untouched.
  *   3. The base list as written.
  *
- * This is why `qty` is numeric and `scalable` is a boolean in the schema —
- * automatic scaling was designed in from the start, not bolted on.
+ * This is why `qty` is a number and `scalable` is a boolean in the content
+ * model rather than quantities being written into prose: prose cannot be
+ * multiplied.
  */
-import type { Ingredient, PackSize, RecipePackVariantRow } from '@/types/database'
+import type { Ingredient, PackSize, PackVariant } from '@/types/content'
 
 export const PACK_SIZES: PackSize[] = ['150g', '200g', '250g', '500g', 'flexible']
 
-export const PACK_GRAMS: Record<Exclude<PackSize, 'flexible'>, number> = {
+const PACK_GRAMS: Record<Exclude<PackSize, 'flexible'>, number> = {
   '150g': 150,
   '200g': 200,
   '250g': 250,
@@ -40,10 +42,9 @@ function roundForKitchen(value: number): number {
 
 export function scaleIngredients(ingredients: Ingredient[], factor: number): Ingredient[] {
   if (factor === 1) return ingredients
-  return ingredients.map((ing) => {
-    if (!ing.scalable || ing.qty === null) return ing
-    return { ...ing, qty: roundForKitchen(ing.qty * factor) }
-  })
+  return ingredients.map((ing) =>
+    !ing.scalable || ing.qty === null ? ing : { ...ing, qty: roundForKitchen(ing.qty * factor) },
+  )
 }
 
 export interface ResolvedIngredients {
@@ -57,22 +58,22 @@ export interface ResolvedIngredients {
 
 export function resolveIngredientsForPack(args: {
   ingredients: Ingredient[]
-  basePackGrams: number | null
-  servings: number | null
+  basePackGrams?: number
+  servings?: number
   isScalable: boolean
   requestedPack: PackSize
-  variants: RecipePackVariantRow[]
+  variants: PackVariant[]
 }): ResolvedIngredients {
   const { ingredients, basePackGrams, servings, isScalable, requestedPack, variants } = args
 
-  const variant = variants.find((v) => v.pack_size === requestedPack)
+  const variant = variants.find((v) => v.packSize === requestedPack)
   if (variant && variant.ingredients.length > 0) {
     return {
       ingredients: variant.ingredients,
       source: 'variant',
       factor: 1,
-      servings: variant.servings ?? servings,
-      note: variant.note,
+      servings: variant.servings ?? servings ?? null,
+      note: variant.note ?? null,
     }
   }
 
@@ -80,12 +81,12 @@ export function resolveIngredientsForPack(args: {
   const canScale =
     isScalable &&
     targetGrams !== null &&
-    basePackGrams !== null &&
+    basePackGrams !== undefined &&
     basePackGrams > 0 &&
     targetGrams !== basePackGrams
 
   if (!canScale) {
-    return { ingredients, source: 'base', factor: 1, servings, note: null }
+    return { ingredients, source: 'base', factor: 1, servings: servings ?? null, note: null }
   }
 
   const factor = targetGrams / basePackGrams
@@ -98,16 +99,16 @@ export function resolveIngredientsForPack(args: {
   }
 }
 
-/** Which pack sizes are worth offering: the base, plus any hand-tuned variant. */
+/** Which pack sizes are worth offering: the base, plus any hand-written variant. */
 export function availablePacksFor(args: {
   recommended: PackSize
   isScalable: boolean
-  basePackGrams: number | null
-  variants: RecipePackVariantRow[]
+  basePackGrams?: number
+  variants: PackVariant[]
 }): PackSize[] {
   const { recommended, isScalable, basePackGrams, variants } = args
   const set = new Set<PackSize>([recommended])
-  for (const v of variants) set.add(v.pack_size)
+  for (const v of variants) set.add(v.packSize)
   if (isScalable && basePackGrams) {
     for (const p of PACK_SIZES) if (p !== 'flexible') set.add(p)
   }
@@ -115,7 +116,9 @@ export function availablePacksFor(args: {
 }
 
 /** Groups an ingredient list by its optional `group` label, order preserved. */
-export function groupIngredients(ingredients: Ingredient[]): { label: string; items: Ingredient[] }[] {
+export function groupIngredients(
+  ingredients: Ingredient[],
+): { label: string; items: Ingredient[] }[] {
   const groups: { label: string; items: Ingredient[] }[] = []
   for (const ing of ingredients) {
     const label = ing.group?.trim() || ''

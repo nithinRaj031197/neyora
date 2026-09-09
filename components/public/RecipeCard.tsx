@@ -4,7 +4,7 @@ import { Icon } from '@/components/ui/Icon'
 import { formatDuration } from '@/lib/utils/format'
 import { packSizeLabel } from '@/lib/utils/scale'
 import { cn } from '@/lib/utils/cn'
-import type { RecipeCardWithMedia } from '@/lib/content/recipes'
+import type { Category, Recipe } from '@/types/content'
 
 /**
  * Recipe card.
@@ -15,23 +15,24 @@ import type { RecipeCardWithMedia } from '@/lib/content/recipes'
  */
 export function RecipeCard({
   recipe,
+  category,
   priority = false,
   size = 'default',
   className,
 }: {
-  recipe: RecipeCardWithMedia
+  recipe: Recipe
+  category?: Category | null
   priority?: boolean
   size?: 'default' | 'large'
   className?: string
 }) {
-  const time = recipe.total_time_minutes
+  const time = recipe.totalTimeMinutes
 
   return (
     <article className={cn('group', className)}>
       <Link href={`/recipes/${recipe.slug}`} className="block">
         <Picture
-          media={recipe.cover}
-          alt={recipe.cover?.alt ?? `${recipe.title} — recipe photograph`}
+          image={recipe.cover}
           aspect={size === 'large' ? '3 / 2' : '4 / 3'}
           sizes={
             size === 'large'
@@ -44,7 +45,7 @@ export function RecipeCard({
         />
 
         <div className="mt-5">
-          {recipe.category ? <p className="eyebrow">{recipe.category.name}</p> : null}
+          {category ? <p className="eyebrow">{category.name}</p> : null}
           <h3
             className={cn(
               'mt-2 transition-colors group-hover:text-botanical',
@@ -76,7 +77,7 @@ export function RecipeCard({
             ) : null}
             <li className="flex items-center gap-1.5">
               <Icon name="flame" size={15} />
-              {packSizeLabel(recipe.recommended_pack_size)}
+              {packSizeLabel(recipe.recommendedPackSize)}
             </li>
           </ul>
         </div>

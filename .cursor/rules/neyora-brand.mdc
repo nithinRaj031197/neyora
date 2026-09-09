@@ -80,8 +80,12 @@ Focus ring: 2px leaf, 2px offset, always visible. Real alt text everywhere.
 
 ## Engineering rules that protect the brand
 
-- Marketing copy lives in Supabase, never in JSX. If you find yourself typing a
-  headline into a component, move it to the CMS and read it from the database.
-- Server components by default; `'use client'` only where interaction requires it.
-- Public site and `/admin` are visually different systems. The admin is a clean,
-  dense, neutral CMS — it does not use the marketing hero styling.
+- Marketing copy lives in `/content`, never in JSX. If you find yourself typing
+  a headline into a component, move it to the content file and read it from
+  `lib/content`.
+- Server components by default; `'use client'` only where interaction requires
+  it.
+- Images need explicit width, height and alt text. The content schema enforces
+  all three — a missing one fails the build, and that is intentional.
+- Never introduce a database, an account system or a paid service without being
+  asked. The site is static on purpose; see ARCHITECTURE.md §1.

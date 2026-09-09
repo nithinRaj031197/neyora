@@ -9,8 +9,7 @@ import {
   relativeTime,
   toDateTimeLocalValue,
 } from '@/lib/utils/format'
-import { whatsappLink, formattedAddress, FALLBACK_SETTINGS } from '@/lib/content/site'
-import { isSafeDestination } from '@/lib/content/redirects'
+
 
 describe('formatQuantity', () => {
   it('keeps whole numbers whole', () => {
@@ -133,75 +132,5 @@ describe('pluralize', () => {
   it('picks the right form', () => {
     expect(pluralize(1, 'recipe')).toBe('recipe')
     expect(pluralize(2, 'recipe')).toBe('recipes')
-  })
-})
-
-describe('whatsappLink', () => {
-  it('builds a wa.me link with a pre-filled message', () => {
-    const link = whatsappLink({ whatsapp_number: '919876543210', whatsapp_message: 'Hi there' })
-    expect(link?.href).toBe('https://wa.me/919876543210?text=Hi%20there')
-    expect(link?.display).toBe('+919876543210')
-  })
-
-  it('strips any stray formatting from the stored number', () => {
-    const link = whatsappLink({ whatsapp_number: '+91 98765-43210', whatsapp_message: null })
-    expect(link?.href).toBe('https://wa.me/919876543210')
-  })
-
-  it('allows the message to be overridden per context', () => {
-    const link = whatsappLink(
-      { whatsapp_number: '919876543210', whatsapp_message: 'default' },
-      'About Fresh Oyster Mushrooms',
-    )
-    expect(link?.href).toContain('About%20Fresh%20Oyster%20Mushrooms')
-  })
-
-  // Callers hide the button entirely rather than link to nowhere.
-  it('returns null when no number is configured', () => {
-    expect(whatsappLink({ whatsapp_number: null, whatsapp_message: null })).toBeNull()
-    expect(whatsappLink({ whatsapp_number: '', whatsapp_message: null })).toBeNull()
-  })
-})
-
-describe('formattedAddress', () => {
-  it('drops empty lines instead of leaving blank rows', () => {
-    const lines = formattedAddress({
-      ...FALLBACK_SETTINGS,
-      address_line1: 'The Farm',
-      address_line2: null,
-      city: 'Bengaluru',
-      state: 'Karnataka',
-      postal_code: '560001',
-      country: 'India',
-    })
-    expect(lines).toEqual(['The Farm', 'Bengaluru, Karnataka', '560001, India'])
-  })
-
-  it('returns nothing when no address is set', () => {
-    expect(formattedAddress(FALLBACK_SETTINGS)).toEqual([])
-  })
-})
-
-describe('isSafeDestination', () => {
-  it('accepts a same-origin path', () => {
-    expect(isSafeDestination('/recipes')).toBe(true)
-  })
-
-  it('accepts a nested path with a query string', () => {
-    expect(isSafeDestination('/recipes/category/quick?sort=new')).toBe(true)
-  })
-
-  // Defence in depth behind the database CHECK constraint: a QR redirect must
-  // never be able to send a customer off-site.
-  it.each([
-    '//evil.example.com',
-    'https://evil.example.com',
-    'recipes',
-    'javascript:alert(1)',
-    '/\\evil.example.com',
-    '/recipes\nLocation: https://evil.example.com',
-    '/recipes\u0000',
-  ])('rejects %j', (destination) => {
-    expect(isSafeDestination(destination)).toBe(false)
   })
 })

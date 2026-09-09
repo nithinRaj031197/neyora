@@ -2,20 +2,22 @@ import Link from 'next/link'
 import { Picture } from '@/components/ui/Picture'
 import { Badge } from '@/components/ui/Badge'
 import { formatPrice } from '@/lib/utils/format'
-import { availabilityLabel } from '@/lib/content/products'
-import type { ProductCardWithMedia } from '@/lib/content/products'
+import { availabilityLabel } from '@/lib/content'
+import type { Category, Product } from '@/types/content'
 
 export function ProductCard({
   product,
+  category,
   priority = false,
 }: {
-  product: ProductCardWithMedia
+  product: Product
+  category?: Category | null
   priority?: boolean
 }) {
-  const price = formatPrice(product.price, product.currency)
+  const price = formatPrice(product.price ?? null, product.currency)
   // Only call it a saving when the MRP is genuinely higher.
   const mrp =
-    product.mrp !== null && product.price !== null && product.mrp > product.price
+    product.mrp !== undefined && product.price !== undefined && product.mrp > product.price
       ? formatPrice(product.mrp, product.currency)
       : null
   const unavailable = product.availability === 'out_of_stock'
@@ -25,8 +27,7 @@ export function ProductCard({
       <Link href={`/products/${product.slug}`} className="block">
         <div className="relative">
           <Picture
-            media={product.cover}
-            alt={product.cover?.alt ?? `${product.name} — product photograph`}
+            image={product.images[0]}
             aspect="1 / 1"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             priority={priority}
@@ -44,12 +45,12 @@ export function ProductCard({
 
         <div className="mt-5 flex items-start justify-between gap-4">
           <div>
-            {product.category ? <p className="eyebrow">{product.category.name}</p> : null}
+            {category ? <p className="eyebrow">{category.name}</p> : null}
             <h3 className="mt-2 font-display text-[1.3125rem] leading-snug transition-colors group-hover:text-botanical">
               {product.name}
             </h3>
-            {product.weight_label ? (
-              <p className="mt-1 text-[0.8125rem] text-earth-muted">{product.weight_label}</p>
+            {product.weightLabel ? (
+              <p className="mt-1 text-[0.8125rem] text-earth-muted">{product.weightLabel}</p>
             ) : null}
           </div>
 
@@ -63,9 +64,9 @@ export function ProductCard({
           ) : null}
         </div>
 
-        {product.short_description ? (
+        {product.shortDescription ? (
           <p className="mt-3 max-w-[44ch] text-[0.9375rem] leading-relaxed text-earth-soft">
-            {product.short_description}
+            {product.shortDescription}
           </p>
         ) : null}
       </Link>

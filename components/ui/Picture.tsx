@@ -1,18 +1,19 @@
 import { cn } from '@/lib/utils/cn'
-import { altText, bestFallbackSrc, buildSrcSet, type MediaLike } from '@/lib/media'
+import type { Image as ContentImage } from '@/types/content'
 
 /**
  * The one image component.
  *
- * A plain <img> with a hand-built srcset rather than next/image, because image
- * optimisation is unavailable on Cloudflare Workers without a paid service —
- * so the sizes are generated at upload time instead (see lib/media.ts).
- * Explicit width/height on every image keeps CLS at zero.
+ * A plain `<img>` rather than `next/image`, because image optimisation is
+ * unavailable on Cloudflare Workers without a paid service. Images are
+ * committed to /public already sized and compressed, and every one carries
+ * explicit width and height so the browser reserves space and the page never
+ * shifts as it loads.
  */
 export function Picture({
-  media,
+  image,
   alt,
-  sizes = '100vw',
+  sizes,
   priority = false,
   className,
   wrapperClassName,
@@ -20,11 +21,11 @@ export function Picture({
   fit = 'cover',
   position,
 }: {
-  media: MediaLike | null | undefined
-  /** Overrides the media library's alt text. Pass "" only for decoration. */
+  image: ContentImage | null | undefined
+  /** Overrides the content's alt text. Pass "" only for decoration. */
   alt?: string
   sizes?: string
-  /** True for the hero only: eager + high priority, everything else lazy. */
+  /** True for the hero only: eager + high priority. Everything else lazy. */
   priority?: boolean
   className?: string
   wrapperClassName?: string
@@ -33,7 +34,7 @@ export function Picture({
   fit?: 'cover' | 'contain'
   position?: string
 }) {
-  if (!media?.public_url) {
+  if (!image?.src) {
     return (
       <div
         aria-hidden="true"
@@ -43,19 +44,17 @@ export function Picture({
     )
   }
 
-  const resolvedAlt = alt !== undefined ? alt : altText(media)
-  const srcSet = buildSrcSet(media)
+  const resolvedAlt = alt !== undefined ? alt : image.alt
 
   const img = (
     <img
-      src={bestFallbackSrc(media)}
-      srcSet={srcSet}
-      sizes={srcSet ? sizes : undefined}
+      src={image.src}
       alt={resolvedAlt}
-      width={media.width ?? undefined}
-      height={media.height ?? undefined}
+      width={image.width}
+      height={image.height}
+      sizes={sizes}
       loading={priority ? 'eager' : 'lazy'}
-      // fetchPriority tells the browser this is the LCP candidate.
+      // Tells the browser this is the LCP candidate.
       fetchPriority={priority ? 'high' : 'auto'}
       decoding={priority ? 'sync' : 'async'}
       className={cn(

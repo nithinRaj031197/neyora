@@ -5,24 +5,21 @@ import { Breadcrumbs } from '@/components/public/Breadcrumbs'
 import { ProductCard } from '@/components/public/ProductCard'
 import { JsonLd } from '@/components/ui/JsonLd'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { getProductCategories, listProducts } from '@/lib/content/products'
-import { getSiteSettings } from '@/lib/content/site'
+import { getProductCategories, getSiteSettings, queryProducts } from '@/lib/content'
 import { buildMetadata } from '@/lib/seo/metadata'
 import { breadcrumbJsonLd } from '@/lib/seo/jsonld'
-
-export const revalidate = 300
 
 const TRAIL = [
   { name: 'Home', path: '/' },
   { name: 'Products', path: '/products' },
 ]
 
-export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSiteSettings()
+export function generateMetadata(): Metadata {
+  const settings = getSiteSettings()
   return buildMetadata({
     title: 'Products',
     description:
-      settings.brand_description ??
+      settings.brandDescription ??
       'Everything NEYORA is growing right now, harvested to order and graded by hand.',
     path: '/products',
     settings,
@@ -35,10 +32,15 @@ export default async function ProductsPage({
   searchParams: Promise<{ category?: string }>
 }) {
   const { category } = await searchParams
-  const [products, categories] = await Promise.all([
-    listProducts({ categorySlug: category }),
-    getProductCategories(),
-  ])
+  const categories = getProductCategories()
+  const products = queryProducts({ category })
+
+  const chipClass = (active: boolean) =>
+    `inline-flex h-9 items-center rounded-xs border px-3.5 text-[0.8125rem] font-medium tracking-[0.04em] uppercase transition-colors ${
+      active
+        ? 'border-forest bg-forest text-ivory'
+        : 'border-beige text-earth-soft hover:border-forest/50 hover:text-forest'
+    }`
 
   return (
     <>
@@ -65,25 +67,17 @@ export default async function ProductsPage({
                   <Link
                     href="/products"
                     aria-current={!category ? 'page' : undefined}
-                    className={`inline-flex h-9 items-center rounded-xs border px-3.5 text-[0.8125rem] font-medium tracking-[0.04em] uppercase transition-colors ${
-                      !category
-                        ? 'border-forest bg-forest text-ivory'
-                        : 'border-beige text-earth-soft hover:border-forest/50 hover:text-forest'
-                    }`}
+                    className={chipClass(!category)}
                   >
                     All
                   </Link>
                 </li>
                 {categories.map((cat) => (
-                  <li key={cat.id}>
+                  <li key={cat.slug}>
                     <Link
                       href={`/products?category=${cat.slug}`}
                       aria-current={category === cat.slug ? 'page' : undefined}
-                      className={`inline-flex h-9 items-center rounded-xs border px-3.5 text-[0.8125rem] font-medium tracking-[0.04em] uppercase transition-colors ${
-                        category === cat.slug
-                          ? 'border-forest bg-forest text-ivory'
-                          : 'border-beige text-earth-soft hover:border-forest/50 hover:text-forest'
-                      }`}
+                      className={chipClass(category === cat.slug)}
                     >
                       {cat.name}
                     </Link>
@@ -106,7 +100,12 @@ export default async function ProductsPage({
         ) : (
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-14">
             {products.map((product, index) => (
-              <ProductCard key={product.id} product={product} priority={index < 3} />
+              <ProductCard
+                key={product.slug}
+                product={product}
+                category={categories.find((c) => c.slug === product.category) ?? null}
+                priority={index < 3}
+              />
             ))}
           </div>
         )}

@@ -1,0 +1,54 @@
+# ============================================================================
+# NEYORA — categories and tags
+#
+# Recipe categories get their own landing page at /recipes/category/<slug>.
+# Product categories filter /products — this is where a second product line
+# begins. Tags are lighter: they only drive the filters on the recipes page.
+# ============================================================================
+
+recipeCategories:
+  - slug: quick
+    name: Under 15 Minutes
+    description: Weeknight cooking. Pan on, pack open, dinner done.
+    image:
+      src: /images/recipes/category-quick.svg
+      alt: A pan of mushrooms cooking quickly over high heat
+      width: 1200
+      height: 800
+    sortOrder: 1
+    status: published
+
+  - slug: south-indian
+    name: South Indian
+    description: Curry leaves, black pepper, coconut oil — the way we cook mushrooms at home.
+    sortOrder: 2
+    status: published
+
+  - slug: snacks
+    name: Snacks & Starters
+    description: Crisp, sharable, best eaten standing at the counter.
+    sortOrder: 3
+    status: published
+
+productCategories:
+  - slug: mushrooms
+    name: Mushrooms
+    description: Freshly grown culinary mushrooms, harvested to order.
+    sortOrder: 1
+    status: published
+
+  # NEYORA is a natural-food brand, not a mushroom company. This is here to
+  # show how the second product line starts: add the category, then a product.
+  - slug: fresh-produce
+    name: Fresh Produce
+    description: Seasonal vegetables and greens. Coming soon.
+    sortOrder: 2
+    status: draft
+
+recipeTags:
+  - { slug: vegetarian, name: Vegetarian }
+  - { slug: high-protein, name: High Protein }
+  - { slug: one-pan, name: One Pan }
+  - { slug: gluten-free, name: Gluten Free }
+  - { slug: party-food, name: Party Food }
+  - { slug: spicy, name: Spicy }

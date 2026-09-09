@@ -1,0 +1,49 @@
+# ============================================================================
+# NEYORA — testimonials
+#
+# `featured: true` puts one in the community section of the homepage.
+#
+# Publish only what someone actually said, and only with their permission.
+# Invented reviews are dishonest and, in most markets, illegal.
+# ============================================================================
+
+testimonials:
+  - quote: >-
+      The difference is texture. Most mushrooms I buy have already started to go
+      soft — these still squeak when you tear them.
+    authorName: Anitha R.
+    authorRole: Home cook
+    location: Bengaluru
+    rating: 5
+    featured: true
+    sortOrder: 1
+
+  - quote: >-
+      We put the pepper fry on the menu as a special and it has not come off
+      since. Consistency pack to pack is what matters to a kitchen, and they
+      deliver it.
+    authorName: Chef Vikram S.
+    authorRole: Head chef
+    location: Kochi
+    rating: 5
+    featured: true
+    sortOrder: 2
+
+  - quote: >-
+      I asked what the substrate was and got a real answer, with the spawn
+      batch. That told me everything I needed to know about the people growing
+      it.
+    authorName: Deepa M.
+    authorRole: Nutritionist
+    location: Chennai
+    rating: 5
+    featured: true
+    sortOrder: 3
+
+  - quote: Harvest date printed on the pack. Such a small thing, and no one else does it.
+    authorName: Rahul K.
+    authorRole: Subscriber
+    location: Hyderabad
+    rating: 4
+    featured: false
+    sortOrder: 4

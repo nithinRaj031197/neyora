@@ -1,6 +1,6 @@
 import { Icon } from '@/components/ui/Icon'
 import { formatDuration } from '@/lib/utils/format'
-import type { RecipeStep } from '@/types/database'
+import type { RecipeStep } from '@/types/content'
 
 /**
  * Numbered method steps.
@@ -40,10 +40,10 @@ export function RecipeSteps({ steps }: { steps: RecipeStep[] }) {
               <p className="mt-1.5 max-w-[62ch] text-[1.0625rem] leading-relaxed text-earth">
                 {step.body}
               </p>
-              {step.duration_minutes ? (
+              {step.durationMinutes ? (
                 <p className="mt-2.5 inline-flex items-center gap-1.5 text-[0.8125rem] text-earth-muted">
                   <Icon name="clock" size={14} />
-                  {formatDuration(step.duration_minutes)}
+                  {formatDuration(step.durationMinutes)}
                 </p>
               ) : null}
             </div>

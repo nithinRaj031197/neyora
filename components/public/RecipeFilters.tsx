@@ -5,7 +5,7 @@ import { useState, useTransition } from 'react'
 import { Icon } from '@/components/ui/Icon'
 import { cn } from '@/lib/utils/cn'
 import { PACK_SIZES, packSizeLabel } from '@/lib/utils/scale'
-import type { PackSize, RecipeTagRow } from '@/types/database'
+import type { PackSize, Tag } from '@/types/content'
 
 /**
  * Recipe filters.
@@ -21,7 +21,7 @@ export function RecipeFilters({
   query,
   basePath,
 }: {
-  tags: RecipeTagRow[]
+  tags: Tag[]
   activeTag: string | null
   activePack: PackSize | null
   query: string
@@ -116,7 +116,7 @@ export function RecipeFilters({
               const active = activeTag === tag.slug
               return (
                 <button
-                  key={tag.id}
+                  key={tag.slug}
                   type="button"
                   aria-pressed={active}
                   onClick={() => apply({ tag: active ? null : tag.slug })}

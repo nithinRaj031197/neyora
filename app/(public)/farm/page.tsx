@@ -2,12 +2,12 @@ import type { Metadata } from 'next'
 import { PageView, generatePageMetadata } from '@/components/public/PageView'
 
 /**
- * Route for the CMS page with slug 'farm'.
- * All copy, the hero image and the SEO fields are edited in Admin -> Pages.
+ * Route for content/pages/farm.md
+ *
+ * All copy, the hero image and the SEO fields live in that file. Edit it,
+ * commit, deploy.
  */
-export const revalidate = 600
-
-export function generateMetadata(): Promise<Metadata> {
+export function generateMetadata(): Metadata {
   return generatePageMetadata('farm', '/farm', 'Our Farm')
 }
 

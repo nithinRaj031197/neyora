@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Icon } from '@/components/ui/Icon'
-import { track } from '@/lib/analytics/client'
 
 /**
  * Share controls for a recipe.
@@ -15,7 +14,7 @@ import { track } from '@/lib/analytics/client'
  * otherwise: the recipe's Open Graph image is what makes a pasted link look
  * right in a story or DM.
  */
-export function ShareRow({ url, title, slug }: { url: string; title: string; slug: string }) {
+export function ShareRow({ url, title }: { url: string; title: string }) {
   const [copied, setCopied] = useState(false)
 
   const encodedUrl = encodeURIComponent(url)
@@ -25,7 +24,6 @@ export function ShareRow({ url, title, slug }: { url: string; title: string; slu
     try {
       await navigator.clipboard.writeText(url)
       setCopied(true)
-      track('recipe_share', { recipe: slug, channel: 'copy' })
       window.setTimeout(() => setCopied(false), 2200)
     } catch {
       // Clipboard can be blocked by permissions policy; the links still work.
@@ -37,7 +35,6 @@ export function ShareRow({ url, title, slug }: { url: string; title: string; slu
     if (!navigator.share) return
     try {
       await navigator.share({ title, url })
-      track('recipe_share', { recipe: slug, channel: 'native' })
     } catch {
       // The user dismissed the sheet. Not an error.
     }
@@ -61,7 +58,6 @@ export function ShareRow({ url, title, slug }: { url: string; title: string; slu
         href={`https://wa.me/?text=${encodedText}`}
         target="_blank"
         rel="noopener noreferrer"
-        onClick={() => track('recipe_share', { recipe: slug, channel: 'whatsapp' })}
         className={buttonClass}
       >
         <Icon name="whatsapp" size={16} />
@@ -72,7 +68,6 @@ export function ShareRow({ url, title, slug }: { url: string; title: string; slu
         href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
         target="_blank"
         rel="noopener noreferrer"
-        onClick={() => track('recipe_share', { recipe: slug, channel: 'facebook' })}
         className={buttonClass}
       >
         <Icon name="facebook" size={16} />

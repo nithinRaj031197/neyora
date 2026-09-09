@@ -6,11 +6,10 @@ import { Alert } from '@/components/ui/Alert'
 import { Wordmark } from '@/components/ui/Wordmark'
 import { Picture } from '@/components/ui/Picture'
 import { Pagination } from '@/components/ui/Pagination'
-import { Field, Input } from '@/components/ui/Form'
 import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer'
 import { NutritionTable } from '@/components/public/NutritionTable'
 import { RecipeSteps } from '@/components/public/RecipeSteps'
-import type { MediaLike } from '@/lib/media'
+import type { Image } from '@/types/content'
 
 describe('StatusBadge', () => {
   it('labels a published item', () => {
@@ -121,63 +120,51 @@ describe('Wordmark', () => {
 })
 
 describe('Picture', () => {
-  const media: MediaLike = {
-    public_url: 'https://cdn.example/large.webp',
+  const image: Image = {
+    src: '/images/recipes/garlic-butter-oyster-mushrooms.svg',
     alt: 'Grey oyster mushrooms on linen',
     width: 1600,
     height: 1200,
-    mime_type: 'image/webp',
-    variants: [
-      { width: 480, path: 'a-480.webp', url: 'https://cdn.example/a-480.webp' },
-      { width: 960, path: 'a-960.webp', url: 'https://cdn.example/a-960.webp' },
-      { width: 1600, path: 'a-1600.webp', url: 'https://cdn.example/a-1600.webp' },
-    ],
   }
 
-  it('emits a srcset from the stored variants', () => {
-    render(<Picture media={media} sizes="50vw" />)
-    const img = screen.getByRole('img', { name: media.alt! })
-    expect(img.getAttribute('srcset')).toContain('480w')
-    expect(img.getAttribute('srcset')).toContain('1600w')
+  it('renders the image with its source and alt text', () => {
+    render(<Picture image={image} sizes="50vw" />)
+    const img = screen.getByRole('img', { name: image.alt })
+    expect(img).toHaveAttribute('src', image.src)
     expect(img).toHaveAttribute('sizes', '50vw')
   })
 
+  // Without explicit dimensions the browser cannot reserve space, and the page
+  // jumps as images load. This is the single biggest CLS cause.
   it('sets explicit dimensions so there is no layout shift', () => {
-    render(<Picture media={media} />)
-    const img = screen.getByRole('img', { name: media.alt! })
+    render(<Picture image={image} />)
+    const img = screen.getByRole('img', { name: image.alt })
     expect(img).toHaveAttribute('width', '1600')
     expect(img).toHaveAttribute('height', '1200')
   })
 
   it('lazy-loads by default and eager-loads only when marked priority', () => {
-    const { unmount } = render(<Picture media={media} />)
-    expect(screen.getByRole('img', { name: media.alt! })).toHaveAttribute('loading', 'lazy')
+    const { unmount } = render(<Picture image={image} />)
+    expect(screen.getByRole('img', { name: image.alt })).toHaveAttribute('loading', 'lazy')
     unmount()
 
-    render(<Picture media={media} priority />)
-    expect(screen.getByRole('img', { name: media.alt! })).toHaveAttribute('loading', 'eager')
+    render(<Picture image={image} priority />)
+    expect(screen.getByRole('img', { name: image.alt })).toHaveAttribute('loading', 'eager')
   })
 
-  it('uses the media library alt text unless overridden', () => {
-    render(<Picture media={media} alt="Overridden" />)
+  it('uses the content alt text unless overridden', () => {
+    render(<Picture image={image} alt="Overridden" />)
     expect(screen.getByRole('img', { name: 'Overridden' })).toBeInTheDocument()
   })
 
   it('renders a decorative image with an empty alt, hidden from the a11y tree', () => {
-    render(<Picture media={media} alt="" />)
+    render(<Picture image={image} alt="" />)
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
   })
 
-  it('renders a placeholder rather than a broken image when there is no media', () => {
-    render(<Picture media={null} aspect="4 / 3" />)
+  it('renders a placeholder rather than a broken image when there is none', () => {
+    render(<Picture image={null} aspect="4 / 3" />)
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
-  })
-
-  it('falls back to the single URL when no variants are stored', () => {
-    render(<Picture media={{ ...media, variants: [] }} />)
-    const img = screen.getByRole('img', { name: media.alt! })
-    expect(img).toHaveAttribute('src', 'https://cdn.example/large.webp')
-    expect(img.getAttribute('srcset')).toBeNull()
   })
 })
 
@@ -214,36 +201,6 @@ describe('Pagination', () => {
       'href',
       '/recipes?tag=one-pan',
     )
-  })
-})
-
-describe('Field', () => {
-  it('binds the label to its control', () => {
-    render(
-      <Field label="Recipe title" htmlFor="title" required>
-        <Input id="title" name="title" />
-      </Field>,
-    )
-    expect(screen.getByLabelText(/recipe title/i)).toHaveAttribute('name', 'title')
-  })
-
-  it('marks an invalid control and shows the message', () => {
-    render(
-      <Field label="Slug" htmlFor="slug" error="Already taken">
-        <Input id="slug" name="slug" invalid />
-      </Field>,
-    )
-    expect(screen.getByText('Already taken')).toBeInTheDocument()
-    expect(screen.getByLabelText(/slug/i)).toHaveAttribute('aria-invalid', 'true')
-  })
-
-  it('tells a screen reader when a field is optional', () => {
-    render(
-      <Field label="Phone" htmlFor="phone">
-        <Input id="phone" name="phone" />
-      </Field>,
-    )
-    expect(screen.getByLabelText(/phone \(optional\)/i)).toBeInTheDocument()
   })
 })
 
@@ -348,7 +305,7 @@ describe('RecipeSteps', () => {
       <RecipeSteps
         steps={[
           { title: 'Clean gently', body: 'Brush away substrate.' },
-          { body: 'Heat the pan.', duration_minutes: 3 },
+          { body: 'Heat the pan.', durationMinutes: 3 },
         ]}
       />,
     )

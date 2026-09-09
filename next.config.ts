@@ -6,15 +6,12 @@ const nextConfig: NextConfig = {
   // Pin the workspace root. Without it, Turbopack walks up looking for a lock
   // file and can settle on the home directory.
   turbopack: { root: import.meta.dirname },
-  // Images are pre-optimised at upload time (client-side resize -> WebP at 3 widths,
-  // stored in Supabase Storage). We emit real srcsets from <Picture />, so we do not
-  // need — and on Cloudflare Workers cannot freely use — a server image optimiser.
+  /*
+   * No server-side image optimiser. Cloudflare Workers has none without a paid
+   * service, so images are committed to /public already sized and compressed,
+   * and <Picture> carries explicit dimensions to keep layout shift at zero.
+   */
   images: { unoptimized: true },
-  experimental: {
-    // Server Actions receive small JSON payloads only; image bytes go straight to
-    // Supabase Storage from the browser via a signed upload URL.
-    serverActions: { bodySizeLimit: '1mb' },
-  },
   async headers() {
     return [
       {

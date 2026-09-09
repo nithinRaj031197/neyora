@@ -5,48 +5,41 @@ import { Picture } from '@/components/ui/Picture'
 import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer'
 import { JsonLd } from '@/components/ui/JsonLd'
 import { Breadcrumbs, type Crumb } from './Breadcrumbs'
-import { getPageBySlug } from '@/lib/content/pages'
-import { getSiteSettings } from '@/lib/content/site'
+import { getPageBySlug, getSiteSettings } from '@/lib/content'
 import { buildMetadata } from '@/lib/seo/metadata'
 import { articleJsonLd, breadcrumbJsonLd } from '@/lib/seo/jsonld'
-import { excerptFromMarkdown } from '@/lib/markdown/plain'
 
 /**
  * Shared renderer for every editorial page (/about, /farm, /quality, /storage
  * and the legal pages).
  *
- * One component rather than seven near-identical route files: each route is a
- * thin wrapper that names its slug and breadcrumb trail, and all the layout,
- * SEO and structured data live here. Adding a page is a CMS row plus a
- * three-line route file.
+ * One component rather than seven near-identical route files: each route names
+ * its slug and breadcrumb trail, and all the layout, SEO and structured data
+ * live here. Adding a page is a Markdown file plus a three-line route.
  */
-export async function generatePageMetadata(
-  slug: string,
-  path: string,
-  fallbackTitle: string,
-): Promise<Metadata> {
-  const [settings, page] = await Promise.all([getSiteSettings(), getPageBySlug(slug)])
+export function generatePageMetadata(slug: string, path: string, fallbackTitle: string): Metadata {
+  const settings = getSiteSettings()
+  const page = getPageBySlug(slug)
 
   if (!page) {
-    return buildMetadata({ title: fallbackTitle, path, settings, noindex: true })
+    return buildMetadata({ title: fallbackTitle, path, settings, seo: { noindex: true } })
   }
 
   return buildMetadata({
-    title: page.seo_title || page.title,
-    description: page.seo_description || page.subtitle,
+    title: page.title,
+    description: page.subtitle,
     descriptionSource: page.body,
     path,
-    canonicalOverride: page.canonical_url,
-    image: page.og ?? page.hero,
-    noindex: page.noindex,
+    image: page.hero,
+    seo: page.seo,
     type: 'article',
-    publishedTime: page.published_at,
-    modifiedTime: page.updated_at,
+    publishedTime: page.publishedAt,
+    modifiedTime: page.updatedAt ?? page.publishedAt,
     settings,
   })
 }
 
-export async function PageView({
+export function PageView({
   slug,
   path,
   trail,
@@ -55,13 +48,14 @@ export async function PageView({
   slug: string
   path: string
   trail: Crumb[]
-  /** Extra content rendered after the Markdown body — e.g. the FAQ accordion. */
+  /** Extra content after the Markdown body — e.g. the FAQ accordion. */
   children?: React.ReactNode
 }) {
-  const [settings, page] = await Promise.all([getSiteSettings(), getPageBySlug(slug)])
+  const settings = getSiteSettings()
+  const page = getPageBySlug(slug)
 
-  // A missing row means the page was unpublished or never seeded. A 404 is the
-  // honest response — better than an empty shell that looks broken.
+  // A missing or unpublished page is an honest 404 — better than an empty
+  // shell that looks broken.
   if (!page) notFound()
 
   return (
@@ -83,8 +77,7 @@ export async function PageView({
 
             {page.hero ? (
               <Picture
-                media={page.hero}
-                alt={page.hero.alt ?? page.title}
+                image={page.hero}
                 aspect="4 / 3"
                 sizes="(max-width: 1024px) 100vw, 40vw"
                 priority
@@ -103,18 +96,7 @@ export async function PageView({
       </Container>
 
       <JsonLd
-        data={[
-          breadcrumbJsonLd(trail),
-          articleJsonLd({
-            title: page.title,
-            description: page.seo_description || page.subtitle || excerptFromMarkdown(page.body),
-            path,
-            image: page.og ?? page.hero,
-            publishedAt: page.published_at,
-            modifiedAt: page.updated_at,
-            settings,
-          }),
-        ]}
+        data={[breadcrumbJsonLd(trail), articleJsonLd({ page, settings, path })]}
       />
     </>
   )

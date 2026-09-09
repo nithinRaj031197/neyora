@@ -1,4 +1,4 @@
-import type { Nutrition } from '@/types/database'
+import type { Nutrition } from '@/types/content'
 
 /**
  * Nutrition panel.

@@ -1,0 +1,100 @@
+# ============================================================================
+# NEYORA — FAQs
+#
+# Shown on /faq, grouped by category, and published as FAQ structured data so
+# answers can appear directly in search results.
+#
+# Answers are Markdown: links, bold and lists all work.
+# ============================================================================
+
+faqs:
+  - question: How fresh are NEYORA mushrooms when they reach me?
+    answer: |-
+      We harvest the morning of dispatch. Every pack carries its harvest date,
+      so you are never guessing.
+
+      If a pack reaches you more than two days after its harvest date, tell us
+      and we will replace it.
+    category: Freshness
+    sortOrder: 1
+
+  - question: How should I store fresh oyster mushrooms?
+    answer: |-
+      Refrigerate at 2–4 °C, **unwashed and loosely covered**. An airtight
+      container traps moisture and the caps turn slimy within a day.
+
+      If you have taken them out of the pack, a paper bag in the vegetable
+      drawer is ideal. Full guidance is on our [storage page](/storage).
+    category: Storage
+    sortOrder: 2
+
+  - question: Should I wash them before cooking?
+    answer: |-
+      Preferably not. Oyster mushrooms are grown on clean pasteurised substrate
+      and we do not wash them post-harvest, so there is rarely anything to
+      remove beyond a little substrate at the base.
+
+      Brush with a dry cloth or soft brush. If you must rinse, do it in the
+      minute before cooking and pat completely dry — wet mushrooms steam
+      instead of browning.
+    category: Cooking
+    sortOrder: 3
+
+  - question: How long do they keep?
+    answer: >-
+      Three to five days refrigerated, and genuinely best within the first 48
+      hours. The texture is what fades first — the flavour holds longer than the
+      bite does.
+    category: Storage
+    sortOrder: 4
+
+  - question: Do you use pesticides or chemicals?
+    answer: |-
+      No pesticides, no growth regulators, and no post-harvest chemical
+      treatment.
+
+      We grow on pasteurised paddy straw and sawdust with lab-sourced spawn.
+      Cleanliness and air control do the work that chemicals would otherwise be
+      used for. Ask us anything about our process — we would rather answer than
+      post a badge.
+    category: Growing
+    sortOrder: 5
+
+  - question: Is the substrate reused or discarded?
+    answer: >-
+      Spent substrate is composted and returns to farmland as a soil amendment.
+      The substrate itself starts as agricultural waste, so very little leaves
+      the loop.
+    category: Growing
+    sortOrder: 6
+
+  - question: What is the QR code on the pack?
+    answer: >-
+      It points at a stable link we control. Today it takes you to our recipes;
+      during a season or a campaign we can point it somewhere more useful
+      without reprinting a single label. Scan it whenever you open a pack.
+    category: Packaging
+    sortOrder: 7
+
+  - question: Will NEYORA sell anything other than mushrooms?
+    answer: >-
+      Yes. NEYORA is a natural-food brand and mushrooms are simply our first
+      crop. Fresh produce and other farm products will follow, held to the same
+      standard.
+    category: About NEYORA
+    sortOrder: 8
+
+  - question: Do you deliver to my area?
+    answer: >-
+      We are expanding steadily. Message us on WhatsApp with your pin code and
+      we will tell you honestly whether we can reach you well — we would rather
+      say no than send you something that has spent two days in transit.
+    category: Orders
+    sortOrder: 9
+
+  - question: Can I visit the farm?
+    answer: >-
+      In small groups, yes. Growing rooms need controlled conditions, so visits
+      are scheduled rather than open. Get in touch and we will arrange a time.
+    category: About NEYORA
+    sortOrder: 10

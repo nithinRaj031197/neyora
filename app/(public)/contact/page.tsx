@@ -1,88 +1,76 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { Container } from '@/components/ui/Container'
 import { Breadcrumbs } from '@/components/public/Breadcrumbs'
 import { Icon, socialIconName } from '@/components/ui/Icon'
 import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer'
 import { JsonLd } from '@/components/ui/JsonLd'
-import { ContactForm } from '@/components/public/ContactForm'
-import { TrackedLink } from '@/components/public/TrackedLink'
 import {
   formattedAddress,
+  getPageBySlug,
   getSiteSettings,
   getSocialLinks,
   whatsappLink,
-} from '@/lib/content/site'
-import { getPageBySlug } from '@/lib/content/pages'
+} from '@/lib/content'
 import { buildMetadata } from '@/lib/seo/metadata'
 import { breadcrumbJsonLd } from '@/lib/seo/jsonld'
-
-export const revalidate = 600
 
 const TRAIL = [
   { name: 'Home', path: '/' },
   { name: 'Contact', path: '/contact' },
 ]
 
-export async function generateMetadata(): Promise<Metadata> {
-  const [settings, page] = await Promise.all([getSiteSettings(), getPageBySlug('contact-intro')])
+export function generateMetadata(): Metadata {
+  const page = getPageBySlug('contact-intro')
   return buildMetadata({
-    title: page?.seo_title || 'Contact',
+    title: page?.title || 'Contact',
     description:
-      page?.seo_description ||
       page?.subtitle ||
       'Reach NEYORA by WhatsApp, phone or email. Wholesale, kitchen supply and farm visits.',
     path: '/contact',
-    settings,
+    seo: page?.seo,
+    settings: getSiteSettings(),
   })
 }
 
-export default async function ContactPage() {
-  const [settings, socials, page] = await Promise.all([
-    getSiteSettings(),
-    getSocialLinks(),
-    getPageBySlug('contact-intro'),
-  ])
+export default function ContactPage() {
+  const settings = getSiteSettings()
+  const socials = getSocialLinks()
+  const page = getPageBySlug('contact-intro')
 
-  const whatsapp = whatsappLink(settings)
-  const address = formattedAddress(settings)
+  const whatsapp = whatsappLink()
+  const address = formattedAddress()
 
-  // Every channel below is admin-controlled: an empty setting simply removes
-  // the row rather than rendering a dead link.
+  /*
+   * Every channel comes from content/site.yml. An empty setting removes the
+   * row entirely rather than rendering a link to nowhere.
+   */
   const channels = [
-    whatsapp
-      ? {
-          key: 'whatsapp',
-          icon: 'whatsapp' as const,
-          label: 'WhatsApp',
-          value: whatsapp.display,
-          href: whatsapp.href,
-          event: 'whatsapp_click' as const,
-          note: 'Fastest for orders and quick questions',
-        }
-      : null,
-    settings.contact_phone
-      ? {
-          key: 'phone',
-          icon: 'phone' as const,
-          label: 'Phone',
-          value: settings.contact_phone,
-          href: `tel:${settings.contact_phone.replace(/\s/g, '')}`,
-          event: 'contact_click' as const,
-          note: settings.business_hours ?? undefined,
-        }
-      : null,
-    settings.contact_email
-      ? {
-          key: 'email',
-          icon: 'mail' as const,
-          label: 'Email',
-          value: settings.contact_email,
-          href: `mailto:${settings.contact_email}`,
-          event: 'contact_click' as const,
-          note: 'Best for anything detailed',
-        }
-      : null,
-  ].filter((c): c is NonNullable<typeof c> => c !== null)
+    whatsapp && {
+      key: 'whatsapp',
+      icon: 'whatsapp' as const,
+      label: 'WhatsApp',
+      value: whatsapp.display,
+      href: whatsapp.href,
+      note: 'Fastest for orders and quick questions',
+    },
+    settings.contactPhone && {
+      key: 'phone',
+      icon: 'phone' as const,
+      label: 'Phone',
+      value: settings.contactPhone,
+      href: `tel:${settings.contactPhone.replace(/\s/g, '')}`,
+      note: settings.businessHours,
+    },
+    settings.contactEmail && {
+      key: 'email',
+      icon: 'mail' as const,
+      label: 'Email',
+      value: settings.contactEmail,
+      href: `mailto:${settings.contactEmail}`,
+      note: 'Best for anything detailed',
+    },
+  ].filter((c): c is Exclude<typeof c, null | undefined | false | ''> => Boolean(c))
 
   return (
     <>
@@ -108,10 +96,52 @@ export default async function ContactPage() {
               <MarkdownRenderer content={page.body} variant="compact" className="mb-12 max-w-[62ch]" />
             ) : null}
 
-            <h2 className="text-(length:--text-display-sm)">Send us a message</h2>
-            <div className="mt-8 max-w-2xl">
-              <ContactForm />
+            {/*
+              No form, and deliberately so. A form needs somewhere to send to,
+              which would mean a database or a paid form service. WhatsApp and
+              email are what customers already use, reach a real person faster,
+              and cost nothing to run.
+            */}
+            <h2 className="text-(length:--text-display-sm)">How to reach us</h2>
+            <p className="mt-5 max-w-[58ch] text-[1.0625rem] leading-relaxed text-earth-soft">
+              WhatsApp is genuinely the fastest route for orders and quick questions. For anything
+              longer — wholesale, a kitchen supply enquiry, a farm visit — email gives us room to
+              answer properly.
+            </p>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              {whatsapp ? (
+                <a
+                  href={whatsapp.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-13 items-center justify-center gap-2.5 rounded-xs border border-forest bg-forest px-7 text-[0.9375rem] font-medium tracking-[0.04em] text-ivory uppercase transition-colors hover:bg-forest-soft"
+                >
+                  <Icon name="whatsapp" size={19} />
+                  Message on WhatsApp
+                </a>
+              ) : null}
+              {settings.contactEmail ? (
+                <a
+                  href={`mailto:${settings.contactEmail}`}
+                  className="inline-flex h-13 items-center justify-center gap-2.5 rounded-xs border border-forest/35 px-7 text-[0.9375rem] font-medium tracking-[0.04em] text-forest uppercase transition-colors hover:border-forest hover:bg-forest/5"
+                >
+                  <Icon name="mail" size={19} />
+                  Email us
+                </a>
+              ) : null}
             </div>
+
+            <p className="mt-6 text-[0.8125rem] leading-relaxed text-earth-muted">
+              We read everything and reply within a working day. See our{' '}
+              <Link
+                href="/privacy"
+                className="underline decoration-earth-muted/40 underline-offset-2 hover:decoration-earth-muted"
+              >
+                privacy policy
+              </Link>
+              .
+            </p>
           </div>
 
           <aside className="flex flex-col gap-10">
@@ -123,10 +153,8 @@ export default async function ContactPage() {
                 <ul className="mt-5 flex flex-col">
                   {channels.map((channel) => (
                     <li key={channel.key} className="border-b border-beige last:border-b-0">
-                      <TrackedLink
+                      <a
                         href={channel.href}
-                        event={channel.event}
-                        props={{ method: channel.key, location: 'contact' }}
                         className="flex items-start gap-3.5 py-4 transition-colors hover:text-forest"
                       >
                         <Icon name={channel.icon} size={19} className="mt-0.5 text-leaf" />
@@ -143,7 +171,7 @@ export default async function ContactPage() {
                             </span>
                           ) : null}
                         </span>
-                      </TrackedLink>
+                      </a>
                     </li>
                   ))}
                 </ul>
@@ -162,9 +190,9 @@ export default async function ContactPage() {
                     </span>
                   ))}
                 </address>
-                {settings.google_maps_url ? (
+                {settings.address.googleMapsUrl ? (
                   <a
-                    href={settings.google_maps_url}
+                    href={settings.address.googleMapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="mt-4 inline-flex items-center gap-1.5 text-[0.875rem] text-botanical underline decoration-botanical/40 underline-offset-4 transition-colors hover:decoration-botanical"
@@ -183,16 +211,16 @@ export default async function ContactPage() {
                 </h2>
                 <ul className="mt-5 flex flex-wrap gap-2.5">
                   {socials.map((social) => (
-                    <li key={social.id}>
-                      <TrackedLink
+                    <li key={social.platform}>
+                      <a
                         href={social.url}
-                        event="social_click"
-                        props={{ platform: social.platform, location: 'contact' }}
-                        ariaLabel={`${settings.brand_name} on ${social.label}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`${settings.brandName} on ${social.label}`}
                         className="inline-flex h-11 w-11 items-center justify-center rounded-xs border border-beige text-earth-soft transition-colors hover:border-forest/50 hover:text-forest"
                       >
                         <Icon name={socialIconName(social.platform)} size={18} />
-                      </TrackedLink>
+                      </a>
                     </li>
                   ))}
                 </ul>

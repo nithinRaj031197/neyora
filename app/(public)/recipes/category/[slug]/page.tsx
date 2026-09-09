@@ -5,16 +5,16 @@ import { Breadcrumbs } from '@/components/public/Breadcrumbs'
 import { RecipeCard } from '@/components/public/RecipeCard'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { JsonLd } from '@/components/ui/JsonLd'
-import { Pagination } from '@/components/ui/Pagination'
 import { Picture } from '@/components/ui/Picture'
-import { getMediaByIds, getSiteSettings } from '@/lib/content/site'
-import { getRecipeCategoryBySlug, listRecipes } from '@/lib/content/recipes'
+import { getRecipeCategories, getRecipeCategoryBySlug, getSiteSettings, queryRecipes } from '@/lib/content'
 import { buildMetadata } from '@/lib/seo/metadata'
 import { breadcrumbJsonLd } from '@/lib/seo/jsonld'
 
-export const revalidate = 300
+export function generateStaticParams() {
+  return getRecipeCategories().map((category) => ({ slug: category.slug }))
+}
 
-const PAGE_SIZE = 12
+export const dynamicParams = false
 
 export async function generateMetadata({
   params,
@@ -22,50 +22,39 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const [settings, category] = await Promise.all([
-    getSiteSettings(),
-    getRecipeCategoryBySlug(slug),
-  ])
+  const settings = getSiteSettings()
+  const category = getRecipeCategoryBySlug(slug)
 
   if (!category) {
     return buildMetadata({
       title: 'Category not found',
       path: `/recipes/category/${slug}`,
       settings,
-      noindex: true,
+      seo: { noindex: true },
     })
   }
 
   return buildMetadata({
-    title: category.seo_title || `${category.name} recipes`,
-    description: category.seo_description || category.description,
+    title: `${category.name} recipes`,
+    description: category.description,
     path: `/recipes/category/${category.slug}`,
+    image: category.image,
+    seo: category.seo,
     settings,
   })
 }
 
 export default async function RecipeCategoryPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ slug: string }>
-  searchParams: Promise<{ page?: string }>
 }) {
-  const [{ slug }, sp] = await Promise.all([params, searchParams])
-  const category = await getRecipeCategoryBySlug(slug)
+  const { slug } = await params
+  const category = getRecipeCategoryBySlug(slug)
   if (!category) notFound()
 
-  const page = Math.max(1, Number.parseInt(sp.page ?? '1', 10) || 1)
-  const [{ recipes, total }, media] = await Promise.all([
-    listRecipes({
-      categorySlug: category.slug,
-      limit: PAGE_SIZE,
-      offset: (page - 1) * PAGE_SIZE,
-    }),
-    getMediaByIds([category.image_id]),
-  ])
-
-  const image = category.image_id ? media.get(category.image_id) ?? null : null
+  const { recipes, total } = queryRecipes({ category: category.slug, limit: 100 })
+  const categories = getRecipeCategories()
 
   const trail = [
     { name: 'Home', path: '/' },
@@ -90,10 +79,9 @@ export default async function RecipeCategoryPage({
               ) : null}
             </div>
 
-            {image ? (
+            {category.image ? (
               <Picture
-                media={image}
-                alt={image.alt ?? category.name}
+                image={category.image}
                 aspect="3 / 2"
                 sizes="(max-width: 1024px) 100vw, 38vw"
                 priority
@@ -119,15 +107,14 @@ export default async function RecipeCategoryPage({
             </p>
             <div className="mt-8 grid gap-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-14">
               {recipes.map((recipe, index) => (
-                <RecipeCard key={recipe.id} recipe={recipe} priority={index < 3} />
+                <RecipeCard
+                  key={recipe.slug}
+                  recipe={recipe}
+                  category={categories.find((c) => c.slug === recipe.category) ?? null}
+                  priority={index < 3}
+                />
               ))}
             </div>
-            <Pagination
-              page={page}
-              pageSize={PAGE_SIZE}
-              total={total}
-              basePath={`/recipes/category/${category.slug}`}
-            />
           </>
         )}
       </Container>

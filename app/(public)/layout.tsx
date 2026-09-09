@@ -1,12 +1,11 @@
 import type { ReactNode } from 'react'
+import Script from 'next/script'
 import { Navbar } from '@/components/public/Navbar'
 import { Footer } from '@/components/public/Footer'
-import { AnalyticsScript } from '@/components/public/AnalyticsScript'
 import { JsonLd } from '@/components/ui/JsonLd'
-import { getSiteSettings, getSocialLinks, getMediaByIds } from '@/lib/content/site'
+import { getSiteSettings, getSocialLinks } from '@/lib/content'
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo/jsonld'
-import { SetupNotice } from '@/components/public/SetupNotice'
-import { isSupabaseConfigured } from '@/lib/env'
+import { publicEnv } from '@/lib/env'
 
 /**
  * Public site shell.
@@ -15,16 +14,13 @@ import { isSupabaseConfigured } from '@/lib/env'
  * every URL carries the entity graph and per-page schemas can reference it by
  * @id instead of repeating it.
  */
-export default async function PublicLayout({ children }: { children: ReactNode }) {
-  if (!isSupabaseConfigured()) {
-    return <SetupNotice />
-  }
+export default function PublicLayout({ children }: { children: ReactNode }) {
+  const settings = getSiteSettings()
+  const socials = getSocialLinks()
+  const { analyticsProvider, analyticsScriptUrl, analyticsSiteId } = publicEnv()
 
-  const [settings, socials] = await Promise.all([getSiteSettings(), getSocialLinks()])
-  const media = await getMediaByIds([settings.default_og_image_id])
-  const logo = settings.default_og_image_id
-    ? media.get(settings.default_og_image_id) ?? null
-    : null
+  const analyticsEnabled =
+    analyticsProvider !== 'none' && Boolean(analyticsScriptUrl && analyticsSiteId)
 
   return (
     <>
@@ -38,8 +34,23 @@ export default async function PublicLayout({ children }: { children: ReactNode }
         </main>
         <Footer />
       </div>
-      <JsonLd data={[organizationJsonLd(settings, socials, logo), websiteJsonLd(settings)]} />
-      <AnalyticsScript />
+
+      <JsonLd data={[organizationJsonLd(settings, socials), websiteJsonLd(settings)]} />
+
+      {/*
+        No third-party JavaScript ships unless a privacy-friendly provider is
+        explicitly configured. The default is nothing at all.
+      */}
+      {analyticsEnabled ? (
+        <Script
+          src={analyticsScriptUrl}
+          strategy="afterInteractive"
+          defer
+          {...(analyticsProvider === 'umami'
+            ? { 'data-website-id': analyticsSiteId }
+            : { 'data-domain': analyticsSiteId })}
+        />
+      ) : null}
     </>
   )
 }

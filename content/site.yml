@@ -1,0 +1,118 @@
+# ============================================================================
+# NEYORA — site settings
+#
+# Everything here appears on every page: the header, the footer, contact
+# details, default SEO, and where the packaging QR code leads.
+#
+# Edit, commit, deploy. Changes are live on the next build.
+# ============================================================================
+
+brandName: NEYORA
+tagline: GROWN FOR LIFE.
+brandDescription: >-
+  NEYORA grows fresh, natural food with care — starting with oyster mushrooms
+  harvested the morning they ship.
+
+# ---------------------------------------------------------------------------
+# Contact
+#
+# Anything left blank is removed from the site rather than shown as a dead
+# link. Replace the placeholders before launch.
+# ---------------------------------------------------------------------------
+contactEmail: hello@neyora.com
+contactPhone: "+91 00000 00000"
+
+# Digits and country code only. No '+', spaces or dashes — wa.me rejects them.
+# Until this is set, every WhatsApp button on the site is hidden.
+whatsappNumber: "910000000000"
+whatsappMessage: Hi NEYORA, I would like to know more about your fresh produce.
+
+address:
+  line1: Update this address in content/site.yml
+  city: Bengaluru
+  state: Karnataka
+  postalCode: "560001"
+  country: India
+
+businessHours: Monday to Saturday, 8am – 6pm IST
+
+# ---------------------------------------------------------------------------
+# Footer
+# ---------------------------------------------------------------------------
+footerTagline: Fresh food, grown with care.
+footerNote: NEYORA is a natural-food brand. Our first crop is fresh oyster mushrooms.
+copyrightHolder: NEYORA
+
+# ---------------------------------------------------------------------------
+# Announcement bar — a single line above the header.
+# Turn it off when it stops being true.
+# ---------------------------------------------------------------------------
+announcement:
+  enabled: false
+  text: ""
+  href: ""
+
+# ---------------------------------------------------------------------------
+# Default SEO — used wherever a page has not set its own
+# ---------------------------------------------------------------------------
+seo:
+  defaultTitle: NEYORA — Fresh Natural Food
+  defaultDescription: >-
+    NEYORA grows fresh, natural food with care. Premium oyster mushrooms,
+    harvested to order and delivered at their best.
+  defaultOgImage: /images/hero/oyster-mushroom-hero.svg
+  organizationLegalName: NEYORA Naturals
+
+# ---------------------------------------------------------------------------
+# The QR code printed on your packaging
+#
+# Print a code that resolves to https://your-domain.com/go — nothing else.
+# Never print a link to a specific recipe: you would be committing to it for
+# the life of every label already in circulation.
+#
+# To change where it leads:
+#   • edit `destination` below and deploy, or
+#   • set the NEYORA_QR_DESTINATION variable in the Cloudflare dashboard,
+#     which takes effect immediately with no redeploy at all.
+#
+# Fill in landingTitle to show a short message before continuing instead of
+# redirecting straight away. Leave it blank for an instant redirect.
+# ---------------------------------------------------------------------------
+qr:
+  destination: /recipes
+  landingTitle: ""
+  landingBody: ""
+
+# ---------------------------------------------------------------------------
+# Social links
+#
+# A link appears only when `enabled` is true AND it has a URL. These are also
+# published as `sameAs` in the organisation's structured data, which is how
+# search engines associate your profiles with the brand.
+# ---------------------------------------------------------------------------
+social:
+  - platform: instagram
+    label: Instagram
+    url: https://instagram.com/neyora
+    handle: "@neyora"
+    enabled: true
+  - platform: whatsapp
+    label: WhatsApp
+    url: ""
+    enabled: false
+  - platform: facebook
+    label: Facebook
+    url: ""
+    enabled: false
+  - platform: youtube
+    label: YouTube
+    url: ""
+    enabled: false
+  - platform: linkedin
+    label: LinkedIn
+    url: ""
+    enabled: false
+  - platform: x
+    label: X
+    url: ""
+    enabled: false

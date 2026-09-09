@@ -7,7 +7,7 @@ import {
   resolveIngredientsForPack,
   scaleIngredients,
 } from '@/lib/utils/scale'
-import type { Ingredient, RecipePackVariantRow } from '@/types/database'
+import type { Ingredient, PackVariant } from '@/types/content'
 
 const BASE: Ingredient[] = [
   { qty: 200, unit: 'g', item: 'oyster mushrooms', scalable: true },
@@ -17,17 +17,13 @@ const BASE: Ingredient[] = [
   { qty: 0.5, unit: 'tsp', item: 'chilli flakes', scalable: false },
 ]
 
-function variant(overrides: Partial<RecipePackVariantRow> = {}): RecipePackVariantRow {
+function variant(overrides: Partial<PackVariant> = {}): PackVariant {
   return {
-    id: 'v1',
-    recipe_id: 'r1',
-    pack_size: '500g',
-    pack_grams: 500,
+    packSize: '500g',
+    packGrams: 500,
     servings: 5,
     ingredients: [{ qty: 500, unit: 'g', item: 'oyster mushrooms', scalable: true }],
     note: 'Cook in two batches.',
-    created_at: '2026-01-01T00:00:00Z',
-    updated_at: '2026-01-01T00:00:00Z',
     ...overrides,
   }
 }
@@ -96,7 +92,7 @@ describe('resolveIngredientsForPack', () => {
     basePackGrams: 200,
     servings: 2,
     isScalable: true,
-    variants: [] as RecipePackVariantRow[],
+    variants: [] as PackVariant[],
   }
 
   it('returns the base list unchanged for the base pack', () => {
@@ -149,7 +145,7 @@ describe('resolveIngredientsForPack', () => {
   it('refuses to scale without a known base weight', () => {
     const result = resolveIngredientsForPack({
       ...args,
-      basePackGrams: null,
+      basePackGrams: undefined,
       requestedPack: '500g',
     })
     expect(result.source).toBe('base')

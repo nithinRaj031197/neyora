@@ -5,7 +5,7 @@ import { Icon } from '@/components/ui/Icon'
 import { Badge } from '@/components/ui/Badge'
 import { formatDuration } from '@/lib/utils/format'
 import { packSizeLabel } from '@/lib/utils/scale'
-import type { MediaRow, RecipeCategoryRow, RecipeRow, RecipeTagRow } from '@/types/database'
+import type { Category, Recipe } from '@/types/content'
 
 const DIFFICULTY_LABEL = { easy: 'Easy', medium: 'Some skill', hard: 'Challenging' } as const
 
@@ -18,18 +18,14 @@ const DIFFICULTY_LABEL = { easy: 'Easy', medium: 'Some skill', hard: 'Challengin
  */
 export function RecipeHero({
   recipe,
-  cover,
   category,
-  tags,
 }: {
-  recipe: RecipeRow
-  cover: MediaRow | null
-  category: RecipeCategoryRow | null
-  tags: RecipeTagRow[]
+  recipe: Recipe
+  category: Category | null
 }) {
   const stats = [
-    { label: 'Prep', value: formatDuration(recipe.prep_time_minutes), icon: 'clock' as const },
-    { label: 'Cook', value: formatDuration(recipe.cook_time_minutes), icon: 'flame' as const },
+    { label: 'Prep', value: formatDuration(recipe.prepTimeMinutes), icon: 'clock' as const },
+    { label: 'Cook', value: formatDuration(recipe.cookTimeMinutes), icon: 'flame' as const },
     {
       label: 'Serves',
       value: recipe.servings ? String(recipe.servings) : '—',
@@ -37,7 +33,7 @@ export function RecipeHero({
     },
     {
       label: 'Pack',
-      value: packSizeLabel(recipe.recommended_pack_size).replace(' pack', ''),
+      value: packSizeLabel(recipe.recommendedPackSize).replace(' pack', ''),
       icon: 'qr' as const,
     },
   ]
@@ -88,11 +84,11 @@ export function RecipeHero({
               </p>
             ) : null}
 
-            {tags.length > 0 ? (
+            {recipe.tags.length > 0 ? (
               <ul className="mt-7 flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <Badge key={tag.id} as="li" tone="leaf">
-                    {tag.name}
+                {recipe.tags.map((tag) => (
+                  <Badge key={tag} as="li" tone="leaf">
+                    {tag.replace(/-/g, ' ')}
                   </Badge>
                 ))}
                 <Badge as="li" tone="outline">
@@ -103,8 +99,7 @@ export function RecipeHero({
           </div>
 
           <Picture
-            media={cover}
-            alt={cover?.alt ?? `${recipe.title} — recipe photograph`}
+            image={recipe.cover}
             aspect="4 / 3"
             sizes="(max-width: 1024px) 100vw, 55vw"
             priority

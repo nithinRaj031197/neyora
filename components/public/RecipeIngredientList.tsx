@@ -9,8 +9,7 @@ import {
   packSizeLabel,
   resolveIngredientsForPack,
 } from '@/lib/utils/scale'
-import { track } from '@/lib/analytics/client'
-import type { Ingredient, PackSize, RecipePackVariantRow } from '@/types/database'
+import type { Ingredient, PackSize, PackVariant } from '@/types/content'
 
 /**
  * Ingredient list with pack-size switching and tick-off.
@@ -32,16 +31,14 @@ export function RecipeIngredientList({
   recommendedPack,
   availablePacks,
   variants,
-  recipeSlug,
 }: {
   ingredients: Ingredient[]
-  basePackGrams: number | null
-  servings: number | null
+  basePackGrams?: number
+  servings?: number
   isScalable: boolean
   recommendedPack: PackSize
   availablePacks: PackSize[]
-  variants: RecipePackVariantRow[]
-  recipeSlug: string
+  variants: PackVariant[]
 }) {
   const [pack, setPack] = useState<PackSize>(recommendedPack)
   const [checked, setChecked] = useState<Set<number>>(new Set())
@@ -79,8 +76,8 @@ export function RecipeIngredientList({
 
   function selectPack(next: PackSize) {
     setPack(next)
+    // Ticks refer to the previous list's rows, so they must not carry over.
     setChecked(new Set())
-    track('pack_size_change', { recipe: recipeSlug, pack: next })
   }
 
   return (
@@ -102,7 +99,7 @@ export function RecipeIngredientList({
           <div className="mt-3 flex flex-wrap gap-2">
             {availablePacks.map((option) => {
               const active = option === pack
-              const hasVariant = variants.some((v) => v.pack_size === option)
+              const hasVariant = variants.some((v) => v.packSize === option)
               return (
                 <button
                   key={option}

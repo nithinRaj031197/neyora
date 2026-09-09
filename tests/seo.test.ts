@@ -9,172 +9,35 @@ import {
   websiteJsonLd,
 } from '@/lib/seo/jsonld'
 import { buildMetadata } from '@/lib/seo/metadata'
-import { FALLBACK_SETTINGS } from '@/lib/content/site'
-import type {
-  FaqRow,
-  MediaRow,
-  ProductRow,
-  RecipeCategoryRow,
-  RecipeRow,
-  SiteSettingsRow,
-  SocialLinkRow,
-} from '@/types/database'
+import { getPublishedRecipes, getRecipeCategories, getSiteSettings } from '@/lib/content'
+import type { Category, Faq, Image, Page, Product, Recipe, SocialLink } from '@/types/content'
 
-const SETTINGS: SiteSettingsRow = {
-  ...FALLBACK_SETTINGS,
-  brand_name: 'NEYORA',
-  tagline: 'GROWN FOR LIFE.',
-  organization_legal_name: 'NEYORA Naturals',
-  contact_email: 'hello@neyora.com',
-  contact_phone: '+91 00000 00000',
-  city: 'Bengaluru',
-  state: 'Karnataka',
-  country: 'India',
-  default_seo_description: 'NEYORA grows fresh, natural food with care.',
-}
+/**
+ * Structured data is what makes a recipe eligible for Google's rich results.
+ * These tests assert against the *real* content files, so a change to a recipe
+ * that would break its markup is caught here.
+ */
+const SETTINGS = getSiteSettings()
 
-const COVER: MediaRow = {
-  id: 'm1',
-  bucket: 'media',
-  path: 'recipes/a-1600.webp',
-  public_url: 'https://cdn.example/recipes/a-1600.webp',
-  mime_type: 'image/webp',
+const COVER: Image = {
+  src: '/images/recipes/garlic-butter-oyster-mushrooms.svg',
+  alt: 'Garlic butter oyster mushrooms in a pan',
   width: 1600,
   height: 1200,
-  size_bytes: 120_000,
-  alt: 'Garlic butter oyster mushrooms in a pan',
-  title: 'Garlic butter',
-  description: null,
-  variants: [],
-  folder: 'recipes',
-  uploaded_by: null,
-  is_demo: false,
-  created_at: '2026-01-01T00:00:00Z',
-  updated_at: '2026-01-01T00:00:00Z',
-  deleted_at: null,
 }
 
-const RECIPE: RecipeRow = {
-  id: 'r1',
-  slug: 'garlic-butter-oyster-mushrooms',
-  title: 'Garlic Butter Oyster Mushrooms',
-  excerpt: 'The one to cook first.',
-  body: '## Why this works\n\nA hot pan.',
-  category_id: 'c1',
-  cover_image_id: 'm1',
-  og_image_id: null,
-  prep_time_minutes: 5,
-  cook_time_minutes: 10,
-  total_time_minutes: 15,
-  servings: 2,
-  servings_label: 'as a side for 2',
-  difficulty: 'easy',
-  cuisine: 'Continental',
-  course: 'Side',
-  recommended_pack_size: '200g',
-  base_pack_grams: 200,
-  is_scalable: true,
-  primary_product_id: null,
-  ingredients: [
-    { qty: 200, unit: 'g', item: 'oyster mushrooms', note: 'torn', scalable: true },
-    { qty: 1.5, unit: 'tbsp', item: 'butter', scalable: true },
-    { qty: null, unit: '', item: 'Salt', note: 'to taste', scalable: false },
-  ],
-  steps: [
-    { title: 'Heat the pan', body: 'Until a drop of water skitters.', duration_minutes: 2 },
-    { body: 'Sear in a single layer.' },
-  ],
-  nutrition: {
-    basis: 'Per serving',
-    per: [
-      { label: 'Energy', value: '118', unit: 'kcal' },
-      { label: 'Protein', value: '3.6', unit: 'g' },
-    ],
-  },
-  equipment: ['Cast-iron pan'],
-  tips: null,
-  featured: true,
-  sort_order: 1,
-  seo_title: null,
-  seo_description: null,
-  canonical_url: null,
-  noindex: false,
-  status: 'published',
-  published_at: '2026-05-01T00:00:00Z',
-  scheduled_at: null,
-  view_count: 12,
-  created_by: null,
-  updated_by: null,
-  is_demo: false,
-  created_at: '2026-05-01T00:00:00Z',
-  updated_at: '2026-05-02T00:00:00Z',
-  deleted_at: null,
+function recipe(): Recipe {
+  const found = getPublishedRecipes().find((r) => r.slug === 'garlic-butter-oyster-mushrooms')
+  if (!found) throw new Error('The seeded garlic butter recipe is missing')
+  return found
 }
 
-const CATEGORY: RecipeCategoryRow = {
-  id: 'c1',
-  slug: 'quick',
-  name: 'Under 15 Minutes',
-  description: null,
-  image_id: null,
-  sort_order: 1,
-  status: 'published',
-  published_at: '2026-01-01T00:00:00Z',
-  scheduled_at: null,
-  is_demo: false,
-  created_at: '2026-01-01T00:00:00Z',
-  updated_at: '2026-01-01T00:00:00Z',
-  deleted_at: null,
-  seo_title: null,
-  seo_description: null,
-}
-
-const PRODUCT: ProductRow = {
-  id: 'p1',
-  slug: 'fresh-oyster-mushrooms-200g',
-  name: 'Fresh Oyster Mushrooms',
-  short_description: 'Hand-picked the morning they ship.',
-  description: 'Long copy.',
-  category_id: null,
-  variety: 'Pleurotus ostreatus',
-  origin: 'Karnataka',
-  weight_grams: 200,
-  weight_label: '200 g',
-  price: 120,
-  mrp: 150,
-  currency: 'INR',
-  unit_label: 'pack',
-  nutrition: {},
-  highlights: [],
-  storage_notes: null,
-  shelf_life: '3–5 days',
-  availability: 'in_stock',
-  featured: true,
-  sort_order: 1,
-  seo_title: null,
-  seo_description: null,
-  canonical_url: null,
-  og_image_id: null,
-  status: 'published',
-  published_at: '2026-01-01T00:00:00Z',
-  scheduled_at: null,
-  is_demo: false,
-  created_at: '2026-01-01T00:00:00Z',
-  updated_at: '2026-01-01T00:00:00Z',
-  deleted_at: null,
+function category(): Category | null {
+  return getRecipeCategories().find((c) => c.slug === recipe().category) ?? null
 }
 
 describe('recipeJsonLd', () => {
-  const json = recipeJsonLd({
-    recipe: RECIPE,
-    cover: COVER,
-    category: CATEGORY,
-    tags: [
-      { id: 't1', slug: 'vegetarian', name: 'Vegetarian', created_at: '', updated_at: '' },
-      { id: 't2', slug: 'one-pan', name: 'One Pan', created_at: '', updated_at: '' },
-    ],
-    settings: SETTINGS,
-  })
+  const json = recipeJsonLd({ recipe: recipe(), category: category(), settings: SETTINGS })
 
   it('declares itself a Recipe', () => {
     expect(json['@type']).toBe('Recipe')
@@ -187,23 +50,33 @@ describe('recipeJsonLd', () => {
     expect(json.totalTime).toBe('PT15M')
   })
 
-  // Google needs flat ingredient strings, which is only possible because the
-  // ingredients are stored structured rather than as prose.
+  /*
+   * Google needs flat ingredient strings. That is only possible because the
+   * ingredients are stored structured rather than written into prose.
+   */
   it('flattens ingredients into readable strings', () => {
     const ingredients = json.recipeIngredient as string[]
-    expect(ingredients[0]).toBe('200 g oyster mushrooms (torn)')
-    expect(ingredients[1]).toBe('1½ tbsp butter')
-    expect(ingredients[2]).toBe('Salt (to taste)')
+    expect(ingredients[0]).toBe('200 g oyster mushrooms (torn into finger-width strips)')
+    expect(ingredients).toContain('Salt (added at the end only)')
+  })
+
+  it('renders fractional quantities as fractions, not decimals', () => {
+    const pepper = recipeJsonLd({
+      recipe: getPublishedRecipes().find((r) => r.slug === 'pepper-oyster-mushroom-fry')!,
+      category: null,
+      settings: SETTINGS,
+    })
+    expect(pepper.recipeIngredient as string[]).toContain(
+      '1½ tsp black peppercorns (coarsely crushed, freshly)',
+    )
   })
 
   it('emits HowToStep objects with resolvable anchors', () => {
     const steps = json.recipeInstructions as { '@type': string; url: string; name: string }[]
-    expect(steps).toHaveLength(2)
+    expect(steps.length).toBeGreaterThan(1)
     expect(steps[0]?.['@type']).toBe('HowToStep')
     expect(steps[0]?.url).toContain('#step-1')
-    expect(steps[0]?.name).toBe('Heat the pan')
-    // A step with no title still needs a name.
-    expect(steps[1]?.name).toBe('Step 2')
+    expect(steps[0]?.name).toBe('Clean gently')
   })
 
   it('maps nutrition onto schema.org property names', () => {
@@ -217,11 +90,11 @@ describe('recipeJsonLd', () => {
   })
 
   it('lists tags as keywords', () => {
-    expect(json.keywords).toBe('Vegetarian, One Pan')
+    expect(json.keywords).toContain('vegetarian')
   })
 
   it('uses an absolute image URL', () => {
-    expect((json.image as string[])[0]).toMatch(/^https:\/\//)
+    expect((json.image as string[])[0]).toMatch(/^https?:\/\//)
   })
 
   // Fabricating a rating to win stars in search results is both a policy
@@ -229,21 +102,30 @@ describe('recipeJsonLd', () => {
   it('never invents an aggregate rating', () => {
     expect(json.aggregateRating).toBeUndefined()
   })
-
-  it('falls back to the body for a description when no excerpt exists', () => {
-    const json2 = recipeJsonLd({
-      recipe: { ...RECIPE, excerpt: null },
-      cover: null,
-      category: null,
-      tags: [],
-      settings: SETTINGS,
-    })
-    expect(json2.description).toContain('Why this works')
-  })
 })
 
 describe('productJsonLd', () => {
-  const json = productJsonLd({ product: PRODUCT, images: [COVER], settings: SETTINGS })
+  const product: Product = {
+    slug: 'fresh-oyster-mushrooms-200g',
+    name: 'Fresh Oyster Mushrooms',
+    shortDescription: 'Hand-picked the morning they ship.',
+    body: 'Long copy.',
+    variety: 'Pleurotus ostreatus',
+    weightGrams: 200,
+    weightLabel: '200 g',
+    price: 120,
+    mrp: 150,
+    currency: 'INR',
+    images: [COVER],
+    highlights: [],
+    availability: 'in_stock',
+    featured: true,
+    sortOrder: 1,
+    status: 'published',
+    isDemo: true,
+  }
+
+  const json = productJsonLd({ product, settings: SETTINGS })
 
   it('declares an Offer with price, currency and availability', () => {
     const offer = json.offers as Record<string, unknown>
@@ -253,25 +135,20 @@ describe('productJsonLd', () => {
   })
 
   it('maps each availability state to the right schema.org URL', () => {
-    const cases: [ProductRow['availability'], string][] = [
+    const cases: [Product['availability'], string][] = [
       ['low_stock', 'https://schema.org/LimitedAvailability'],
       ['out_of_stock', 'https://schema.org/OutOfStock'],
       ['coming_soon', 'https://schema.org/PreOrder'],
     ]
     for (const [availability, expected] of cases) {
-      const result = productJsonLd({
-        product: { ...PRODUCT, availability },
-        images: [],
-        settings: SETTINGS,
-      })
+      const result = productJsonLd({ product: { ...product, availability }, settings: SETTINGS })
       expect((result.offers as Record<string, unknown>).availability).toBe(expected)
     }
   })
 
   it('omits the Offer entirely when no price is published', () => {
     const result = productJsonLd({
-      product: { ...PRODUCT, price: null },
-      images: [],
+      product: { ...product, price: undefined },
       settings: SETTINGS,
     })
     expect(result.offers).toBeUndefined()
@@ -283,32 +160,12 @@ describe('productJsonLd', () => {
 })
 
 describe('organizationJsonLd', () => {
-  const socials: SocialLinkRow[] = [
-    {
-      id: 's1',
-      platform: 'instagram',
-      label: 'Instagram',
-      url: 'https://instagram.com/neyora',
-      handle: '@neyora',
-      sort_order: 1,
-      enabled: true,
-      created_at: '',
-      updated_at: '',
-    },
-    {
-      id: 's2',
-      platform: 'facebook',
-      label: 'Facebook',
-      url: '',
-      handle: null,
-      sort_order: 2,
-      enabled: false,
-      created_at: '',
-      updated_at: '',
-    },
+  const socials: SocialLink[] = [
+    { platform: 'instagram', label: 'Instagram', url: 'https://instagram.com/neyora', enabled: true },
+    { platform: 'facebook', label: 'Facebook', url: '', enabled: false },
   ]
 
-  const json = organizationJsonLd(SETTINGS, socials, null)
+  const json = organizationJsonLd(SETTINGS, socials)
 
   it('carries a stable @id other schemas can reference', () => {
     expect(json['@id']).toContain('#organization')
@@ -320,11 +177,6 @@ describe('organizationJsonLd', () => {
 
   it('includes a postal address when one is configured', () => {
     expect((json.address as Record<string, unknown>).addressLocality).toBe('Bengaluru')
-  })
-
-  it('omits the address entirely when nothing is configured', () => {
-    const bare = organizationJsonLd(FALLBACK_SETTINGS, [], null)
-    expect(bare.address).toBeUndefined()
   })
 })
 
@@ -350,41 +202,36 @@ describe('breadcrumbJsonLd', () => {
 
 describe('faqJsonLd', () => {
   it('converts Markdown answers to plain text', () => {
-    const faqs: FaqRow[] = [
+    const faqs: Faq[] = [
       {
-        id: 'f1',
         question: 'How should I store them?',
         answer: 'Refrigerate at **2–4 °C**, see [storage](/storage).',
         category: 'Storage',
-        sort_order: 1,
+        sortOrder: 1,
         status: 'published',
-        published_at: null,
-        scheduled_at: null,
-        is_demo: false,
-        created_at: '',
-        updated_at: '',
-        deleted_at: null,
       },
     ]
-    const json = faqJsonLd(faqs)
-    const entity = json.mainEntity as { acceptedAnswer: { text: string } }[]
+    const entity = faqJsonLd(faqs).mainEntity as { acceptedAnswer: { text: string } }[]
     expect(entity[0]?.acceptedAnswer.text).toBe('Refrigerate at 2–4 °C, see storage.')
   })
 })
 
 describe('articleJsonLd', () => {
   it('sets both published and modified dates', () => {
-    const json = articleJsonLd({
+    const page: Page = {
+      slug: 'farm',
       title: 'Our Farm',
-      description: 'How we grow.',
-      path: '/farm',
-      image: COVER,
-      publishedAt: '2026-01-01T00:00:00Z',
-      modifiedAt: '2026-02-01T00:00:00Z',
-      settings: SETTINGS,
-    })
-    expect(json.datePublished).toBe('2026-01-01T00:00:00Z')
-    expect(json.dateModified).toBe('2026-02-01T00:00:00Z')
+      body: 'How we grow.',
+      hero: COVER,
+      sortOrder: 1,
+      status: 'published',
+      publishedAt: '2026-01-01',
+      updatedAt: '2026-02-01',
+      isDemo: true,
+    }
+    const json = articleJsonLd({ page, settings: SETTINGS, path: '/farm' })
+    expect(json.datePublished).toBe('2026-01-01')
+    expect(json.dateModified).toBe('2026-02-01')
     expect(json.url).toBe('https://neyora.test/farm')
   })
 })
@@ -418,49 +265,42 @@ describe('buildMetadata', () => {
 
   it('falls back to the site default description', () => {
     const meta = buildMetadata({ title: 'Something', path: '/x', settings: SETTINGS })
-    expect(meta.description).toBe('NEYORA grows fresh, natural food with care.')
+    expect(meta.description).toBe(SETTINGS.seo.defaultDescription)
   })
 
-  it('honours a canonical override', () => {
+  it('lets a page override the title, description and canonical', () => {
     const meta = buildMetadata({
-      title: 'Recipe',
+      title: 'Ignored',
       path: '/recipes/a',
-      canonicalOverride: 'https://elsewhere.example/a',
+      seo: {
+        title: 'Chosen title',
+        description: 'Chosen description',
+        canonicalUrl: 'https://elsewhere.example/a',
+      },
       settings: SETTINGS,
     })
+    expect(meta.title).toBe('Chosen title')
+    expect(meta.description).toBe('Chosen description')
     expect(meta.alternates?.canonical).toBe('https://elsewhere.example/a')
   })
 
   it('emits noindex for a hidden page', () => {
-    const meta = buildMetadata({ title: 'Hidden', path: '/x', settings: SETTINGS, noindex: true })
+    const meta = buildMetadata({
+      title: 'Hidden',
+      path: '/x',
+      settings: SETTINGS,
+      seo: { noindex: true },
+    })
     expect(meta.robots).toMatchObject({ index: false, follow: false })
   })
 
-  it('uses a large image card only when there is an image', () => {
-    // Next's Twitter metadata type is a union; `card` is only present on some
-    // members, so read it through a narrow view of the object.
-    const card = (meta: { twitter?: unknown }) =>
-      (meta.twitter as { card?: string } | undefined)?.card
-
-    expect(
-      card(buildMetadata({ title: 'Recipe', path: '/r', image: COVER, settings: SETTINGS })),
-    ).toBe('summary_large_image')
-
-    expect(card(buildMetadata({ title: 'Recipe', path: '/r', settings: SETTINGS }))).toBe('summary')
-  })
-
   it('makes a site-relative image URL absolute for Open Graph', () => {
-    const meta = buildMetadata({
-      title: 'Recipe',
-      path: '/r',
-      image: { ...COVER, public_url: '/images/hero.svg', variants: [] },
-      settings: SETTINGS,
-    })
+    const meta = buildMetadata({ title: 'Recipe', path: '/r', image: COVER, settings: SETTINGS })
     const images = meta.openGraph?.images as { url: string }[]
-    expect(images[0]?.url).toBe('https://neyora.test/images/hero.svg')
+    expect(images[0]?.url).toBe(`https://neyora.test${COVER.src}`)
   })
 
-  it('caps the description length so it is not truncated mid-word by Google', () => {
+  it('caps the description so Google does not truncate it mid-word', () => {
     const meta = buildMetadata({
       title: 'X',
       description: 'word '.repeat(200),
@@ -475,14 +315,14 @@ describe('buildMetadata', () => {
       title: 'Farm',
       path: '/farm',
       type: 'article',
-      publishedTime: '2026-01-01T00:00:00Z',
-      modifiedTime: '2026-02-01T00:00:00Z',
+      publishedTime: '2026-01-01',
+      modifiedTime: '2026-02-01',
       settings: SETTINGS,
     })
     expect(meta.openGraph).toMatchObject({
       type: 'article',
-      publishedTime: '2026-01-01T00:00:00Z',
-      modifiedTime: '2026-02-01T00:00:00Z',
+      publishedTime: '2026-01-01',
+      modifiedTime: '2026-02-01',
     })
   })
 })

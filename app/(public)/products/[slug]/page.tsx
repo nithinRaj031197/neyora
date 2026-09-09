@@ -11,16 +11,25 @@ import { JsonLd } from '@/components/ui/JsonLd'
 import { NutritionTable } from '@/components/public/NutritionTable'
 import { Breadcrumbs } from '@/components/public/Breadcrumbs'
 import { RecipeCard } from '@/components/public/RecipeCard'
-import { TrackedLink } from '@/components/public/TrackedLink'
-import { ViewTracker } from '@/components/public/ViewTracker'
-import { availabilityLabel, getProductBySlug } from '@/lib/content/products'
-import { listRecipes } from '@/lib/content/recipes'
-import { getSiteSettings, whatsappLink } from '@/lib/content/site'
+import {
+  availabilityLabel,
+  getProductBySlug,
+  getProductCategories,
+  getPublishedProducts,
+  getRecipeCategories,
+  getSiteSettings,
+  queryRecipes,
+  whatsappLink,
+} from '@/lib/content'
 import { buildMetadata } from '@/lib/seo/metadata'
 import { breadcrumbJsonLd, productJsonLd } from '@/lib/seo/jsonld'
 import { formatPrice } from '@/lib/utils/format'
 
-export const revalidate = 300
+export function generateStaticParams() {
+  return getPublishedProducts().map((product) => ({ slug: product.slug }))
+}
+
+export const dynamicParams = false
 
 export async function generateMetadata({
   params,
@@ -28,48 +37,51 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const [settings, product] = await Promise.all([getSiteSettings(), getProductBySlug(slug)])
+  const settings = getSiteSettings()
+  const product = getProductBySlug(slug)
 
   if (!product) {
-    return buildMetadata({ title: 'Product not found', path: `/products/${slug}`, settings, noindex: true })
+    return buildMetadata({
+      title: 'Product not found',
+      path: `/products/${slug}`,
+      settings,
+      seo: { noindex: true },
+    })
   }
 
   return buildMetadata({
-    title: product.seo_title || product.name,
-    description: product.seo_description || product.short_description,
-    descriptionSource: product.description,
+    title: product.name,
+    description: product.shortDescription,
+    descriptionSource: product.body,
     path: `/products/${product.slug}`,
-    canonicalOverride: product.canonical_url,
-    image: product.og ?? product.images[0] ?? null,
+    image: product.images[0],
+    seo: product.seo,
     settings,
   })
 }
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const [settings, product] = await Promise.all([getSiteSettings(), getProductBySlug(slug)])
+  const settings = getSiteSettings()
+  const product = getProductBySlug(slug)
 
   if (!product) notFound()
 
+  const category = getProductCategories().find((c) => c.slug === product.category) ?? null
+  const recipeCategories = getRecipeCategories()
+  const { recipes } = queryRecipes({ limit: 3 })
+
   const whatsapp = whatsappLink(
-    settings,
-    `Hi ${settings.brand_name}, I would like to order ${product.name}${
-      product.weight_label ? ` (${product.weight_label})` : ''
+    `Hi ${settings.brandName}, I would like to order ${product.name}${
+      product.weightLabel ? ` (${product.weightLabel})` : ''
     }.`,
   )
 
-  // Recipes written for this product, so the pack has somewhere to lead.
-  const { recipes } = await listRecipes({ limit: 3 })
-
-  const price = formatPrice(product.price, product.currency)
-  const mrp =
-    product.mrp !== null && product.price !== null && product.mrp > product.price
-      ? formatPrice(product.mrp, product.currency)
-      : null
-  const saving =
-    product.mrp !== null && product.price !== null && product.mrp > product.price
-      ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
-      : null
+  const price = formatPrice(product.price ?? null, product.currency)
+  const showMrp =
+    product.mrp !== undefined && product.price !== undefined && product.mrp > product.price
+  const mrp = showMrp ? formatPrice(product.mrp!, product.currency) : null
+  const saving = showMrp ? Math.round(((product.mrp! - product.price!) / product.mrp!) * 100) : null
 
   const trail = [
     { name: 'Home', path: '/' },
@@ -79,24 +91,20 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   const facts = [
     product.variety ? { label: 'Variety', value: product.variety } : null,
-    product.weight_label ? { label: 'Pack size', value: product.weight_label } : null,
-    product.shelf_life ? { label: 'Shelf life', value: product.shelf_life } : null,
+    product.weightLabel ? { label: 'Pack size', value: product.weightLabel } : null,
+    product.shelfLife ? { label: 'Shelf life', value: product.shelfLife } : null,
     product.origin ? { label: 'Grown at', value: product.origin } : null,
   ].filter((f): f is { label: string; value: string } => f !== null)
 
   return (
     <>
-      <ViewTracker event="product_view" props={{ product: product.slug }} />
-
       <Container size="wide" className="pt-10 lg:pt-14">
         <Breadcrumbs trail={trail} />
 
         <div className="mt-9 grid gap-12 lg:grid-cols-2 lg:gap-16">
-          {/* Gallery. The primary image is the LCP element, hence priority. */}
           <div className="flex flex-col gap-3">
             <Picture
-              media={product.images[0] ?? null}
-              alt={product.images[0]?.alt ?? product.name}
+              image={product.images[0]}
               aspect="1 / 1"
               sizes="(max-width: 1024px) 100vw, 48vw"
               priority
@@ -105,10 +113,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             {product.images.length > 1 ? (
               <ul className="grid grid-cols-4 gap-3">
                 {product.images.slice(1, 5).map((image) => (
-                  <li key={image.id}>
+                  <li key={image.src}>
                     <Picture
-                      media={image}
-                      alt={image.alt ?? `${product.name} — additional view`}
+                      image={image}
                       aspect="1 / 1"
                       sizes="14vw"
                       wrapperClassName="rounded-xs bg-beige-soft"
@@ -120,12 +127,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           </div>
 
           <div>
-            {product.category ? <p className="eyebrow">{product.category.name}</p> : null}
+            {category ? <p className="eyebrow">{category.name}</p> : null}
             <h1 className="mt-4 text-(length:--text-display-md)">{product.name}</h1>
 
-            {product.short_description ? (
+            {product.shortDescription ? (
               <p className="mt-5 max-w-[50ch] text-[1.0625rem] leading-relaxed text-earth-soft">
-                {product.short_description}
+                {product.shortDescription}
               </p>
             ) : null}
 
@@ -133,12 +140,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               {price ? (
                 <p className="font-display text-(length:--text-display-sm) text-forest">{price}</p>
               ) : null}
-              {mrp ? (
-                <p className="text-[0.9375rem] text-earth-muted line-through">{mrp}</p>
-              ) : null}
+              {mrp ? <p className="text-[0.9375rem] text-earth-muted line-through">{mrp}</p> : null}
               {saving ? <Badge tone="leaf">{saving}% off</Badge> : null}
-              {product.unit_label ? (
-                <span className="text-[0.875rem] text-earth-muted">per {product.unit_label}</span>
+              {product.unitLabel ? (
+                <span className="text-[0.875rem] text-earth-muted">per {product.unitLabel}</span>
               ) : null}
             </div>
 
@@ -154,15 +159,15 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             */}
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               {whatsapp ? (
-                <TrackedLink
+                <a
                   href={whatsapp.href}
-                  event="whatsapp_click"
-                  props={{ location: 'product', product: product.slug }}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex h-13 flex-1 items-center justify-center gap-2.5 rounded-xs border border-forest bg-forest px-7 text-[0.9375rem] font-medium tracking-[0.04em] text-ivory uppercase transition-colors hover:bg-forest-soft"
                 >
                   <Icon name="whatsapp" size={19} />
                   Order on WhatsApp
-                </TrackedLink>
+                </a>
               ) : null}
               <Link
                 href="/contact"
@@ -201,20 +206,20 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
       <Container size="wide" className="py-(--spacing-section)">
         <div className="grid gap-16 lg:grid-cols-[minmax(0,68ch)_1fr] lg:gap-20">
-          <MarkdownRenderer content={product.description} />
+          <MarkdownRenderer content={product.body} />
 
           <aside className="flex flex-col gap-10">
-            {product.nutrition?.per?.length ? (
+            {product.nutrition?.per.length ? (
               <NutritionTable nutrition={product.nutrition} />
             ) : null}
 
-            {product.storage_notes ? (
+            {product.storageNotes ? (
               <section aria-labelledby="storage-heading">
                 <h2 id="storage-heading" className="font-display text-xl text-forest">
                   Storing it well
                 </h2>
                 <MarkdownRenderer
-                  content={product.storage_notes}
+                  content={product.storageNotes}
                   variant="compact"
                   className="mt-4"
                 />
@@ -241,18 +246,17 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           />
           <div className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-12">
             {recipes.map((recipe) => (
-              <RecipeCard key={recipe.id} recipe={recipe} />
+              <RecipeCard
+                key={recipe.slug}
+                recipe={recipe}
+                category={recipeCategories.find((c) => c.slug === recipe.category) ?? null}
+              />
             ))}
           </div>
         </Section>
       ) : null}
 
-      <JsonLd
-        data={[
-          breadcrumbJsonLd(trail),
-          productJsonLd({ product, images: product.images, settings }),
-        ]}
-      />
+      <JsonLd data={[breadcrumbJsonLd(trail), productJsonLd({ product, settings })]} />
     </>
   )
 }

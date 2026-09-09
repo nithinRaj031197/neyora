@@ -7,13 +7,11 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { JsonLd } from '@/components/ui/JsonLd'
 import { RecipeFilters } from '@/components/public/RecipeFilters'
 import { Pagination } from '@/components/ui/Pagination'
-import { getRecipeCategories, getRecipeTags, listRecipes } from '@/lib/content/recipes'
-import { getSiteSettings } from '@/lib/content/site'
+import { getRecipeCategories, getRecipeTags, getSiteSettings, queryRecipes } from '@/lib/content'
 import { buildMetadata } from '@/lib/seo/metadata'
 import { breadcrumbJsonLd } from '@/lib/seo/jsonld'
-import { packSizeSchema } from '@/lib/validation/common'
-
-export const revalidate = 300
+import { PACK_SIZES } from '@/lib/utils/scale'
+import type { PackSize } from '@/types/content'
 
 const PAGE_SIZE = 12
 
@@ -22,14 +20,13 @@ const TRAIL = [
   { name: 'Recipes', path: '/recipes' },
 ]
 
-export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSiteSettings()
+export function generateMetadata(): Metadata {
   return buildMetadata({
     title: 'Recipes',
     description:
       'Simple, well-tested ways to cook fresh oyster mushrooms while they are at their best. Most take under twenty minutes.',
     path: '/recipes',
-    settings,
+    settings: getSiteSettings(),
   })
 }
 
@@ -40,23 +37,20 @@ export default async function RecipesPage({
 }) {
   const sp = await searchParams
 
-  // Validate the pack filter rather than trusting the query string — an
-  // invalid enum value would otherwise make Postgres error on the request.
-  const packResult = packSizeSchema.safeParse(sp.pack)
+  // Validate the pack filter rather than trusting the query string.
+  const pack = PACK_SIZES.includes(sp.pack as PackSize) ? (sp.pack as PackSize) : undefined
   const page = Math.max(1, Number.parseInt(sp.page ?? '1', 10) || 1)
 
-  const [{ recipes, total }, categories, tags] = await Promise.all([
-    listRecipes({
-      tagSlug: sp.tag,
-      packSize: packResult.success ? packResult.data : undefined,
-      search: sp.q,
-      limit: PAGE_SIZE,
-      offset: (page - 1) * PAGE_SIZE,
-    }),
-    getRecipeCategories(),
-    getRecipeTags(),
-  ])
+  const { recipes, total } = queryRecipes({
+    tag: sp.tag,
+    packSize: pack,
+    search: sp.q,
+    limit: PAGE_SIZE,
+    offset: (page - 1) * PAGE_SIZE,
+  })
 
+  const categories = getRecipeCategories()
+  const tags = getRecipeTags()
   const hasFilters = Boolean(sp.tag || sp.pack || sp.q)
 
   return (
@@ -81,7 +75,7 @@ export default async function RecipesPage({
             <nav aria-label="Recipe categories">
               <ul className="flex flex-wrap gap-2">
                 {categories.map((cat) => (
-                  <li key={cat.id}>
+                  <li key={cat.slug}>
                     <Link
                       href={`/recipes/category/${cat.slug}`}
                       className="inline-flex h-9 items-center rounded-xs border border-beige px-3.5 text-[0.8125rem] font-medium tracking-[0.04em] text-earth-soft uppercase transition-colors hover:border-forest/50 hover:text-forest"
@@ -100,7 +94,7 @@ export default async function RecipesPage({
         <RecipeFilters
           tags={tags}
           activeTag={sp.tag ?? null}
-          activePack={packResult.success ? packResult.data : null}
+          activePack={pack ?? null}
           query={sp.q ?? ''}
           basePath="/recipes"
         />
@@ -127,7 +121,12 @@ export default async function RecipesPage({
 
             <div className="mt-8 grid gap-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-14">
               {recipes.map((recipe, index) => (
-                <RecipeCard key={recipe.id} recipe={recipe} priority={index < 3} />
+                <RecipeCard
+                  key={recipe.slug}
+                  recipe={recipe}
+                  category={categories.find((c) => c.slug === recipe.category) ?? null}
+                  priority={index < 3}
+                />
               ))}
             </div>
 

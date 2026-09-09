@@ -9,69 +9,51 @@ import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer'
 import { Wordmark } from '@/components/ui/Wordmark'
 import { RecipeCard } from '@/components/public/RecipeCard'
 import { ProductCard } from '@/components/public/ProductCard'
-import { TrackedLink } from '@/components/public/TrackedLink'
-import { getHomepage, getTestimonials } from '@/lib/content/pages'
-import { getMediaByIds, getSiteSettings, getSocialLinks } from '@/lib/content/site'
-import { listProducts } from '@/lib/content/products'
-import { listRecipes } from '@/lib/content/recipes'
+import {
+  getHomepage,
+  getProductCategories,
+  getRecipeCategories,
+  getSiteSettings,
+  getSocialLinks,
+  getTestimonials,
+  queryProducts,
+  queryRecipes,
+} from '@/lib/content'
 import { buildMetadata } from '@/lib/seo/metadata'
 
 /**
  * Homepage.
  *
- * Every headline, paragraph, CTA label and image on this page comes from the
- * `homepage` table. There is no marketing copy in this file — which is the
- * whole point of the brief: content changes must never require a deploy.
- *
- * Revalidated rather than fully dynamic so a visit costs no database
- * round-trip most of the time.
+ * Every headline, paragraph, CTA label and image comes from
+ * content/homepage.yml. There is no marketing copy in this file.
  */
-export const revalidate = 300
-
-export async function generateMetadata(): Promise<Metadata> {
-  const [settings, homepage] = await Promise.all([getSiteSettings(), getHomepage()])
-  const media = await getMediaByIds([homepage?.og_image_id, homepage?.hero_image_id])
-  const og =
-    (homepage?.og_image_id ? media.get(homepage.og_image_id) : null) ??
-    (homepage?.hero_image_id ? media.get(homepage.hero_image_id) : null) ??
-    null
+export function generateMetadata(): Metadata {
+  const settings = getSiteSettings()
+  const homepage = getHomepage()
 
   return buildMetadata({
-    title: homepage?.seo_title || settings.default_seo_title || settings.brand_name,
-    description: homepage?.seo_description || settings.default_seo_description,
+    title: settings.seo.defaultTitle ?? settings.brandName,
+    image: homepage.hero.image,
+    seo: homepage.seo,
     path: '/',
-    image: og,
     settings,
     // The homepage title is already the brand; appending it would repeat.
     appendBrand: false,
   })
 }
 
-export default async function HomePage() {
-  const [settings, homepage, socials] = await Promise.all([
-    getSiteSettings(),
-    getHomepage(),
-    getSocialLinks(),
-  ])
+export default function HomePage() {
+  const home = getHomepage()
+  const socials = getSocialLinks()
 
-  const visible = (key: string) => homepage?.section_visibility?.[key] !== false
+  const products = home.products.enabled ? queryProducts({ limit: 3 }) : []
+  const recipes = home.recipes.enabled ? queryRecipes({ limit: 3 }).recipes : []
+  const testimonials = home.community.enabled
+    ? getTestimonials({ featuredOnly: true, limit: 3 })
+    : []
 
-  const [products, recipes, testimonials] = await Promise.all([
-    visible('products') ? listProducts({ limit: 3 }) : Promise.resolve([]),
-    visible('recipes') ? listRecipes({ limit: 3 }).then((r) => r.recipes) : Promise.resolve([]),
-    visible('community') ? getTestimonials({ featuredOnly: true, limit: 3 }) : Promise.resolve([]),
-  ])
-
-  const media = await getMediaByIds([
-    homepage?.hero_image_id,
-    homepage?.farm_image_id,
-    homepage?.final_cta_image_id,
-  ])
-  const hero = homepage?.hero_image_id ? media.get(homepage.hero_image_id) ?? null : null
-  const farmImage = homepage?.farm_image_id ? media.get(homepage.farm_image_id) ?? null : null
-  const ctaImage = homepage?.final_cta_image_id
-    ? media.get(homepage.final_cta_image_id) ?? null
-    : null
+  const recipeCategories = getRecipeCategories()
+  const productCategories = getProductCategories()
 
   return (
     <>
@@ -80,38 +62,36 @@ export default async function HomePage() {
         <Container size="wide" className="pt-16 pb-0 lg:pt-24">
           <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-16">
             <div className="animate-rise">
-              {homepage?.hero_eyebrow ? <p className="eyebrow">{homepage.hero_eyebrow}</p> : null}
+              {home.hero.eyebrow ? <p className="eyebrow">{home.hero.eyebrow}</p> : null}
 
               <h1 id="hero-heading" className="mt-6">
                 <Wordmark
                   as="span"
-                  brandName={homepage?.hero_headline || settings.brand_name}
+                  brandName={home.hero.headline}
                   className="text-(length:--text-display-xl) leading-[0.9]"
                 />
-                <span className="mt-4 block font-display text-(length:--text-display-md) leading-none font-light tracking-[0.06em] text-earth-soft">
-                  {homepage?.hero_subheadline || settings.tagline}
-                </span>
+                {home.hero.subheadline ? (
+                  <span className="mt-4 block font-display text-(length:--text-display-md) leading-none font-light tracking-[0.06em] text-earth-soft">
+                    {home.hero.subheadline}
+                  </span>
+                ) : null}
               </h1>
 
-              {homepage?.hero_description ? (
+              {home.hero.description ? (
                 <p className="animate-rise animate-rise-delay-1 mt-8 max-w-[50ch] text-[1.125rem] leading-relaxed text-earth-soft">
-                  {homepage.hero_description}
+                  {home.hero.description}
                 </p>
               ) : null}
 
               <div className="animate-rise animate-rise-delay-2 mt-10 flex flex-wrap gap-3">
-                {homepage?.hero_cta_label && homepage.hero_cta_href ? (
-                  <ButtonLink href={homepage.hero_cta_href} size="lg">
-                    {homepage.hero_cta_label}
+                {home.hero.ctaLabel && home.hero.ctaHref ? (
+                  <ButtonLink href={home.hero.ctaHref} size="lg">
+                    {home.hero.ctaLabel}
                   </ButtonLink>
                 ) : null}
-                {homepage?.hero_secondary_cta_label && homepage.hero_secondary_cta_href ? (
-                  <ButtonLink
-                    href={homepage.hero_secondary_cta_href}
-                    variant="secondary"
-                    size="lg"
-                  >
-                    {homepage.hero_secondary_cta_label}
+                {home.hero.secondaryCtaLabel && home.hero.secondaryCtaHref ? (
+                  <ButtonLink href={home.hero.secondaryCtaHref} variant="secondary" size="lg">
+                    {home.hero.secondaryCtaLabel}
                   </ButtonLink>
                 ) : null}
               </div>
@@ -119,16 +99,15 @@ export default async function HomePage() {
 
             <figure className="animate-rise animate-rise-delay-1">
               <Picture
-                media={hero}
-                alt={hero?.alt ?? `${settings.brand_name} fresh produce`}
+                image={home.hero.image}
                 aspect="4 / 3"
                 sizes="(max-width: 1024px) 100vw, 52vw"
                 priority
                 wrapperClassName="rounded-t-sm lg:rounded-sm"
               />
-              {homepage?.hero_image_caption ? (
+              {home.hero.image?.caption ? (
                 <figcaption className="mt-3 text-[0.8125rem] text-earth-muted">
-                  {homepage.hero_image_caption}
+                  {home.hero.image.caption}
                 </figcaption>
               ) : null}
             </figure>
@@ -139,51 +118,53 @@ export default async function HomePage() {
       </section>
 
       {/* ------------------------------------------------------------ Products */}
-      {visible('products') && products.length > 0 ? (
+      {home.products.enabled && products.length > 0 ? (
         <Section tone="ivory" containerSize="wide" ariaLabelledby="products-heading">
           <div className="flex flex-wrap items-end justify-between gap-8">
             <SectionHeader
               id="products-heading"
-              eyebrow={homepage?.products_eyebrow}
-              heading={homepage?.products_heading}
-              description={homepage?.products_description}
+              eyebrow={home.products.eyebrow}
+              heading={home.products.heading}
+              description={home.products.description}
             />
-            {homepage?.products_cta_label && homepage.products_cta_href ? (
-              <ButtonLink href={homepage.products_cta_href} variant="secondary">
-                {homepage.products_cta_label}
+            {home.products.ctaLabel && home.products.ctaHref ? (
+              <ButtonLink href={home.products.ctaHref} variant="secondary">
+                {home.products.ctaLabel}
               </ButtonLink>
             ) : null}
           </div>
 
           <div className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-12">
             {products.map((product, index) => (
-              <ProductCard key={product.id} product={product} priority={index === 0} />
+              <ProductCard
+                key={product.slug}
+                product={product}
+                category={productCategories.find((c) => c.slug === product.category) ?? null}
+                priority={index === 0}
+              />
             ))}
           </div>
         </Section>
       ) : null}
 
       {/* ----------------------------------------------------------- Why NEYORA */}
-      {visible('why') && (homepage?.why_pillars?.length ?? 0) > 0 ? (
+      {home.why.enabled && home.why.pillars.length > 0 ? (
         <Section tone="forest" containerSize="wide" ariaLabelledby="why-heading">
           <SectionHeader
             id="why-heading"
-            eyebrow={homepage?.why_eyebrow}
-            heading={homepage?.why_heading}
-            description={homepage?.why_description}
+            eyebrow={home.why.eyebrow}
+            heading={home.why.heading}
+            description={home.why.description}
             invert
           />
 
           <ol className="mt-16 grid gap-px overflow-hidden border-t border-ivory/15 sm:grid-cols-2 lg:grid-cols-4">
-            {homepage?.why_pillars.map((pillar, index) => (
+            {home.why.pillars.map((pillar, index) => (
               <li
                 key={pillar.title}
-                className="border-b border-ivory/15 pt-8 pb-8 sm:border-r sm:pr-8 sm:last:border-r-0 sm:odd:pr-8 lg:pr-10"
+                className="border-b border-ivory/15 pt-8 pb-8 sm:border-r sm:pr-8 sm:last:border-r-0 lg:pr-10"
               >
-                <span
-                  aria-hidden="true"
-                  className="font-display text-sm text-golden"
-                >
+                <span aria-hidden="true" className="font-display text-sm text-golden">
                   {String(index + 1).padStart(2, '0')}
                 </span>
                 <h3 className="mt-4 font-display text-[1.375rem] leading-snug text-ivory">
@@ -199,12 +180,11 @@ export default async function HomePage() {
       ) : null}
 
       {/* --------------------------------------------------------------- Farm */}
-      {visible('farm') && (homepage?.farm_heading || farmImage) ? (
+      {home.farm.enabled && (home.farm.heading || home.farm.image) ? (
         <Section tone="ivory" containerSize="wide" ariaLabelledby="farm-heading">
           <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-20">
             <Picture
-              media={farmImage}
-              alt={farmImage?.alt ?? 'The NEYORA farm'}
+              image={home.farm.image}
               aspect="5 / 4"
               sizes="(max-width: 1024px) 100vw, 52vw"
               wrapperClassName="rounded-sm"
@@ -213,21 +193,21 @@ export default async function HomePage() {
             <div>
               <SectionHeader
                 id="farm-heading"
-                eyebrow={homepage?.farm_eyebrow}
-                heading={homepage?.farm_heading}
-                description={homepage?.farm_description}
+                eyebrow={home.farm.eyebrow}
+                heading={home.farm.heading}
+                description={home.farm.description}
               />
-              {homepage?.farm_body ? (
+              {home.farm.body ? (
                 <MarkdownRenderer
-                  content={homepage.farm_body}
+                  content={home.farm.body}
                   variant="compact"
                   className="mt-6 max-w-[52ch]"
                 />
               ) : null}
-              {homepage?.farm_cta_label && homepage.farm_cta_href ? (
+              {home.farm.ctaLabel && home.farm.ctaHref ? (
                 <div className="mt-9">
-                  <ButtonLink href={homepage.farm_cta_href} variant="secondary">
-                    {homepage.farm_cta_label}
+                  <ButtonLink href={home.farm.ctaHref} variant="secondary">
+                    {home.farm.ctaLabel}
                   </ButtonLink>
                 </div>
               ) : null}
@@ -237,44 +217,48 @@ export default async function HomePage() {
       ) : null}
 
       {/* ------------------------------------------------------------ Recipes */}
-      {visible('recipes') && recipes.length > 0 ? (
+      {home.recipes.enabled && recipes.length > 0 ? (
         <Section tone="ivory-soft" containerSize="wide" ariaLabelledby="recipes-heading">
           <div className="flex flex-wrap items-end justify-between gap-8">
             <SectionHeader
               id="recipes-heading"
-              eyebrow={homepage?.recipes_eyebrow}
-              heading={homepage?.recipes_heading}
-              description={homepage?.recipes_description}
+              eyebrow={home.recipes.eyebrow}
+              heading={home.recipes.heading}
+              description={home.recipes.description}
             />
-            {homepage?.recipes_cta_label && homepage.recipes_cta_href ? (
-              <ButtonLink href={homepage.recipes_cta_href} variant="secondary">
-                {homepage.recipes_cta_label}
+            {home.recipes.ctaLabel && home.recipes.ctaHref ? (
+              <ButtonLink href={home.recipes.ctaHref} variant="secondary">
+                {home.recipes.ctaLabel}
               </ButtonLink>
             ) : null}
           </div>
 
           <div className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-12">
             {recipes.map((recipe) => (
-              <RecipeCard key={recipe.id} recipe={recipe} />
+              <RecipeCard
+                key={recipe.slug}
+                recipe={recipe}
+                category={recipeCategories.find((c) => c.slug === recipe.category) ?? null}
+              />
             ))}
           </div>
         </Section>
       ) : null}
 
       {/* ---------------------------------------------------------- Community */}
-      {visible('community') && testimonials.length > 0 ? (
+      {home.community.enabled && testimonials.length > 0 ? (
         <Section tone="ivory" containerSize="wide" ariaLabelledby="community-heading">
           <SectionHeader
             id="community-heading"
-            eyebrow={homepage?.community_eyebrow}
-            heading={homepage?.community_heading}
-            description={homepage?.community_description}
+            eyebrow={home.community.eyebrow}
+            heading={home.community.heading}
+            description={home.community.description}
           />
 
           <ul className="mt-14 grid gap-px border-t border-beige lg:grid-cols-3">
             {testimonials.map((testimonial) => (
               <li
-                key={testimonial.id}
+                key={testimonial.authorName}
                 className="border-b border-beige py-9 lg:border-r lg:pr-10 lg:last:border-r-0"
               >
                 <blockquote>
@@ -283,13 +267,11 @@ export default async function HomePage() {
                   </p>
                   <footer className="mt-6 text-[0.875rem] text-earth-muted">
                     <cite className="font-sans font-medium text-earth not-italic">
-                      {testimonial.author_name}
+                      {testimonial.authorName}
                     </cite>
-                    {testimonial.author_role || testimonial.location ? (
+                    {testimonial.authorRole || testimonial.location ? (
                       <span className="mt-0.5 block">
-                        {[testimonial.author_role, testimonial.location]
-                          .filter(Boolean)
-                          .join(' · ')}
+                        {[testimonial.authorRole, testimonial.location].filter(Boolean).join(' · ')}
                       </span>
                     ) : null}
                   </footer>
@@ -301,28 +283,28 @@ export default async function HomePage() {
       ) : null}
 
       {/* ------------------------------------------------------------- Social */}
-      {visible('social') && socials.length > 0 ? (
+      {home.social.enabled && socials.length > 0 ? (
         <Section tone="beige" containerSize="wide" size="compact" ariaLabelledby="social-heading">
           <div className="flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-center">
             <SectionHeader
               id="social-heading"
-              eyebrow={homepage?.social_eyebrow}
-              heading={homepage?.social_heading}
-              description={homepage?.social_description}
+              eyebrow={home.social.eyebrow}
+              heading={home.social.heading}
+              description={home.social.description}
             />
 
             <ul className="flex flex-wrap gap-2.5">
               {socials.map((social) => (
-                <li key={social.id}>
-                  <TrackedLink
+                <li key={social.platform}>
+                  <a
                     href={social.url}
-                    event="social_click"
-                    props={{ platform: social.platform, location: 'homepage' }}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="inline-flex h-12 items-center gap-2.5 rounded-xs border border-forest/25 px-4 text-[0.8125rem] font-medium tracking-[0.06em] text-forest uppercase transition-colors hover:border-forest hover:bg-forest/5"
                   >
                     <Icon name={socialIconName(social.platform)} size={18} />
                     {social.handle || social.label}
-                  </TrackedLink>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -331,12 +313,12 @@ export default async function HomePage() {
       ) : null}
 
       {/* ---------------------------------------------------------- Final CTA */}
-      {visible('final_cta') && homepage?.final_cta_heading ? (
+      {home.finalCta.enabled && home.finalCta.heading ? (
         <section className="relative overflow-hidden bg-earth" aria-labelledby="final-cta-heading">
-          {ctaImage ? (
+          {home.finalCta.image ? (
             <>
               <Picture
-                media={ctaImage}
+                image={home.finalCta.image}
                 alt=""
                 sizes="100vw"
                 wrapperClassName="absolute inset-0"
@@ -346,30 +328,27 @@ export default async function HomePage() {
             </>
           ) : null}
 
-          <Container
-            size="wide"
-            className="relative py-(--spacing-section) text-center"
-          >
+          <Container size="wide" className="relative py-(--spacing-section) text-center">
             <div className="mx-auto max-w-2xl">
-              {homepage.final_cta_eyebrow ? (
-                <p className="eyebrow text-leaf">{homepage.final_cta_eyebrow}</p>
+              {home.finalCta.eyebrow ? (
+                <p className="eyebrow text-leaf">{home.finalCta.eyebrow}</p>
               ) : null}
               <h2
                 id="final-cta-heading"
                 className="mt-5 text-(length:--text-display-lg) text-ivory"
               >
-                {homepage.final_cta_heading}
+                {home.finalCta.heading}
               </h2>
-              {homepage.final_cta_description ? (
+              {home.finalCta.description ? (
                 <p className="mx-auto mt-6 max-w-[52ch] text-[1.0625rem] leading-relaxed text-ivory/75">
-                  {homepage.final_cta_description}
+                  {home.finalCta.description}
                 </p>
               ) : null}
 
               <div className="mt-10 flex flex-wrap justify-center gap-3">
-                {homepage.final_cta_label && homepage.final_cta_href ? (
-                  <ButtonLink href={homepage.final_cta_href} variant="inverse" size="lg">
-                    {homepage.final_cta_label}
+                {home.finalCta.ctaLabel && home.finalCta.ctaHref ? (
+                  <ButtonLink href={home.finalCta.ctaHref} variant="inverse" size="lg">
+                    {home.finalCta.ctaLabel}
                   </ButtonLink>
                 ) : null}
                 <ButtonLink href="/contact" variant="inverse-outline" size="lg">

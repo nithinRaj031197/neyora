@@ -7,7 +7,7 @@
  *
  * Deploy:
  *   npm run cf:build     # adapt the Next.js build for Workers
- *   npm run cf:preview   # run it locally in workerd (needs Node >= 22)
+ *   npm run cf:preview   # run it locally in workerd
  *   npm run cf:deploy    # push it live
  */
 {
@@ -19,8 +19,8 @@
   // means a future runtime change could alter behaviour without a code change.
   "compatibility_date": "2026-09-01",
 
-  // nodejs_compat is required: Next.js server code uses Node built-ins
-  // (streams, crypto, buffer) that the base Workers runtime does not provide.
+  // nodejs_compat is required: Next.js server code uses Node built-ins that
+  // the base Workers runtime does not provide.
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
 
   "assets": {
@@ -32,22 +32,17 @@
     "enabled": true
   },
 
-  // Public values only. Secrets are set with `wrangler secret put NAME`, or in
-  // the Cloudflare dashboard — never committed here.
+  /*
+   * Public values only — there are no secrets in this project.
+   *
+   * NEYORA_QR_DESTINATION is the one worth knowing about: change it here or
+   * in the Cloudflare dashboard and every QR code already printed on your
+   * packaging points somewhere new, with no redeploy and no reprinting.
+   * Leave it unset to use `qr.destination` from content/site.yml.
+   */
   "vars": {
-    "NEXT_PUBLIC_ANALYTICS_PROVIDER": "internal",
-    "NEXT_PUBLIC_SUPABASE_MEDIA_BUCKET": "media"
+    "NEXT_PUBLIC_SITE_URL": "https://neyora.com",
+    "NEXT_PUBLIC_ANALYTICS_PROVIDER": "none"
+    // "NEYORA_QR_DESTINATION": "/recipes"
   }
-
-  // --- Optional: full ISR/caching support -----------------------------------
-  // Without a cache binding, pages marked `revalidate` are rendered per
-  // request. That is correct and works fine; it is simply not cached between
-  // requests. To enable real incremental caching, create an R2 bucket and
-  // uncomment both this binding and the matching incrementalCache line in
-  // open-next.config.ts. R2 has a free tier, but it is a quota, not "free
-  // forever" — watch your usage.
-  //
-  // "r2_buckets": [
-  //   { "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "neyora-cache" }
-  // ]
 }

@@ -1,9 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import { Fraunces, Inter } from 'next/font/google'
 import './globals.css'
-import { getMediaByIds, getSiteSettings } from '@/lib/content/site'
+import { getSiteSettings } from '@/lib/content'
 import { buildRootMetadata } from '@/lib/seo/metadata'
-import { isSupabaseConfigured } from '@/lib/env'
 
 /**
  * Fraunces for display: a variable serif with real optical sizing, warm and
@@ -33,11 +32,8 @@ const inter = Inter({
   fallback: ['system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
 })
 
-export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSiteSettings()
-  const media = await getMediaByIds([settings.default_og_image_id])
-  const og = settings.default_og_image_id ? media.get(settings.default_og_image_id) ?? null : null
-  return buildRootMetadata(settings, og)
+export function generateMetadata(): Metadata {
+  return buildRootMetadata(getSiteSettings())
 }
 
 export const viewport: Viewport = {
@@ -56,12 +52,6 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${fraunces.variable} ${inter.variable}`} suppressHydrationWarning>
-      <head>
-        {/* Storage lives on a different origin, so warm the connection early. */}
-        {isSupabaseConfigured() && process.env.NEXT_PUBLIC_SUPABASE_URL ? (
-          <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} crossOrigin="" />
-        ) : null}
-      </head>
       <body className="min-h-dvh bg-ivory font-sans text-earth antialiased">{children}</body>
     </html>
   )
