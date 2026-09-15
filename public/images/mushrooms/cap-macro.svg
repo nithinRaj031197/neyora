@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="2000" viewBox="0 0 1600 2000" role="img" aria-label="CAP — placeholder">
+  <defs>
+    <radialGradient id="a5748" cx="6%" cy="16%" r="86%">
+      <stop offset="0%" stop-color="#D8C9B5" stop-opacity="0.95"/>
+      <stop offset="55%" stop-color="#D8C9B5" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#D8C9B5" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="b5748" cx="80%" cy="92%" r="76%">
+      <stop offset="0%" stop-color="#3F7D3A" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="#3F7D3A" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="v5748" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#14120F" stop-opacity="0.34"/>
+      <stop offset="42%" stop-color="#14120F" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#14120F" stop-opacity="0.52"/>
+    </linearGradient>
+    <filter id="g5748" x="-4%" y="-4%" width="108%" height="108%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.86" numOctaves="4" seed="25"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.07"/></feComponentTransfer>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="2000" fill="#14120F"/>
+  <rect width="1600" height="2000" fill="url(#a5748)"/>
+  <rect width="1600" height="2000" fill="url(#b5748)"/>
+  <rect width="1600" height="2000" fill="url(#v5748)"/>
+  <rect width="1600" height="2000" filter="url(#g5748)" opacity="0.85"/>
+
+  <text x="50%" y="1000" text-anchor="middle"
+        font-family="Fraunces, Georgia, serif" font-size="93" font-weight="500"
+        fill="#F6F0E3" opacity="0.88" letter-spacing="4.65">CAP</text>
+  <text x="50%" y="1144.15" text-anchor="middle"
+        font-family="Inter, system-ui, sans-serif" font-size="33" font-weight="500"
+        fill="#F6F0E3" opacity="0.5" letter-spacing="7.92">MACRO — SINGLE CAP</text>
+</svg>

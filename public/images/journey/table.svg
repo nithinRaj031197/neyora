@@ -1,36 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1750" viewBox="0 0 1400 1750" role="img" aria-label="IN THE HAND — placeholder">
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1750" viewBox="0 0 1400 1750" role="img" aria-label="04 AT YOUR TABLE — placeholder">
   <defs>
-    <radialGradient id="a5562" cx="6%" cy="16%" r="86%">
+    <radialGradient id="a9375" cx="6%" cy="16%" r="86%">
       <stop offset="0%" stop-color="#D8C9B5" stop-opacity="0.95"/>
       <stop offset="55%" stop-color="#D8C9B5" stop-opacity="0.28"/>
       <stop offset="100%" stop-color="#D8C9B5" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="b5562" cx="80%" cy="92%" r="76%">
+    <radialGradient id="b9375" cx="80%" cy="92%" r="76%">
       <stop offset="0%" stop-color="#3F7D3A" stop-opacity="0.72"/>
       <stop offset="100%" stop-color="#3F7D3A" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="v5562" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="v9375" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#14120F" stop-opacity="0.34"/>
       <stop offset="42%" stop-color="#14120F" stop-opacity="0"/>
       <stop offset="100%" stop-color="#14120F" stop-opacity="0.52"/>
     </linearGradient>
-    <filter id="g5562" x="-4%" y="-4%" width="108%" height="108%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.86" numOctaves="4" seed="33"/>
+    <filter id="g9375" x="-4%" y="-4%" width="108%" height="108%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.86" numOctaves="4" seed="63"/>
       <feColorMatrix type="saturate" values="0"/>
       <feComponentTransfer><feFuncA type="linear" slope="0.07"/></feComponentTransfer>
     </filter>
   </defs>
 
   <rect width="1400" height="1750" fill="#14120F"/>
-  <rect width="1400" height="1750" fill="url(#a5562)"/>
-  <rect width="1400" height="1750" fill="url(#b5562)"/>
-  <rect width="1400" height="1750" fill="url(#v5562)"/>
-  <rect width="1400" height="1750" filter="url(#g5562)" opacity="0.85"/>
+  <rect width="1400" height="1750" fill="url(#a9375)"/>
+  <rect width="1400" height="1750" fill="url(#b9375)"/>
+  <rect width="1400" height="1750" fill="url(#v9375)"/>
+  <rect width="1400" height="1750" filter="url(#g9375)" opacity="0.85"/>
 
   <text x="50%" y="875" text-anchor="middle"
         font-family="Fraunces, Georgia, serif" font-size="81" font-weight="500"
-        fill="#F6F0E3" opacity="0.88" letter-spacing="4.05">IN THE HAND</text>
+        fill="#F6F0E3" opacity="0.88" letter-spacing="4.05">04 AT YOUR TABLE</text>
   <text x="50%" y="1000.55" text-anchor="middle"
         font-family="Inter, system-ui, sans-serif" font-size="29" font-weight="500"
-        fill="#F6F0E3" opacity="0.5" letter-spacing="6.96">SCALE AND TEXTURE</text>
+        fill="#F6F0E3" opacity="0.5" letter-spacing="6.96">COOKED, PLATED</text>
 </svg>

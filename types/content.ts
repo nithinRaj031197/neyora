@@ -279,38 +279,122 @@ export interface SiteSettings {
   social: SocialLink[]
 }
 
-export interface Pillar {
-  title: string
-  description: string
-}
-
+/**
+ * The homepage, modelled as nine visual chapters rather than a stack of
+ * sections.
+ *
+ * Each chapter has its own composition, colour ground and scroll behaviour.
+ * They are typed individually rather than sharing one generic "section" shape
+ * because they are genuinely different — a four-stage sticky sequence and a
+ * macro-photography moment have almost nothing in common.
+ */
 export interface Homepage {
-  hero: {
-    eyebrow?: string
-    headline: string
-    subheadline?: string
-    description?: string
-    image?: Image
-    ctaLabel?: string
-    ctaHref?: string
-    secondaryCtaLabel?: string
-    secondaryCtaHref?: string
-  }
-  products: SectionCopy
-  why: SectionCopy & { pillars: Pillar[] }
-  farm: SectionCopy & { body?: string; image?: Image }
-  recipes: SectionCopy
-  community: SectionCopy
-  social: SectionCopy & { handle?: string }
-  finalCta: SectionCopy & { image?: Image }
+  hero: HeroChapter
+  nature: NatureChapter
+  mushroom: MushroomChapter
+  journey: JourneyChapter
+  product: ProductChapter
+  food: FoodChapter
+  farm: FarmChapter
+  quality: QualityChapter
+  finalCta: FinalCtaChapter
   seo?: Seo
 }
 
-export interface SectionCopy {
+/** Shared by every chapter: a switch, and an optional eyebrow. */
+interface ChapterBase {
   enabled: boolean
   eyebrow?: string
-  heading?: string
+}
+
+export interface HeroChapter extends ChapterBase {
+  /** Set in the NEYORA wordmark. Normally the brand name. */
+  headline: string
+  tagline?: string
   description?: string
+  image?: Image
+  /** A portrait crop for phones — a different composition, not a resize. */
+  imageMobile?: Image
   ctaLabel?: string
   ctaHref?: string
+  secondaryCtaLabel?: string
+  secondaryCtaHref?: string
+  /** Hint shown at the foot of the hero, e.g. "Scroll". */
+  scrollHint?: string
+}
+
+/**
+ * Chapter 2 — the statement, told across a sequence of images that widen from
+ * a single cap out to the farm.
+ */
+export interface NatureChapter extends ChapterBase {
+  /** Rendered as separate lines of oversized display type. */
+  lines: string[]
+  body?: string
+  /** Ordered close → wide. Each becomes one frame of the reveal. */
+  frames: { image: Image; caption?: string }[]
+}
+
+/** Chapter 3 — macro photography, oversized type around it. */
+export interface MushroomChapter extends ChapterBase {
+  lines: string[]
+  secondaryLines?: string[]
+  body?: string
+  image?: Image
+}
+
+/** Chapter 4 — grown → harvested → packed → at your table. */
+export interface JourneyChapter extends ChapterBase {
+  heading?: string
+  stages: { number: string; title: string; description?: string; image?: Image }[]
+}
+
+/** Chapter 5 — the product, large. Pulled from content/products by slug. */
+export interface ProductChapter extends ChapterBase {
+  heading?: string
+  body?: string
+  /** Which product to feature. Falls back to the first featured one. */
+  productSlug?: string
+  ctaLabel?: string
+}
+
+/** Chapter 6 — food, editorial, appetite-led. */
+export interface FoodChapter extends ChapterBase {
+  lines: string[]
+  body?: string
+  ctaLabel?: string
+  ctaHref?: string
+}
+
+/** Chapter 7 — back to the farm. Quiet, honest, human. */
+export interface FarmChapter extends ChapterBase {
+  lines: string[]
+  body?: string
+  images: Image[]
+  ctaLabel?: string
+  ctaHref?: string
+}
+
+/** Chapter 8 — trust, told in single words. */
+export interface QualityChapter extends ChapterBase {
+  heading?: string
+  body?: string
+  /** One word each: CLEAN, CAREFUL, FRESH, TRACEABLE. */
+  pillars: { word: string; description: string }[]
+  ctaLabel?: string
+  ctaHref?: string
+}
+
+/** Chapter 9 — the final frame. */
+export interface FinalCtaChapter extends ChapterBase {
+  lines: string[]
+  body?: string
+  image?: Image
+  ctaLabel?: string
+  ctaHref?: string
+}
+
+export interface Pillar {
+  title: string
+  description: string
 }

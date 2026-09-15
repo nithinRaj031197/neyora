@@ -441,3 +441,192 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 }
+
+/* ==========================================================================
+   Scroll-driven composition
+   --------------------------------------------------------------------------
+   The homepage is a sequence of chapters that respond to scroll position.
+
+   The whole system is built on one rule: THE DEFAULT STATE IS THE FINAL
+   STATE. Every element is fully visible, correctly positioned, with no
+   transform, unless a browser both supports scroll-driven animations and the
+   viewer has not asked for reduced motion. Get that backwards and an
+   unsupported browser shows a page of invisible text — the single worst
+   failure mode this technique has.
+
+   So everything below lives inside:
+     @supports (animation-timeline: view())
+     @media (prefers-reduced-motion: no-preference)
+
+   Animations run on the compositor (transform, opacity, clip-path only) and
+   need no JavaScript, no IntersectionObserver and no scroll listener.
+   ========================================================================== */
+
+@layer components {
+  /* Default state for every animated element: visible, in place, untransformed. */
+  .scene,
+  .scene-rise,
+  .scene-fade,
+  .scene-zoom,
+  .scene-wipe,
+  .scene-drift,
+  .scene-line {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+  }
+
+  /* Oversized editorial display type, set tight. */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 500;
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  .display-xl { font-size: clamp(3rem, 12vw, 11rem); }
+  .display-lg { font-size: clamp(2.5rem, 8.5vw, 7.5rem); }
+  .display-md { font-size: clamp(2rem, 5.5vw, 4.5rem); }
+
+  /* A single line of display type; each gets its own reveal delay. */
+  .scene-line {
+    display: block;
+  }
+
+  /* Full-bleed chapter that fills the viewport. */
+  .chapter-full {
+    min-height: 100svh;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    @layer components {
+      /*
+       * Entrance: rise and fade as the element enters the viewport.
+       * `view()` measures the element against its scrollport, so the
+       * animation is tied to position rather than to time.
+       */
+      @keyframes scene-rise {
+        from { opacity: 0; transform: translateY(2.5rem); }
+        to   { opacity: 1; transform: none; }
+      }
+
+      @keyframes scene-fade {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+      }
+
+      /* A slow push-in across the whole time the element is on screen. */
+      @keyframes scene-zoom {
+        from { transform: scale(1.14); }
+        to   { transform: scale(1); }
+      }
+
+      /* Wipe a photograph open from its lower edge. */
+      @keyframes scene-wipe {
+        from { clip-path: inset(0 0 22% 0); opacity: 0.55; }
+        to   { clip-path: inset(0 0 0 0); opacity: 1; }
+      }
+
+      /* Slow parallax drift — type moving against the image behind it. */
+      @keyframes scene-drift {
+        from { transform: translateY(3.5rem); }
+        to   { transform: translateY(-3.5rem); }
+      }
+
+      .scene-rise {
+        animation: scene-rise linear both;
+        animation-timeline: view();
+        /* Complete well before the element centres, so it is settled and
+           readable by the time the eye reaches it. */
+        animation-range: entry 8% cover 32%;
+      }
+
+      .scene-fade {
+        animation: scene-fade linear both;
+        animation-timeline: view();
+        animation-range: entry 4% cover 26%;
+      }
+
+      .scene-zoom {
+        animation: scene-zoom linear both;
+        animation-timeline: view();
+        animation-range: cover 0% cover 100%;
+      }
+
+      .scene-wipe {
+        animation: scene-wipe linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 40%;
+      }
+
+      .scene-drift {
+        animation: scene-drift linear both;
+        animation-timeline: view();
+        animation-range: cover 0% cover 100%;
+      }
+
+      /*
+       * Staggered lines. Each line starts fractionally later, so a headline
+       * assembles itself rather than appearing all at once.
+       */
+      .scene-line { animation-delay: 0ms; }
+      .scene-line:nth-child(2) { animation-range: entry 14% cover 36%; }
+      .scene-line:nth-child(3) { animation-range: entry 20% cover 40%; }
+      .scene-line:nth-child(4) { animation-range: entry 26% cover 44%; }
+
+      /*
+       * The hero. Tied to the page's own scroll rather than to view(),
+       * because it starts at the very top where there is no entry phase.
+       */
+      @keyframes hero-image {
+        from { transform: scale(1); }
+        to   { transform: scale(1.12) translateY(3%); }
+      }
+
+      @keyframes hero-type {
+        from { opacity: 1; transform: none; }
+        to   { opacity: 0; transform: translateY(-3rem); }
+      }
+
+      .hero-image {
+        animation: hero-image linear both;
+        animation-timeline: scroll(root);
+        animation-range: 0 100svh;
+      }
+
+      .hero-type {
+        animation: hero-type linear both;
+        animation-timeline: scroll(root);
+        /* Holds until the reader has committed to scrolling. */
+        animation-range: 25svh 92svh;
+      }
+
+      /* The scroll hint retires as soon as it has been obeyed. */
+      @keyframes hero-hint { to { opacity: 0; } }
+      .hero-hint {
+        animation: hero-hint linear both;
+        animation-timeline: scroll(root);
+        animation-range: 0 22svh;
+      }
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   The one piece of motion that is not scroll-driven: a slow, optional
+   breathing hint under the hero. Removed entirely under reduced motion.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  @layer utilities {
+    @keyframes hint-nudge {
+      0%, 100% { transform: translateY(0); opacity: 0.55; }
+      50%      { transform: translateY(0.4rem); opacity: 1; }
+    }
+    .animate-hint {
+      animation: hint-nudge 2.6s ease-in-out infinite;
+    }
+  }
+}

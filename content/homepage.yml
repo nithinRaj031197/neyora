@@ -1,124 +1,255 @@
 # ============================================================================
 # NEYORA — homepage
 #
-# Every headline, paragraph, button label and image on the homepage.
+# Nine visual chapters, not a stack of sections. Each has its own composition,
+# colour ground and scroll behaviour; the order below is the order a visitor
+# scrolls through, and the light → dark → light rhythm is deliberate.
 #
-# Each section has an `enabled` flag: set it to false to hide the whole block
-# without losing the copy you wrote for it. Useful when you have no
-# testimonials yet, or nothing in season.
+# Every `enabled: false` hides a whole chapter without losing the copy.
+#
+# Display type is written as `lines:` — one array entry per rendered line, so
+# you control where the line breaks rather than leaving it to the viewport.
 # ============================================================================
 
+# ── 01 ─ HERO ───────────────────────────────────── dark, full viewport ─────
 hero:
-  eyebrow: Natural food, grown with care
+  enabled: true
+  eyebrow: Natural food / grown with care
   headline: NEYORA
-  subheadline: GROWN FOR LIFE.
+  tagline: GROWN FOR LIFE.
   description: >-
-    Fresh food grown with care. We start each day in the growing rooms and
-    finish it packing what was ready — nothing sits waiting for an order.
+    Fresh food grown with care. Harvested the morning it ships, graded by hand,
+    and dated on every pack.
   image:
-    src: /images/hero/oyster-mushroom-hero.svg
-    alt: Clusters of fresh grey oyster mushrooms on raw linen in soft morning light
-    width: 1920
-    height: 1280
-    caption: Grey oyster mushrooms, picked at first light.
-  ctaLabel: Explore our products
+    src: /images/hero/hero-desktop.svg
+    alt: Clusters of fresh grey oyster mushrooms in low, directional morning light
+    width: 2400
+    height: 1350
+  # A portrait composition for phones — not a resize of the one above. Drop a
+  # real vertical crop here; the layout reserves space from the desktop file's
+  # dimensions, so swapping it costs no layout shift.
+  imageMobile:
+    src: /images/hero/hero-mobile.svg
+    alt: Clusters of fresh grey oyster mushrooms in low, directional morning light
+    width: 1200
+    height: 1800
+  ctaLabel: Shop fresh mushrooms
   ctaHref: /products
   secondaryCtaLabel: Discover our recipes
   secondaryCtaHref: /recipes
+  scrollHint: Scroll
 
-products:
+# ── 02 ─ FROM NATURE ────────────────────────── warm ivory, widening reveal ─
+# The frames are ordered close → wide: one cap, a cluster, the growing room,
+# the farm. Scrolling pulls the camera back.
+nature:
+  enabled: true
+  eyebrow: From nature
+  lines:
+    - GOOD FOOD
+    - STARTS WITH
+    - HOW IT IS GROWN.
+  body: >-
+    There is no way to fake a fresh mushroom. No long ripening window to hide
+    behind, no waxing, no cold-chain trick. Either it was picked this morning
+    and moved quickly, or it was not — and anyone who cooks can tell.
+  frames:
+    - image:
+        src: /images/mushrooms/cap-macro.svg
+        alt: A single oyster mushroom cap, close enough to see the velvet on its edge
+        width: 1600
+        height: 2000
+      caption: One cap
+    - image:
+        src: /images/mushrooms/cluster.svg
+        alt: A whole cluster of grey oyster mushrooms, cut and resting on linen
+        width: 1800
+        height: 1800
+      caption: One cluster
+    - image:
+        src: /images/farm/growing-room.svg
+        alt: Rows of substrate bags fruiting in the NEYORA growing room
+        width: 2000
+        height: 1250
+      caption: One room
+    - image:
+        src: /images/farm/farm-wide.svg
+        alt: The NEYORA farm in early daylight
+        width: 2400
+        height: 1350
+      caption: One farm
+
+# ── 03 ─ THE MUSHROOM ─────────────────────────────── dark, macro, still ────
+mushroom:
+  enabled: true
+  eyebrow: The mushroom
+  lines:
+    - LOOK
+    - CLOSER.
+  secondaryLines:
+    - FRESHNESS
+    - HAS A
+    - TEXTURE.
+  body: >-
+    Gills like folded paper. A cap that squeaks when you tear it along the
+    grain. A faint sweetness, a little of aniseed. This is what two days old
+    looks like — and what five days old does not.
+  image:
+    src: /images/mushrooms/gills-macro.svg
+    alt: Macro detail of oyster mushroom gills, each fold catching the light
+    width: 2000
+    height: 2500
+
+# ── 04 ─ THE JOURNEY ───────────────────────── beige, sticky four-stage run ─
+journey:
+  enabled: true
+  eyebrow: Grown to table
+  heading: Under one hour from cut to cold
+  stages:
+    - number: "01"
+      title: GROWN
+      description: >-
+        Pasteurised paddy straw and sawdust. Lab-sourced spawn, traceable by
+        batch. No chemical supplementation, nothing added to force yield.
+      image:
+        src: /images/journey/grown.svg
+        alt: Young oyster mushrooms pinning from a substrate bag
+        width: 1400
+        height: 1750
+    - number: "02"
+      title: HARVESTED
+      description: >-
+        Picked the morning of dispatch, when the cap edge just begins to
+        flatten. Cut as whole clusters, never picked apart.
+      image:
+        src: /images/journey/harvested.svg
+        alt: A grower's hands lifting a cluster at harvest
+        width: 1400
+        height: 1750
+    - number: "03"
+      title: PACKED
+      description: >-
+        Graded by hand, one cluster at a time. Between 8% and 12% of a harvest
+        never reaches a pack. The harvest date is printed on the one that does.
+      image:
+        src: /images/journey/packed.svg
+        alt: A 200 g pack of NEYORA oyster mushrooms being closed
+        width: 1400
+        height: 1750
+    - number: "04"
+      title: AT YOUR TABLE
+      description: >-
+        In a hot pan within days, not weeks. That is the whole point of the
+        four steps above.
+      image:
+        src: /images/journey/table.svg
+        alt: Seared oyster mushrooms plated and ready to eat
+        width: 1400
+        height: 1750
+
+# ── 05 ─ THE PRODUCT ──────────────────────────── warm ivory, large, buyable ─
+product:
   enabled: true
   eyebrow: What we grow
-  heading: Harvested to order, never to stock
-  description: >-
-    One crop today, more to come. Everything we grow is held to the same
-    standard — picked at its peak, cooled straight away, and moved quickly.
-  ctaLabel: View all products
-  ctaHref: /products
-
-why:
-  enabled: true
-  eyebrow: Why NEYORA
-  heading: Quality without compromise
-  description: Four things we do not negotiate on, whatever we are growing.
-  pillars:
-    - title: Quality without compromise
-      description: >-
-        We grade by hand and pack only what we would cook at home that evening.
-        Anything short of it never leaves the farm.
-    - title: Freshly grown
-      description: >-
-        Harvest happens the morning of dispatch. From cut to cold storage is
-        under an hour, which is what keeps the texture intact.
-    - title: Transparent farming
-      description: >-
-        Substrate, spawn source, water, growing conditions — ask us anything and
-        we will tell you plainly. No vague claims.
-    - title: Responsible growing
-      description: >-
-        Agricultural waste becomes our substrate; spent substrate returns to the
-        soil as compost. Very little leaves the loop.
-
-farm:
-  enabled: true
-  eyebrow: Our farm
-  heading: A quiet room, the right air, and time
-  description: >-
-    Oyster mushrooms are honest. Get the humidity, air exchange and cleanliness
-    right and they grow beautifully. Get it wrong and there is nowhere to hide.
+  heading: |-
+    THE KIND OF FRESH
+    YOU CAN SEE.
   body: >-
-    We grow in a controlled room built from ordinary materials — nothing exotic.
-    The work is in the routine: pasteurising substrate properly, keeping the
-    room clean, watching the air, and picking at exactly the right moment.
-  image:
-    src: /images/farm/growing-room.svg
-    alt: Rows of substrate bags in the NEYORA growing room, daylight through an open doorway
-    width: 1600
-    height: 1200
-  ctaLabel: Read our farm story
-  ctaHref: /farm
+    Whole clusters, not loose caps. Firm enough to squeak when you tear them.
+    A clean, faintly sweet scent. Harvest date on the pack, so you are never
+    guessing.
+  productSlug: fresh-oyster-mushrooms-200g
+  ctaLabel: Order on WhatsApp
 
-recipes:
+# ── 06 ─ FOOD ─────────────────────────────────── dark, cinematic, appetite ─
+food:
   enabled: true
   eyebrow: From the kitchen
-  heading: What to cook tonight
-  description: >-
-    Simple, well-tested ways to use a pack while it is at its best. Most take
-    under twenty minutes.
+  lines:
+    - WHAT WILL
+    - YOU COOK
+    - TODAY?
+  body: >-
+    Simple, well-tested ways to use a pack while it is at its best. Most are
+    done in under twenty minutes.
   ctaLabel: Browse all recipes
   ctaHref: /recipes
 
-community:
+# ── 07 ─ THE FARM ───────────────────────────────── earthy, quiet, honest ───
+farm:
   enabled: true
-  eyebrow: Our community
-  heading: Cooked by people who care what they eat
-  description: A few words from the kitchens we deliver to.
+  eyebrow: Our farm
+  lines:
+    - GROWN WITH PATIENCE.
+    - HARVESTED WITH CARE.
+  body: >-
+    A controlled room built from ordinary materials — nothing exotic. The work
+    is in the routine: pasteurising properly, keeping the room clean, watching
+    the air, and picking at exactly the right moment. Spent substrate goes back
+    to the soil as compost.
+  images:
+    - src: /images/farm/harvest-hands.svg
+      alt: A grower's hands lifting a cluster of oyster mushrooms at harvest
+      width: 1600
+      height: 2000
+    - src: /images/farm/substrate.svg
+      alt: Pasteurised paddy straw and sawdust substrate, close up
+      width: 1400
+      height: 1400
+  ctaLabel: Read our farm story
+  ctaHref: /farm
 
-social:
+# ── 08 ─ QUALITY ────────────────────────────── warm ivory, calm, restrained ─
+# Single words. The composition sets these very large.
+quality:
   enabled: true
-  eyebrow: Follow along
-  heading: Growing, harvesting, cooking
-  description: Day-to-day from the farm and the kitchen.
-  handle: "@neyora"
+  eyebrow: Our standards
+  heading: Quality without compromise
+  body: >-
+    Easy to print and hard to do. Here is what it actually means in our
+    operation.
+  pillars:
+    - word: CLEAN
+      description: >-
+        No pesticides, no growth regulators, no post-harvest washing or
+        chemical treatment. Cleanliness and air control do the work.
+    - word: CAREFUL
+      description: >-
+        Graded by hand. A torn cap, a dry edge or an off scent goes to compost
+        rather than into a pack.
+    - word: FRESH
+      description: >-
+        Harvest the morning of dispatch. Under an hour from cut to cold
+        storage, which is what keeps the texture intact.
+    - word: TRACEABLE
+      description: >-
+        Every pack traces to its harvest date, growing room, substrate batch
+        and spawn batch. Ask us and we will tell you.
+  ctaLabel: How we grow
+  ctaHref: /quality
 
+# ── 09 ─ FINAL FRAME ────────────────────────────── dark, the closing shot ──
 finalCta:
   enabled: true
   eyebrow: Start here
-  heading: Fresh food, grown for life
-  description: >-
+  lines:
+    - BRING
+    - GOODNESS
+    - HOME.
+  body: >-
     Order a pack, cook it the same week, and tell us what you thought. That
     feedback is how we improve.
-  ctaLabel: See our products
-  ctaHref: /products
   image:
     src: /images/hero/final-cta.svg
-    alt: Fresh produce laid out on a linen cloth in warm daylight
-    width: 1800
-    height: 900
+    alt: Fresh oyster mushrooms and a finished dish on a warm table
+    width: 2400
+    height: 1500
+  ctaLabel: Shop fresh mushrooms
+  ctaHref: /products
 
 seo:
   title: NEYORA — Fresh Natural Food, Grown For Life
   description: >-
     NEYORA grows fresh natural food with care. Premium oyster mushrooms
     harvested to order, plus simple recipes to cook them at their best.
-  ogImage: /images/hero/oyster-mushroom-hero.svg
+  ogImage: /images/hero/hero-desktop.svg

@@ -1,28 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200" role="img" aria-label="PEPPER FRY — demo placeholder">
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="2000" viewBox="0 0 1600 2000" role="img" aria-label="PEPPER FRY — placeholder">
   <defs>
-    <radialGradient id="a666355370" cx="18%" cy="22%" r="78%">
-      <stop offset="0%" stop-color="#C6B83A" stop-opacity="0.92"/>
+    <radialGradient id="a9375" cx="6%" cy="16%" r="86%">
+      <stop offset="0%" stop-color="#C6B83A" stop-opacity="0.95"/>
+      <stop offset="55%" stop-color="#C6B83A" stop-opacity="0.28"/>
       <stop offset="100%" stop-color="#C6B83A" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="b666355370" cx="84%" cy="88%" r="72%">
-      <stop offset="0%" stop-color="#2B2923" stop-opacity="0.78"/>
-      <stop offset="100%" stop-color="#2B2923" stop-opacity="0"/>
+    <radialGradient id="b9375" cx="80%" cy="92%" r="76%">
+      <stop offset="0%" stop-color="#3F7D3A" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="#3F7D3A" stop-opacity="0"/>
     </radialGradient>
-    <filter id="g666355370" x="-6%" y="-6%" width="112%" height="112%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="96"/>
+    <linearGradient id="v9375" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#14120F" stop-opacity="0.34"/>
+      <stop offset="42%" stop-color="#14120F" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#14120F" stop-opacity="0.52"/>
+    </linearGradient>
+    <filter id="g9375" x="-4%" y="-4%" width="108%" height="108%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.86" numOctaves="4" seed="63"/>
       <feColorMatrix type="saturate" values="0"/>
-      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+      <feComponentTransfer><feFuncA type="linear" slope="0.07"/></feComponentTransfer>
     </filter>
   </defs>
-  <rect width="1600" height="1200" fill="#123C2A"/>
-  <rect width="1600" height="1200" fill="url(#a666355370)"/>
-  <rect width="1600" height="1200" fill="url(#b666355370)"/>
-  <rect width="1600" height="1200" filter="url(#g666355370)" opacity="0.9"/>
-  <g font-family="Fraunces, Georgia, serif" text-anchor="middle">
-    <text x="50%" y="600" font-size="62" font-weight="500"
-          fill="#F6F0E3" opacity="0.9" letter-spacing="3.7199999999999998">PEPPER FRY</text>
-  </g>
-  <text x="50%" y="693" text-anchor="middle"
-        font-family="Inter, system-ui, sans-serif" font-size="26" font-weight="500"
-        fill="#F6F0E3" opacity="0.55" letter-spacing="5.72">DEMO PLACEHOLDER</text>
+
+  <rect width="1600" height="2000" fill="#2B2923"/>
+  <rect width="1600" height="2000" fill="url(#a9375)"/>
+  <rect width="1600" height="2000" fill="url(#b9375)"/>
+  <rect width="1600" height="2000" fill="url(#v9375)"/>
+  <rect width="1600" height="2000" filter="url(#g9375)" opacity="0.85"/>
+
+  <text x="50%" y="1000" text-anchor="middle"
+        font-family="Fraunces, Georgia, serif" font-size="93" font-weight="500"
+        fill="#F6F0E3" opacity="0.88" letter-spacing="4.65">PEPPER FRY</text>
+  <text x="50%" y="1144.15" text-anchor="middle"
+        font-family="Inter, system-ui, sans-serif" font-size="33" font-weight="500"
+        fill="#F6F0E3" opacity="0.5" letter-spacing="7.92">CURRY LEAVES, COARSE PEPPER</text>
 </svg>

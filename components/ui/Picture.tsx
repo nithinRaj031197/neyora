@@ -12,6 +12,8 @@ import type { Image as ContentImage } from '@/types/content'
  */
 export function Picture({
   image,
+  mobileImage,
+  mobileUpTo = 640,
   alt,
   sizes,
   priority = false,
@@ -22,6 +24,16 @@ export function Picture({
   position,
 }: {
   image: ContentImage | null | undefined
+  /**
+   * An art-directed crop for small screens.
+   *
+   * Not a smaller copy of the same file — a different composition. A 16:9
+   * landscape hero shown on a 9:19 phone is a sliver of its subject, which is
+   * the difference between a cinematic hero and a shrunk desktop one.
+   */
+  mobileImage?: ContentImage | null
+  /** Breakpoint below which `mobileImage` is used, in px. */
+  mobileUpTo?: number
   /** Overrides the content's alt text. Pass "" only for decoration. */
   alt?: string
   sizes?: string
@@ -46,7 +58,7 @@ export function Picture({
 
   const resolvedAlt = alt !== undefined ? alt : image.alt
 
-  const img = (
+  const picture = (
     <img
       src={image.src}
       alt={resolvedAlt}
@@ -64,6 +76,20 @@ export function Picture({
       )}
       style={position ? { objectPosition: position } : undefined}
     />
+  )
+
+  /*
+   * <picture> only when there is genuinely a second composition to offer.
+   * The <img> keeps the desktop dimensions, so the aspect box below still
+   * reserves the right space and the swap costs no layout shift.
+   */
+  const img = mobileImage ? (
+    <picture>
+      <source media={`(max-width: ${mobileUpTo}px)`} srcSet={mobileImage.src} />
+      {picture}
+    </picture>
+  ) : (
+    picture
   )
 
   if (!aspect && !wrapperClassName) return img

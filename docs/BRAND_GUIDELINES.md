@@ -146,6 +146,37 @@ substrate. No marble, no slate boards, no chalkboards.
 > surface, minimal deep-green label, soft even daylight, realistic
 > supermarket-quality product photography, three-quarter angle, subtle shadow.
 
+### The homepage needs exactly these shots
+
+The composition is built around them, and each placeholder in `/public` is
+already the right aspect ratio — dropping a real file in changes nothing about
+the layout.
+
+| Chapter | File | Ratio | The shot |
+| --- | --- | --- | --- |
+| 01 Hero | `hero/hero-desktop` | 16:9 | Clusters in low directional light. Dark enough that ivory type reads over it, with quiet space lower-left |
+| 01 Hero | `hero/hero-mobile` | 2:3 | **A different composition**, not a crop. Vertical, subject high |
+| 02 Nature | `mushrooms/cap-macro` | 4:5 | One cap, close enough to see the velvet on its edge |
+| 02 Nature | `mushrooms/cluster` | 1:1 | A whole cut cluster on linen |
+| 02 Nature | `farm/growing-room` | 8:5 | Substrate bags fruiting, daylight through a doorway |
+| 02 Nature | `farm/farm-wide` | 16:9 | The farm, early light, atmospheric |
+| 03 Mushroom | `mushrooms/gills-macro` | 4:5 | **The most important shot on the site.** Gills, moisture, texture. Light raking from the right |
+| 04 Journey | `journey/grown` | 4:5 | Young pins emerging from a bag |
+| 04 Journey | `journey/harvested` | 4:5 | A grower's hands lifting a cluster |
+| 04 Journey | `journey/packed` | 4:5 | The 200 g pack being closed |
+| 04 Journey | `journey/table` | 4:5 | Cooked, plated, someone about to eat |
+| 05 Product | `products/oyster-mushrooms-200g` | 4:5 | The pack, three-quarter, soft even daylight |
+| 05 Product | `products/oyster-mushrooms-detail` | 1:1 | The harvest-date panel |
+| 06 Food | `recipes/garlic-butter-oyster-mushrooms` | 4:3 | Cast iron, golden seared edges, steam just visible |
+| 06 Food | `recipes/pepper-oyster-mushroom-fry` | 4:5 | Curry leaves, coarse pepper, dark ceramic |
+| 06 Food | `recipes/crispy-oyster-mushroom` | 4:3 | Shattering crust, lime, brown paper |
+| 07 Farm | `farm/harvest-hands` | 4:5 | Hands at work. No face, no posing |
+| 07 Farm | `farm/substrate` | 1:1 | Paddy straw and sawdust, close |
+| 09 Final | `hero/final-cta` | 8:5 | The closing frame. Warm, full table, someone's home |
+
+Export as `.webp` at roughly twice the displayed width, under ~300 KB each.
+Replace the `.svg` extension in `content/homepage.yml` when you do.
+
 ### Never
 - Stock-photo "smiling family in kitchen".
 - AI-looking illustration, flat vector farms, hand-drawn leaf doodles.

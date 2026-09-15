@@ -364,41 +364,125 @@ export const siteSchema = z.object({
   social: z.array(socialLinkSchema).default([]),
 })
 
-const sectionCopySchema = z.object({
+/**
+ * The homepage is nine typed chapters, not a list of generic sections.
+ *
+ * Each is validated separately so a missing image or an empty line array
+ * fails the build naming the chapter, rather than rendering a composition
+ * with a hole in it.
+ */
+const chapterBase = {
   enabled: z.boolean().default(true),
   eyebrow: optionalString,
-  heading: optionalString,
-  description: optionalString,
-  ctaLabel: optionalString,
-  ctaHref: optionalString,
-})
+}
+
+/** Oversized display type, one array entry per rendered line. */
+const displayLines = z.array(z.string().min(1)).min(1)
 
 export const homepageSchema = z.object({
   hero: z.object({
-    eyebrow: optionalString,
+    ...chapterBase,
     headline: z.string().min(1),
-    subheadline: optionalString,
+    tagline: optionalString,
     description: optionalString,
     image: imageSchema.optional(),
+    // A portrait crop for phones. Optional: without it the desktop image is
+    // used everywhere, cropped by object-fit.
+    imageMobile: imageSchema.optional(),
     ctaLabel: optionalString,
     ctaHref: optionalString,
     secondaryCtaLabel: optionalString,
     secondaryCtaHref: optionalString,
+    scrollHint: optionalString,
   }),
-  products: sectionCopySchema.prefault({}),
-  why: sectionCopySchema
-    .extend({
-      pillars: z
-        .array(z.object({ title: z.string().min(1), description: z.string().default('') }))
-        .default([]),
-    })
-    .prefault({}),
-  farm: sectionCopySchema
-    .extend({ body: optionalString, image: imageSchema.optional() })
-    .prefault({}),
-  recipes: sectionCopySchema.prefault({}),
-  community: sectionCopySchema.prefault({}),
-  social: sectionCopySchema.extend({ handle: optionalString }).prefault({}),
-  finalCta: sectionCopySchema.extend({ image: imageSchema.optional() }).prefault({}),
+
+  nature: z.object({
+    ...chapterBase,
+    lines: displayLines,
+    body: optionalString,
+    /*
+     * Ordered close → wide. Two is the minimum for the reveal to read as a
+     * progression rather than a single image that happens to move.
+     */
+    frames: z
+      .array(z.object({ image: imageSchema, caption: optionalString }))
+      .min(2, 'The nature sequence needs at least two frames to read as a progression'),
+  }),
+
+  mushroom: z.object({
+    ...chapterBase,
+    lines: displayLines,
+    secondaryLines: z.array(z.string().min(1)).default([]),
+    body: optionalString,
+    image: imageSchema.optional(),
+  }),
+
+  journey: z.object({
+    ...chapterBase,
+    heading: optionalString,
+    stages: z
+      .array(
+        z.object({
+          number: z.string().min(1),
+          title: z.string().min(1),
+          description: optionalString,
+          image: imageSchema.optional(),
+        }),
+      )
+      .min(2),
+  }),
+
+  product: z.object({
+    ...chapterBase,
+    heading: optionalString,
+    body: optionalString,
+    productSlug: slug.optional(),
+    ctaLabel: optionalString,
+  }),
+
+  food: z.object({
+    ...chapterBase,
+    lines: displayLines,
+    body: optionalString,
+    ctaLabel: optionalString,
+    ctaHref: optionalString,
+  }),
+
+  farm: z.object({
+    ...chapterBase,
+    lines: displayLines,
+    body: optionalString,
+    images: z.array(imageSchema).default([]),
+    ctaLabel: optionalString,
+    ctaHref: optionalString,
+  }),
+
+  quality: z.object({
+    ...chapterBase,
+    heading: optionalString,
+    body: optionalString,
+    pillars: z
+      .array(
+        z.object({
+          // One word. The composition sets these very large, and two words
+          // break the line in a way that looks like a mistake.
+          word: z.string().min(1).max(14, 'Keep a quality pillar to a single short word'),
+          description: z.string().min(1),
+        }),
+      )
+      .default([]),
+    ctaLabel: optionalString,
+    ctaHref: optionalString,
+  }),
+
+  finalCta: z.object({
+    ...chapterBase,
+    lines: displayLines,
+    body: optionalString,
+    image: imageSchema.optional(),
+    ctaLabel: optionalString,
+    ctaHref: optionalString,
+  }),
+
   seo: seoSchema.optional(),
 })

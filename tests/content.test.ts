@@ -124,12 +124,23 @@ describe('images', () => {
   function collectImagePaths(): { path: string; where: string }[] {
     const found: { path: string; where: string }[] = []
 
+    // The homepage is nine chapters, each with its own imagery.
     const home = getHomepage()
-    for (const [where, img] of [
+    const homeImages: [string, { src: string } | undefined][] = [
       ['homepage.hero', home.hero.image],
-      ['homepage.farm', home.farm.image],
+      ['homepage.mushroom', home.mushroom.image],
       ['homepage.finalCta', home.finalCta.image],
-    ] as const) {
+      ...home.nature.frames.map(
+        (f, i) => [`homepage.nature.frames[${i}]`, f.image] as [string, { src: string }],
+      ),
+      ...home.journey.stages.map(
+        (s, i) => [`homepage.journey.stages[${i}]`, s.image] as [string, { src: string } | undefined],
+      ),
+      ...home.farm.images.map(
+        (img, i) => [`homepage.farm.images[${i}]`, img] as [string, { src: string }],
+      ),
+    ]
+    for (const [where, img] of homeImages) {
       if (img) found.push({ path: img.src, where })
     }
 

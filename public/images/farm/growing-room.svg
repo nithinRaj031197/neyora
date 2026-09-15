@@ -1,28 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200" role="img" aria-label="OUR FARM — demo placeholder">
+<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="1250" viewBox="0 0 2000 1250" role="img" aria-label="GROWING ROOM — placeholder">
   <defs>
-    <radialGradient id="a983478705" cx="18%" cy="22%" r="78%">
-      <stop offset="0%" stop-color="#3F7D3A" stop-opacity="0.92"/>
+    <radialGradient id="a9891" cx="6%" cy="16%" r="86%">
+      <stop offset="0%" stop-color="#C6B83A" stop-opacity="0.95"/>
+      <stop offset="55%" stop-color="#C6B83A" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#C6B83A" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="b9891" cx="80%" cy="92%" r="76%">
+      <stop offset="0%" stop-color="#3F7D3A" stop-opacity="0.72"/>
       <stop offset="100%" stop-color="#3F7D3A" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="b983478705" cx="84%" cy="88%" r="72%">
-      <stop offset="0%" stop-color="#D8C9B5" stop-opacity="0.78"/>
-      <stop offset="100%" stop-color="#D8C9B5" stop-opacity="0"/>
-    </radialGradient>
-    <filter id="g983478705" x="-6%" y="-6%" width="112%" height="112%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="70"/>
+    <linearGradient id="v9891" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#14120F" stop-opacity="0.34"/>
+      <stop offset="42%" stop-color="#14120F" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#14120F" stop-opacity="0.52"/>
+    </linearGradient>
+    <filter id="g9891" x="-4%" y="-4%" width="108%" height="108%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.86" numOctaves="4" seed="94"/>
       <feColorMatrix type="saturate" values="0"/>
-      <feComponentTransfer><feFuncA type="linear" slope="0.055"/></feComponentTransfer>
+      <feComponentTransfer><feFuncA type="linear" slope="0.07"/></feComponentTransfer>
     </filter>
   </defs>
-  <rect width="1600" height="1200" fill="#2B2923"/>
-  <rect width="1600" height="1200" fill="url(#a983478705)"/>
-  <rect width="1600" height="1200" fill="url(#b983478705)"/>
-  <rect width="1600" height="1200" filter="url(#g983478705)" opacity="0.9"/>
-  <g font-family="Fraunces, Georgia, serif" text-anchor="middle">
-    <text x="50%" y="600" font-size="62" font-weight="500"
-          fill="#F6F0E3" opacity="0.9" letter-spacing="3.7199999999999998">OUR FARM</text>
-  </g>
-  <text x="50%" y="693" text-anchor="middle"
+
+  <rect width="2000" height="1250" fill="#2B2923"/>
+  <rect width="2000" height="1250" fill="url(#a9891)"/>
+  <rect width="2000" height="1250" fill="url(#b9891)"/>
+  <rect width="2000" height="1250" fill="url(#v9891)"/>
+  <rect width="2000" height="1250" filter="url(#g9891)" opacity="0.85"/>
+
+  <text x="50%" y="625" text-anchor="middle"
+        font-family="Fraunces, Georgia, serif" font-size="73" font-weight="500"
+        fill="#F6F0E3" opacity="0.88" letter-spacing="3.6500000000000004">GROWING ROOM</text>
+  <text x="50%" y="738.15" text-anchor="middle"
         font-family="Inter, system-ui, sans-serif" font-size="26" font-weight="500"
-        fill="#F6F0E3" opacity="0.55" letter-spacing="5.72">DEMO PLACEHOLDER</text>
+        fill="#F6F0E3" opacity="0.5" letter-spacing="6.24">SUBSTRATE BAGS, DAYLIGHT</text>
 </svg>
