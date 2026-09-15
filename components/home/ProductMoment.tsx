@@ -119,7 +119,7 @@ export function ProductMoment({
                     href={whatsapp.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex h-14 flex-1 items-center justify-center gap-2.5 rounded-xs border border-forest bg-forest px-7 text-[0.875rem] font-medium tracking-[0.06em] text-ivory uppercase transition-colors hover:bg-forest-soft"
+                    className="press cta-arrow inline-flex h-14 flex-1 items-center justify-center gap-2.5 rounded-xs border border-forest bg-forest px-7 text-[0.875rem] font-medium tracking-[0.06em] text-ivory uppercase transition-colors hover:bg-forest-soft"
                   >
                     <Icon name="whatsapp" size={19} />
                     {chapter.ctaLabel ?? 'Order on WhatsApp'}
@@ -127,7 +127,7 @@ export function ProductMoment({
                 ) : null}
                 <Link
                   href={`/products/${product.slug}`}
-                  className="inline-flex h-14 items-center justify-center rounded-xs border border-forest/35 px-7 text-[0.875rem] font-medium tracking-[0.06em] text-forest uppercase transition-colors hover:border-forest hover:bg-forest/5"
+                  className="press inline-flex h-14 items-center justify-center rounded-xs border border-forest/35 px-7 text-[0.875rem] font-medium tracking-[0.06em] text-forest uppercase transition-colors hover:border-forest hover:bg-forest/5"
                 >
                   Full details
                 </Link>

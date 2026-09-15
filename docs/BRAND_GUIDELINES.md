@@ -154,8 +154,8 @@ the layout.
 
 | Chapter | File | Ratio | The shot |
 | --- | --- | --- | --- |
-| 01 Hero | `hero/hero-desktop` | 16:9 | Clusters in low directional light. Dark enough that ivory type reads over it, with quiet space lower-left |
-| 01 Hero | `hero/hero-mobile` | 2:3 | **A different composition**, not a crop. Vertical, subject high |
+| 01 Hero | `hero/hero-desktop` | 16:9 | Clusters in low directional light. **Subject in the right 40%** — see "the type column" below |
+| 01 Hero | `hero/hero-mobile` | 2:3 | **A different composition**, not a crop. Vertical, **subject in the top 45%** |
 | 02 Nature | `mushrooms/cap-macro` | 4:5 | One cap, close enough to see the velvet on its edge |
 | 02 Nature | `mushrooms/cluster` | 1:1 | A whole cut cluster on linen |
 | 02 Nature | `farm/growing-room` | 8:5 | Substrate bags fruiting, daylight through a doorway |
@@ -172,10 +172,29 @@ the layout.
 | 06 Food | `recipes/crispy-oyster-mushroom` | 4:3 | Shattering crust, lime, brown paper |
 | 07 Farm | `farm/harvest-hands` | 4:5 | Hands at work. No face, no posing |
 | 07 Farm | `farm/substrate` | 1:1 | Paddy straw and sawdust, close |
-| 09 Final | `hero/final-cta` | 8:5 | The closing frame. Warm, full table, someone's home |
+| 09 Final | `hero/final-cta` | 8:5 | The closing frame. Warm, full table, someone's home. **Subject right of centre** |
 
 Export as `.webp` at roughly twice the displayed width, under ~300 KB each.
 Replace the `.svg` extension in `content/homepage.yml` when you do.
+
+### The type column
+
+Three frames carry the headline on top of them: both hero crops and the final
+frame. On those, where the subject sits is not a taste question.
+
+* **Desktop** — the headline occupies the left ~55% of the frame. Keep the
+  subject in the right 40%, and keep that left band dark and uncluttered.
+* **Phone** — the headline occupies the lower half. Keep the subject in the
+  top 45%.
+
+A scrim can rescue a frame that gets this wrong, but only by flattening the
+photograph — which defeats the point of shooting it. The site already applies
+two crossed scrims; they are there to guarantee a contrast floor, not to fix
+framing.
+
+The pale side of an oyster mushroom is the worst case: it reflects more light
+than anything else in the shot, and ivory type over a lit cap is the one
+combination that will not read.
 
 ### Never
 - Stock-photo "smiling family in kitchen".

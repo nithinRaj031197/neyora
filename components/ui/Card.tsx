@@ -33,7 +33,16 @@ export function Card({
     'group relative flex flex-col overflow-hidden rounded-sm border',
     tones[tone],
     (interactive || href) &&
-      'transition-colors duration-300 ease-(--ease-out-soft) hover:border-forest/45',
+      cn(
+        'transition-colors duration-300 ease-(--ease-out-soft) hover:border-forest/45',
+        // Motion (globals.css §3). Three cooperating effects, all
+        // transform/opacity only:
+        //   hover-lift   the card rises 4px
+        //   hover-rule   the brand hairline draws along its lower edge
+        //   hover-media  any <img> inside pushes in slightly
+        // The card already has overflow-hidden, which hover-media needs.
+        'hover-lift hover-rule hover-media',
+      ),
     className,
   )
 

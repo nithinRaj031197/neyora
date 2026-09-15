@@ -34,6 +34,11 @@ const BASE = cn(
   'inline-flex items-center justify-center rounded-xs font-sans font-medium',
   'tracking-[0.04em] uppercase whitespace-nowrap',
   'transition-colors duration-200 ease-(--ease-out-soft)',
+  // Motion (globals.css §3): `press` gives the button a spring recoil under a
+  // finger, `cta-arrow` leans any arrow icon toward its destination on hover.
+  // Both are transform-only, so neither can cause a reflow inside a button
+  // sitting in a flex row.
+  'press cta-arrow',
   'disabled:pointer-events-none disabled:opacity-45',
   'aria-disabled:pointer-events-none aria-disabled:opacity-45',
 )

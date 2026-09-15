@@ -12,6 +12,12 @@ import { PRIMARY_NAV } from './nav-links'
  * Deliberately not sticky-and-frosted: the brand guidelines rule out
  * glassmorphism and frosted navbars. A plain header on ivory with a hairline
  * rule.
+ *
+ * It does earn one piece of motion. At the top of the page the hairline is
+ * absent, so the header sits quietly on the hero photograph; once the reader
+ * has scrolled past the hero it fades in and the header reads as attached to
+ * the page. That is a tone change, not a backdrop-filter — see globals.css §4.
+ * A reading-progress rule runs along the very top on the same timeline.
  */
 export function Navbar() {
   const settings = getSiteSettings()
@@ -38,9 +44,24 @@ export function Navbar() {
       ) : null}
 
       <header
-        className="sticky top-0 z-50 border-b border-beige bg-ivory/98"
+        className="sticky top-0 z-50 bg-ivory/98"
         style={{ ['--nav-height' as string]: '4.25rem' }}
       >
+        {/*
+          Both of these are decoration and are hidden from assistive tech: the
+          progress rule duplicates the scrollbar, and the hairline carries no
+          information a sighted reader does not already have from the layout.
+          Where scroll-driven animation is unsupported, the hairline is simply
+          always present and the progress rule is not rendered at all.
+        */}
+        <div
+          aria-hidden="true"
+          className="scroll-progress neyora-rule absolute inset-x-0 top-0 h-0.5"
+        />
+        <div
+          aria-hidden="true"
+          className="nav-settle pointer-events-none absolute inset-x-0 bottom-0 h-px bg-beige"
+        />
         <Container size="wide" className="flex h-17 items-center justify-between gap-6">
           <Link
             href="/"

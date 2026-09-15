@@ -52,7 +52,7 @@ export function Food({
         <>
           {/* The lead recipe runs close to full-bleed. */}
           <article className="mt-16 lg:mt-24">
-            <Link href={`/recipes/${lead.slug}`} className="group block">
+            <Link href={`/recipes/${lead.slug}`} className="group hover-media block">
               <Picture
                 image={lead.cover}
                 sizes="100vw"
@@ -91,7 +91,7 @@ export function Food({
                 {rest.map((recipe, index) => (
                   <li key={recipe.slug} className={index % 2 === 1 ? 'lg:mt-24' : undefined}>
                     <article>
-                      <Link href={`/recipes/${recipe.slug}`} className="group block">
+                      <Link href={`/recipes/${recipe.slug}`} className="group hover-media block">
                         <Picture
                           image={recipe.cover}
                           sizes="(max-width: 1024px) 100vw, 44vw"
@@ -129,7 +129,7 @@ export function Food({
         <div className="mx-auto mt-20 w-full max-w-[88rem] px-5 sm:px-8 lg:px-12">
           <Link
             href={food.ctaHref}
-            className="scene-fade inline-flex h-14 items-center gap-2.5 rounded-xs border border-ivory/35 px-7 text-[0.875rem] font-medium tracking-[0.06em] text-ivory uppercase transition-colors hover:border-ivory hover:bg-ivory/10"
+            className="scene-fade press cta-arrow inline-flex h-14 items-center gap-2.5 rounded-xs border border-ivory/35 px-7 text-[0.875rem] font-medium tracking-[0.06em] text-ivory uppercase transition-colors hover:border-ivory hover:bg-ivory/10"
           >
             {food.ctaLabel}
             <Icon name="arrow-right" size={17} />

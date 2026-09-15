@@ -51,7 +51,23 @@
   --radius-sm: 3px;
   --radius-md: 6px;
 
+  /* ---- Motion tokens. Every duration and curve in the system lives here. --
+     Guidelines §4 asks for restrained motion: fade plus a short translate,
+     200-500ms. These sit inside that envelope. The one exception is
+     --duration-media, a slow photographic push-in on hover, which is a
+     continuous state change rather than an entrance and reads as sluggish
+     any faster. */
   --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+  /* A spring with barely-there overshoot (peaks ~1.5%). A real bouncy spring
+     — cubic-bezier(0.34, 1.56, 0.64, 1) — is the house style at Stripe and
+     Vercel but fights this brand's stillness, so it is deliberately damped
+     and used only where a finger expects recoil: press-release and the arrow. */
+  --ease-spring-soft: cubic-bezier(0.22, 1.12, 0.36, 1);
+
+  --duration-micro: 160ms;
+  --duration-hover: 320ms;
+  --duration-enter: 500ms;
+  --duration-media: 600ms;
 }
 
 /* ==========================================================================
@@ -399,20 +415,237 @@
 }
 
 /* ==========================================================================
-   Motion — one entrance animation, used sparingly (guidelines §4)
-   ========================================================================== */
-@layer utilities {
-  @keyframes neyora-rise {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: none; }
-  }
-  .animate-rise {
-    animation: neyora-rise 560ms var(--ease-out-soft) both;
-  }
-  .animate-rise-delay-1 { animation-delay: 90ms; }
-  .animate-rise-delay-2 { animation-delay: 180ms; }
-  .animate-rise-delay-3 { animation-delay: 270ms; }
+   MOTION SYSTEM
+   --------------------------------------------------------------------------
+   Four families, each with one job. Reach for the one that matches WHEN the
+   motion is triggered, not what it looks like:
 
+     §2  .enter / .enter-group    page load, above the fold only
+     §3  .hover-* / .press        pointer and focus
+     §4  .scene-* / .scroll-*     scroll position (further down this file)
+
+   THE RULE THAT GOVERNS ALL OF THEM: the default state is the final state.
+   Every element is fully visible, untransformed and correctly positioned
+   unless the browser supports the technique AND the viewer has not asked for
+   reduced motion. Built the other way round, one unsupported feature leaves a
+   page of invisible text.
+
+   Only `opacity`, `transform`, `translate`, `scale` and `filter` are
+   animated — none of them trigger layout, so every animation here stays on
+   the compositor at 60fps. Nothing animates `width`, `height`, `top`,
+   `margin` or `box-shadow`.
+
+   TWO DELIBERATE SUBSTITUTIONS. The modern-web playbook reaches for
+   glassmorphic elevation and glowing gradient borders. Both are ruled out by
+   docs/BRAND_GUIDELINES.md §4 — no frosted panels, no glow, hairlines instead
+   of shadows. So .hover-tone substitutes a tone shift for the frosted panel,
+   and .hover-rule substitutes the sanctioned brand hairline for the glow.
+   Same micro-interaction payoff, no brand violation. See docs/MOTION.md.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   §2 ENTRANCE — time-driven, for content already on screen at load
+   --------------------------------------------------------------------------
+   Use ONLY above the fold. Below the fold, .scene-* (§4) ties the same effect
+   to scroll position instead, which is both cheaper and better timed.
+
+   Stagger is driven by a custom property so a component can set its own order
+   without a new class per position:
+
+     <p class="enter" style="--enter-index: 2">
+
+   or let .enter-group assign indices to its direct children automatically.
+   -------------------------------------------------------------------------- */
+@layer components {
+  /* Default state — visible, in place. Never reorder this below the @media. */
+  .enter,
+  .enter-group > * {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @layer components {
+    @keyframes enter-rise {
+      from {
+        opacity: 0;
+        /* translate3d, not translateY: promotes to its own layer on the
+           older mobile GPUs that still need the hint. */
+        transform: translate3d(0, var(--enter-distance, 1rem), 0);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    /* A softer variant for large display type, where a plain slide reads
+       mechanical. blur() is the most expensive property here, so it is
+       restricted to short-lived entrances on small areas — never on a
+       full-bleed photograph. */
+    @keyframes enter-focus {
+      from {
+        opacity: 0;
+        filter: blur(6px);
+        transform: translate3d(0, var(--enter-distance, 0.75rem), 0);
+      }
+      to {
+        opacity: 1;
+        filter: blur(0);
+        transform: none;
+      }
+    }
+
+    .enter,
+    .enter-group > * {
+      animation: enter-rise var(--duration-enter) var(--ease-out-soft) both;
+      animation-delay: calc(
+        var(--enter-index, 0) * var(--enter-step, 70ms) + var(--enter-offset, 0ms)
+      );
+      /* No will-change: these run once and then sit still, and a permanent
+         compositor layer per element costs more memory than the animation
+         ever saved. */
+    }
+
+    .enter-focus {
+      animation-name: enter-focus;
+    }
+
+    /* Auto-stagger. Six is the ceiling on purpose — a seventh element
+       entering 490ms late is a page that feels slow, not considered. */
+    .enter-group > *:nth-child(1) { --enter-index: 0; }
+    .enter-group > *:nth-child(2) { --enter-index: 1; }
+    .enter-group > *:nth-child(3) { --enter-index: 2; }
+    .enter-group > *:nth-child(4) { --enter-index: 3; }
+    .enter-group > *:nth-child(5) { --enter-index: 4; }
+    .enter-group > *:nth-child(n + 6) { --enter-index: 5; }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   §3 HOVER, FOCUS AND PRESS
+   --------------------------------------------------------------------------
+   Every hover rule is wrapped in `@media (hover: hover)` so a touch device
+   never gets a state it cannot leave — on a phone, :hover sticks after a tap
+   until you touch something else.
+
+   Each also answers to :focus-visible or :focus-within, so a keyboard user
+   gets the same affordance a mouse user does.
+
+   These use the INDIVIDUAL transform properties (`translate`, `scale`) rather
+   than the `transform` shorthand, so that a lifted card can also be pressed
+   without the two rules overwriting each other.
+   -------------------------------------------------------------------------- */
+@layer components {
+  /* .hover-lift — the element rises. Put it on the card, not on its inner
+     text, or the text will lift out of its own border. */
+  .hover-lift {
+    transition: translate var(--duration-hover) var(--ease-out-soft);
+  }
+  @media (hover: hover) {
+    .hover-lift:hover,
+    .hover-lift:focus-visible,
+    .hover-lift:focus-within {
+      translate: 0 -4px;
+    }
+  }
+
+  /* .hover-media — the photograph inside pushes in and warms very slightly.
+     Requires an ancestor with overflow:hidden (Card and Picture both have
+     one) or the image will escape its frame. */
+  .hover-media img {
+    transition:
+      scale var(--duration-media) var(--ease-out-soft),
+      filter var(--duration-media) var(--ease-out-soft);
+  }
+  @media (hover: hover) {
+    .hover-media:hover img,
+    .hover-media:focus-within img {
+      scale: 1.04;
+      filter: brightness(1.03) saturate(1.04);
+    }
+  }
+
+  /* .hover-rule — the brand hairline draws itself along the lower edge.
+     This is the glow substitute: guidelines §2 sanctions the NEYORA gradient
+     on the wordmark and on a hairline rule, and this is a hairline rule.
+     Animating scaleX costs nothing; animating width would relayout. */
+  .hover-rule {
+    position: relative;
+  }
+  .hover-rule::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 1px;
+    background-image: linear-gradient(
+      90deg,
+      var(--color-forest) 0%,
+      var(--color-botanical) 30%,
+      var(--color-leaf) 62%,
+      var(--color-golden) 88%,
+      transparent 100%
+    );
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--duration-hover) var(--ease-out-soft);
+    pointer-events: none;
+  }
+  @media (hover: hover) {
+    .hover-rule:hover::after,
+    .hover-rule:focus-within::after {
+      transform: scaleX(1);
+    }
+  }
+
+  /* .hover-tone — elevation expressed as a warmer ground rather than a
+     frosted panel or a drop shadow, both of which guidelines §4 rules out.
+     A pseudo-element fading in, so the transition is opacity-only. */
+  .hover-tone {
+    position: relative;
+    isolation: isolate;
+  }
+  .hover-tone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-color: var(--color-ivory-soft);
+    opacity: 0;
+    transition: opacity var(--duration-hover) var(--ease-out-soft);
+    pointer-events: none;
+  }
+  @media (hover: hover) {
+    .hover-tone:hover::before,
+    .hover-tone:focus-within::before {
+      opacity: 1;
+    }
+  }
+
+  /* .press — the only place the spring is allowed. A finger expects recoil,
+     so the release overshoots by a hair and settles. */
+  .press {
+    transition: scale var(--duration-micro) var(--ease-spring-soft);
+  }
+  .press:active {
+    scale: 0.98;
+    transition-duration: 80ms;
+  }
+
+  /* .cta-arrow — the arrow leans toward where the link goes. */
+  .cta-arrow svg {
+    transition: translate var(--duration-hover) var(--ease-spring-soft);
+  }
+  @media (hover: hover) {
+    .cta-arrow:hover svg,
+    .cta-arrow:focus-visible svg {
+      translate: 0.25rem 0;
+    }
+  }
+}
+
+@layer utilities {
   /* Screen-reader-only, but focusable. */
   .sr-only-focusable:not(:focus):not(:focus-within) {
     position: absolute;
@@ -443,7 +676,7 @@
 }
 
 /* ==========================================================================
-   Scroll-driven composition
+   §4 SCROLL-DRIVEN COMPOSITION
    --------------------------------------------------------------------------
    The homepage is a sequence of chapters that respond to scroll position.
 
@@ -536,8 +769,18 @@
         to   { transform: translateY(-3.5rem); }
       }
 
+      /*
+       * Reveals are eased, parallax is not.
+       *
+       * On a scroll timeline the timing function remaps scroll progress, not
+       * elapsed time. An ease-out therefore makes a reveal finish early and
+       * sit still while the reader arrives at it — which is what you want.
+       * Applied to a continuous effect like .scene-zoom it would instead make
+       * the image drift at a changing rate and rubber-band when the reader
+       * scrolls back up, so those stay linear.
+       */
       .scene-rise {
-        animation: scene-rise linear both;
+        animation: scene-rise var(--ease-out-soft) both;
         animation-timeline: view();
         /* Complete well before the element centres, so it is settled and
            readable by the time the eye reaches it. */
@@ -545,7 +788,7 @@
       }
 
       .scene-fade {
-        animation: scene-fade linear both;
+        animation: scene-fade var(--ease-out-soft) both;
         animation-timeline: view();
         animation-range: entry 4% cover 26%;
       }
@@ -557,7 +800,7 @@
       }
 
       .scene-wipe {
-        animation: scene-wipe linear both;
+        animation: scene-wipe var(--ease-out-soft) both;
         animation-timeline: view();
         animation-range: entry 0% cover 40%;
       }
@@ -610,6 +853,59 @@
         animation: hero-hint linear both;
         animation-timeline: scroll(root);
         animation-range: 0 22svh;
+      }
+
+      /*
+       * The header earns its edge.
+       *
+       * At the top of the page there is nothing above the fold to divide the
+       * header from, so it carries no rule. Once the reader has scrolled, the
+       * hairline fades in and the header reads as sitting on top of content
+       * rather than being part of it. Opacity only — guidelines §4 rules out
+       * frosted navbars, and a backdrop-filter on a sticky element repaints
+       * the strip beneath it on every frame anyway.
+       */
+      @keyframes nav-settle {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+      }
+      .nav-settle {
+        animation: nav-settle linear both;
+        animation-timeline: scroll(root);
+        animation-range: 0 14svh;
+      }
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   §4b Reading progress
+   --------------------------------------------------------------------------
+   A 2px brand rule across the top, scaled by how far down the page you are.
+
+   `display: none` is the default rather than `transform: scaleX(0)`. The
+   usual rule — default state equals final state — exists so unsupported
+   browsers never hide real content, and this bar carries none: it is
+   aria-hidden decoration duplicating the scrollbar. Hiding it outright is
+   therefore safer than leaving a full-width bar stranded at 100%.
+   -------------------------------------------------------------------------- */
+@layer components {
+  .scroll-progress { display: none; }
+}
+
+@supports (animation-timeline: scroll(root)) {
+  @media (prefers-reduced-motion: no-preference) {
+    @layer components {
+      @keyframes scroll-progress {
+        from { transform: scaleX(0); }
+        to   { transform: scaleX(1); }
+      }
+      .scroll-progress {
+        display: block;
+        transform: scaleX(0);
+        transform-origin: left center;
+        animation: scroll-progress linear both;
+        animation-timeline: scroll(root);
       }
     }
   }

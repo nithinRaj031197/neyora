@@ -62,7 +62,7 @@ export function FinalFrame({
           {finalCta.ctaLabel && finalCta.ctaHref ? (
             <Link
               href={finalCta.ctaHref}
-              className="inline-flex h-14 items-center gap-2.5 rounded-xs bg-ivory px-8 text-[0.875rem] font-medium tracking-[0.06em] text-forest uppercase transition-colors hover:bg-beige-soft"
+              className="press cta-arrow inline-flex h-14 items-center gap-2.5 rounded-xs bg-ivory px-8 text-[0.875rem] font-medium tracking-[0.06em] text-forest uppercase transition-colors hover:bg-beige-soft"
             >
               {finalCta.ctaLabel}
               <Icon name="arrow-right" size={17} />
@@ -70,7 +70,7 @@ export function FinalFrame({
           ) : null}
           <Link
             href="/contact"
-            className="inline-flex h-14 items-center rounded-xs border border-ivory/35 px-7 text-[0.875rem] font-medium tracking-[0.06em] text-ivory uppercase transition-colors hover:border-ivory hover:bg-ivory/10"
+            className="press inline-flex h-14 items-center rounded-xs border border-ivory/35 px-7 text-[0.875rem] font-medium tracking-[0.06em] text-ivory uppercase transition-colors hover:border-ivory hover:bg-ivory/10"
           >
             Talk to us
           </Link>
