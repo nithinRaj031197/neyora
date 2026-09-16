@@ -25,13 +25,22 @@ function readPublicEnv(): PublicEnv {
    * inlines a NEXT_PUBLIC_* value into the client bundle when it can see the
    * whole name statically. A computed lookup compiles to `undefined` in the
    * browser and fails only at runtime.
+   *
+   * Each value is trimmed and collapsed to the default with `||`, not `??`:
+   * an env var that is set but EMPTY must behave exactly like an unset one.
+   * `??` would let the empty string through and fail validation — the build
+   * once crashed on /_not-found with "must be a valid http(s) URL" on a
+   * machine whose .env.local was perfectly fine.
    */
   const raw = {
-    siteUrl: (process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000').replace(/\/+$/, ''),
-    analyticsProvider: process.env.NEXT_PUBLIC_ANALYTICS_PROVIDER ?? 'none',
-    analyticsScriptUrl: process.env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL || undefined,
-    analyticsSiteId: process.env.NEXT_PUBLIC_ANALYTICS_SITE_ID || undefined,
-    googleSiteVerification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+    siteUrl: (process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'http://localhost:3000').replace(
+      /\/+$/,
+      '',
+    ),
+    analyticsProvider: process.env.NEXT_PUBLIC_ANALYTICS_PROVIDER?.trim() || 'none',
+    analyticsScriptUrl: process.env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL?.trim() || undefined,
+    analyticsSiteId: process.env.NEXT_PUBLIC_ANALYTICS_SITE_ID?.trim() || undefined,
+    googleSiteVerification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim() || undefined,
   }
 
   const parsed = publicSchema.safeParse(raw)
