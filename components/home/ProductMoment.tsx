@@ -41,7 +41,7 @@ export function ProductMoment({
   return (
     <section
       aria-labelledby="product-heading"
-      className="overflow-hidden bg-ivory py-(--spacing-section)"
+      className="overflow-clip bg-ivory py-(--spacing-section)"
     >
       <div className="mx-auto w-full max-w-[88rem] px-5 sm:px-8 lg:px-12">
         <div className="lg:grid lg:grid-cols-12 lg:items-center lg:gap-12">
@@ -51,7 +51,7 @@ export function ProductMoment({
               image={product.images[0]}
               sizes="(max-width: 1024px) 100vw, 48vw"
               aspect="4 / 5"
-              wrapperClassName="scene-wipe overflow-hidden rounded-sm bg-beige-soft"
+              wrapperClassName="scene-wipe overflow-clip rounded-sm bg-beige-soft"
               className="scene-zoom"
             />
 
@@ -63,7 +63,7 @@ export function ProductMoment({
                       image={image}
                       sizes="16vw"
                       aspect="1 / 1"
-                      wrapperClassName="scene-fade overflow-hidden rounded-xs bg-beige-soft"
+                      wrapperClassName="scene-fade overflow-clip rounded-xs bg-beige-soft"
                     />
                   </li>
                 ))}

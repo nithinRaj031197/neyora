@@ -5,6 +5,13 @@ import { Display, Eyebrow } from './Display'
 import { formatDuration } from '@/lib/utils/format'
 import type { Category, FoodChapter, Recipe } from '@/types/content'
 
+function imageAspect(recipe: Recipe, fallback: string): string {
+  const width = recipe.cover?.width
+  const height = recipe.cover?.height
+  if (!width || !height) return fallback
+  return `${width} / ${height}`
+}
+
 /**
  * Chapter 06 — food.
  *
@@ -31,7 +38,7 @@ export function Food({
   return (
     <section
       aria-labelledby="food-heading"
-      className="overflow-hidden bg-ink py-(--spacing-section) text-ivory"
+      className="overflow-clip bg-ink py-(--spacing-section) text-ivory"
     >
       <div className="mx-auto w-full max-w-[88rem] px-5 sm:px-8 lg:px-12">
         <div className="lg:grid lg:grid-cols-12 lg:items-end lg:gap-10">
@@ -56,8 +63,8 @@ export function Food({
               <Picture
                 image={lead.cover}
                 sizes="100vw"
-                aspect="16 / 9"
-                wrapperClassName="scene-wipe overflow-hidden"
+                aspect={imageAspect(lead, '16 / 9')}
+                wrapperClassName="scene-wipe overflow-clip"
                 className="scene-zoom transition-transform duration-700 ease-(--ease-out-soft)"
               />
 
@@ -95,8 +102,8 @@ export function Food({
                         <Picture
                           image={recipe.cover}
                           sizes="(max-width: 1024px) 100vw, 44vw"
-                          aspect={index % 2 === 1 ? '4 / 5' : '4 / 3'}
-                          wrapperClassName="scene-wipe overflow-hidden rounded-sm"
+                          aspect={imageAspect(recipe, '4 / 3')}
+                          wrapperClassName="scene-wipe overflow-clip rounded-sm"
                           className="scene-zoom"
                         />
                         <p className="mt-5 flex flex-wrap items-center gap-x-4 text-[0.6875rem] tracking-[0.2em] text-ivory/45 uppercase">

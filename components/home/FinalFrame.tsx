@@ -25,7 +25,7 @@ export function FinalFrame({
   return (
     <section
       aria-labelledby="final-heading"
-      className="chapter-full relative isolate flex items-center overflow-hidden bg-ink"
+      className="chapter-full relative isolate flex items-center overflow-clip bg-ink"
     >
       <div className="absolute inset-0 -z-10">
         <Picture
@@ -68,12 +68,6 @@ export function FinalFrame({
               <Icon name="arrow-right" size={17} />
             </Link>
           ) : null}
-          <Link
-            href="/contact"
-            className="press inline-flex h-14 items-center rounded-xs border border-ivory/35 px-7 text-[0.875rem] font-medium tracking-[0.06em] text-ivory uppercase transition-colors hover:border-ivory hover:bg-ivory/10"
-          >
-            Talk to us
-          </Link>
         </div>
 
         <div className="scene-fade mt-20 border-t border-ivory/15 pt-8">

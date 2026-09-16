@@ -4,7 +4,7 @@ slug: quality
 eyebrow: Our standards
 subtitle: What we measure, what we reject, and what we will tell you if you ask.
 hero:
-  src: /images/mushrooms/cluster-closeup.svg
+  src: /images/mushrooms/cluster-closeup.webp
   alt: Macro detail of oyster mushroom gills and cap edges
   width: 1400
   height: 1750

@@ -7,13 +7,13 @@ sortOrder: 6
 status: published
 publishedAt: "2026-08-01"
 seo:
-  title: Contact NEYORA — WhatsApp, Email & Farm Enquiries
+  title: Contact NEYORA — WhatsApp, Email & Enquiries
   description: >-
-    Reach NEYORA by WhatsApp, phone or email. Wholesale enquiries, kitchen
-    supply, farm visits and general questions.
+    Reach NEYORA by WhatsApp, phone or email. Orders, kitchen supply, retail
+    enquiries and general questions.
 isDemo: true
 ---
 
 For orders and quick questions, WhatsApp is genuinely the fastest route. For
-anything longer — wholesale, a kitchen supply enquiry, a farm visit — email is
+anything longer — retail, wholesale or a kitchen supply enquiry — email is
 better, because it gives us room to answer properly.

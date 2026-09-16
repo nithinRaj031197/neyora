@@ -17,7 +17,7 @@ export function Farm({ farm }: { farm: FarmChapter }) {
   return (
     <section
       aria-labelledby="farm-heading"
-      className="overflow-hidden bg-earth py-(--spacing-section) text-ivory"
+      className="overflow-clip bg-earth py-(--spacing-section) text-ivory"
     >
       <div className="mx-auto w-full max-w-[88rem] px-5 sm:px-8 lg:px-12">
         <div className="lg:grid lg:grid-cols-12 lg:gap-12">
@@ -48,7 +48,7 @@ export function Farm({ farm }: { farm: FarmChapter }) {
                 image={primary}
                 sizes="(max-width: 1024px) 100vw, 46vw"
                 aspect="4 / 5"
-                wrapperClassName="scene-wipe overflow-hidden rounded-sm"
+                wrapperClassName="scene-wipe overflow-clip rounded-sm"
                 className="scene-zoom"
               />
 
@@ -58,7 +58,7 @@ export function Farm({ farm }: { farm: FarmChapter }) {
                     image={secondary}
                     sizes="(max-width: 1024px) 100vw, 28vw"
                     aspect="1 / 1"
-                    wrapperClassName="scene-wipe overflow-hidden rounded-sm"
+                    wrapperClassName="scene-wipe overflow-clip rounded-sm"
                   />
                 </div>
               ) : null}

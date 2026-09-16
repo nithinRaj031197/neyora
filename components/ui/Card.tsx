@@ -30,7 +30,7 @@ export function Card({
   }
 
   const classes = cn(
-    'group relative flex flex-col overflow-hidden rounded-sm border',
+    'group relative flex flex-col overflow-clip rounded-sm border',
     tones[tone],
     (interactive || href) &&
       cn(
@@ -40,7 +40,8 @@ export function Card({
         //   hover-lift   the card rises 4px
         //   hover-rule   the brand hairline draws along its lower edge
         //   hover-media  any <img> inside pushes in slightly
-        // The card already has overflow-hidden, which hover-media needs.
+        // The card already has overflow-clip, which hover-media needs to
+        // contain the image scale (clip, not hidden — see Picture.tsx).
         'hover-lift hover-rule hover-media',
       ),
     className,

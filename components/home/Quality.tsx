@@ -22,7 +22,7 @@ export function Quality({
   testimonial?: Testimonial
 }) {
   return (
-    <section aria-labelledby="quality-heading" className="overflow-hidden bg-ivory py-(--spacing-section)">
+    <section aria-labelledby="quality-heading" className="overflow-clip bg-ivory py-(--spacing-section)">
       <div className="mx-auto w-full max-w-[88rem] px-5 sm:px-8 lg:px-12">
         <div className="lg:grid lg:grid-cols-12 lg:gap-12">
           <div className="lg:col-span-5">

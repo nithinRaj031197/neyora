@@ -5,7 +5,6 @@ import { Mushroom } from '@/components/home/Mushroom'
 import { Journey } from '@/components/home/Journey'
 import { ProductMoment } from '@/components/home/ProductMoment'
 import { Food } from '@/components/home/Food'
-import { Farm } from '@/components/home/Farm'
 import { Quality } from '@/components/home/Quality'
 import { FinalFrame } from '@/components/home/FinalFrame'
 import {
@@ -21,7 +20,7 @@ import {
 import { buildMetadata } from '@/lib/seo/metadata'
 
 /**
- * The homepage — nine visual chapters.
+ * The homepage — eight public V1 visual chapters.
  *
  * This file is assembly only. Every word, image and button label comes from
  * content/homepage.yml; each chapter owns its own composition; and the
@@ -33,9 +32,11 @@ import { buildMetadata } from '@/lib/seo/metadata'
  *   04 The journey   beige, sticky four-stage sequence
  *   05 The product   warm ivory, large, buyable
  *   06 Food          dark, cinematic, editorial recipes
- *   07 The farm      earthy, quiet
- *   08 Quality       warm ivory, calm
- *   09 Final frame   dark, the closing shot
+ *   07 Quality       warm ivory, calm
+ *   08 Final frame   dark, the closing shot
+ *
+ * The Farm chapter remains implemented and content-driven, but is hidden from
+ * the public V1 homepage until the farm story is ready to re-open.
  */
 export function generateMetadata(): Metadata {
   const settings = getSiteSettings()
@@ -68,7 +69,7 @@ export default function HomePage() {
   const testimonial = getTestimonials({ featuredOnly: true, limit: 1 })[0]
 
   return (
-    <>
+    <div className="neyora-home">
       {home.hero.enabled ? <Hero hero={home.hero} /> : null}
 
       {home.nature.enabled ? <Nature nature={home.nature} /> : null}
@@ -93,8 +94,6 @@ export default function HomePage() {
         <Food food={home.food} recipes={recipes} categories={recipeCategories} />
       ) : null}
 
-      {home.farm.enabled ? <Farm farm={home.farm} /> : null}
-
       {home.quality.enabled ? (
         <Quality quality={home.quality} testimonial={testimonial} />
       ) : null}
@@ -106,6 +105,6 @@ export default function HomePage() {
           tagline={settings.tagline}
         />
       ) : null}
-    </>
+    </div>
   )
 }

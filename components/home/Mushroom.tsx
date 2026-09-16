@@ -14,7 +14,7 @@ export function Mushroom({ mushroom }: { mushroom: MushroomChapter }) {
   return (
     <section
       aria-labelledby="mushroom-heading"
-      className="relative overflow-hidden bg-ink py-(--spacing-section) text-ivory"
+      className="relative overflow-clip bg-ink py-(--spacing-section) text-ivory"
     >
       <div className="relative mx-auto w-full max-w-[88rem] px-5 sm:px-8 lg:px-12">
         <div className="lg:grid lg:grid-cols-12 lg:items-center lg:gap-8">
@@ -27,7 +27,7 @@ export function Mushroom({ mushroom }: { mushroom: MushroomChapter }) {
               lines={mushroom.lines}
               size="xl"
               invert
-              className="scene-drift mt-8"
+              className="scene-rise mt-8"
             />
           </div>
 
@@ -35,8 +35,8 @@ export function Mushroom({ mushroom }: { mushroom: MushroomChapter }) {
             <Picture
               image={mushroom.image}
               sizes="(max-width: 1024px) 100vw, 66vw"
-              wrapperClassName="scene-wipe overflow-hidden rounded-sm"
-              className="scene-zoom"
+              wrapperClassName="scene-fade overflow-clip rounded-sm"
+              position="center center"
             />
           </div>
         </div>

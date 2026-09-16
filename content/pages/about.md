@@ -6,7 +6,7 @@ subtitle: >-
   A natural-food brand that started with mushrooms because mushrooms are the
   hardest thing to fake.
 hero:
-  src: /images/farm/harvest-hands.svg
+  src: /images/farm/harvest-hands.webp
   alt: A grower's hands lifting a cluster of oyster mushrooms at harvest
   width: 1400
   height: 1050

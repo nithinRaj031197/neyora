@@ -17,7 +17,7 @@ export default function NotFound() {
           {[
             { href: '/products', label: 'Products' },
             { href: '/recipes', label: 'Recipes' },
-            { href: '/farm', label: 'Our farm' },
+            { href: '/quality', label: 'Quality' },
             { href: '/contact', label: 'Contact us' },
           ].map((link) => (
             <li key={link.href}>

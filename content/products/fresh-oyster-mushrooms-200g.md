@@ -14,15 +14,15 @@ mrp: 150
 currency: INR
 unitLabel: pack
 images:
-  - src: /images/products/oyster-mushrooms-200g.svg
+  - src: /images/products/oyster-mushrooms-200g.webp
     alt: A 200 g punnet of fresh NEYORA grey oyster mushrooms on a warm ivory surface
-    width: 1400
-    height: 1400
-  - src: /images/products/oyster-mushrooms-detail.svg
+    width: 1800
+    height: 2250
+  - src: /images/products/oyster-mushrooms-detail.webp
     alt: Close detail of the NEYORA 200 g pack showing the harvest date panel
     width: 1400
     height: 1400
-  - src: /images/mushrooms/cluster-closeup.svg
+  - src: /images/mushrooms/cluster-closeup.webp
     alt: Macro detail of oyster mushroom gills and cap edges
     width: 1400
     height: 1750

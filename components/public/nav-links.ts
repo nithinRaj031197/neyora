@@ -14,9 +14,8 @@ export interface NavLink {
 }
 
 export const PRIMARY_NAV: NavLink[] = [
-  { href: '/products', label: 'Products', hint: 'What we grow right now' },
+  { href: '/products', label: 'Fresh Mushrooms', hint: 'What we grow right now' },
   { href: '/recipes', label: 'Recipes', hint: 'Simple ways to cook it' },
-  { href: '/farm', label: 'Our Farm', hint: 'How and where it grows' },
   { href: '/quality', label: 'Quality', hint: 'What we test and reject' },
   { href: '/about', label: 'About', hint: 'Who we are' },
 ]
@@ -34,8 +33,7 @@ export const FOOTER_NAV: { heading: string; links: NavLink[] }[] = [
     heading: 'NEYORA',
     links: [
       { href: '/about', label: 'About us' },
-      { href: '/farm', label: 'Our farm' },
-      { href: '/quality', label: 'Quality & growing' },
+      { href: '/quality', label: 'Quality' },
       { href: '/faq', label: 'FAQ' },
     ],
   },

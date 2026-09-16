@@ -4,7 +4,7 @@ slug: farm
 eyebrow: Where it grows
 subtitle: A controlled room, ordinary materials, and a routine we do not shortcut.
 hero:
-  src: /images/farm/growing-room.svg
+  src: /images/farm/growing-room.webp
   alt: Rows of substrate bags in the NEYORA growing room, daylight through an open doorway
   width: 1600
   height: 1200
@@ -13,6 +13,7 @@ status: published
 publishedAt: "2026-08-01"
 seo:
   title: Our Farm — How NEYORA Grows Oyster Mushrooms
+  noindex: true
   description: >-
     Pasteurised agricultural substrate, lab-sourced spawn, controlled air, hand
     grading, and spent substrate composted back to soil. How NEYORA grows.

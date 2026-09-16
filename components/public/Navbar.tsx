@@ -5,6 +5,7 @@ import { Container } from '@/components/ui/Container'
 import { MobileNav } from './MobileNav'
 import { NavLinks } from './NavLinks'
 import { PRIMARY_NAV } from './nav-links'
+import { HeaderFrame } from './HeaderFrame'
 
 /**
  * Site header.
@@ -43,10 +44,7 @@ export function Navbar() {
         </div>
       ) : null}
 
-      <header
-        className="sticky top-0 z-50 bg-ivory/98"
-        style={{ ['--nav-height' as string]: '4.25rem' }}
-      >
+      <HeaderFrame>
         {/*
           Both of these are decoration and are hidden from assistive tech: the
           progress rule duplicates the scrollbar, and the hairline carries no
@@ -92,7 +90,7 @@ export function Navbar() {
             />
           </div>
         </Container>
-      </header>
+      </HeaderFrame>
     </>
   )
 }

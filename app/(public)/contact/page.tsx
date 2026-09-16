@@ -26,7 +26,7 @@ export function generateMetadata(): Metadata {
     title: page?.title || 'Contact',
     description:
       page?.subtitle ||
-      'Reach NEYORA by WhatsApp, phone or email. Wholesale, kitchen supply and farm visits.',
+      'Reach NEYORA by WhatsApp, phone or email. Orders, kitchen supply and retail enquiries.',
     path: '/contact',
     seo: page?.seo,
     settings: getSiteSettings(),
@@ -105,7 +105,7 @@ export default function ContactPage() {
             <h2 className="text-(length:--text-display-sm)">How to reach us</h2>
             <p className="mt-5 max-w-[58ch] text-[1.0625rem] leading-relaxed text-earth-soft">
               WhatsApp is genuinely the fastest route for orders and quick questions. For anything
-              longer — wholesale, a kitchen supply enquiry, a farm visit — email gives us room to
+              longer — retail, wholesale or a kitchen supply enquiry — email gives us room to
               answer properly.
             </p>
 

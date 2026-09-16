@@ -15,6 +15,10 @@
   --color-ivory: #f6f0e3;
   --color-beige: #d8c9b5;
   --color-earth: #2b2923;
+  /* The near-black ground for the dark chapters and every photographic scrim.
+     Darker and warmer than --color-earth, which is a surface colour; this is
+     the colour of an unlit frame. */
+  --color-ink: #14120f;
 
   /* Derived tints. Kept few on purpose — a wide ramp invites green sprawl. */
   --color-ivory-soft: #fbf8f1;
@@ -221,6 +225,59 @@
     transition: top 160ms var(--ease-out-soft);
   }
   .skip-link:focus { top: 1rem; }
+
+  .site-header {
+    isolation: isolate;
+    color: var(--color-earth);
+    transition: color var(--duration-hover) var(--ease-out-soft);
+  }
+
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-color: rgb(246 240 227 / 0.98);
+    opacity: 1;
+    transition: opacity var(--duration-hover) var(--ease-out-soft);
+    pointer-events: none;
+  }
+
+  body:has(.neyora-home) .site-header {
+    margin-bottom: calc(var(--nav-height, 4.25rem) * -1);
+  }
+
+  body:has(.neyora-home) .site-header:not([data-scrolled='true']) {
+    color: var(--color-ivory);
+  }
+
+  body:has(.neyora-home) .site-header:not([data-scrolled='true'])::before {
+    opacity: 0;
+  }
+
+  body:has(.neyora-home) .site-header:not([data-scrolled='true']) a,
+  body:has(.neyora-home) .site-header:not([data-scrolled='true']) button {
+    color: color-mix(in oklab, var(--color-ivory) 88%, transparent);
+  }
+
+  body:has(.neyora-home) .site-header:not([data-scrolled='true']) a:hover,
+  body:has(.neyora-home) .site-header:not([data-scrolled='true']) button:hover {
+    color: var(--color-ivory);
+  }
+
+  body:has(.neyora-home) .site-header:not([data-scrolled='true']) .neyora-gradient-text {
+    background-image: linear-gradient(
+      100deg,
+      var(--color-ivory) 0%,
+      var(--color-beige) 42%,
+      var(--color-leaf) 78%,
+      var(--color-golden) 100%
+    );
+  }
+
+  body:has(.neyora-home) .site-header:not([data-scrolled='true']) .nav-settle {
+    background-color: color-mix(in oklab, var(--color-ivory) 18%, transparent);
+  }
 }
 
 /* ==========================================================================
@@ -693,6 +750,16 @@
 
    Animations run on the compositor (transform, opacity, clip-path only) and
    need no JavaScript, no IntersectionObserver and no scroll listener.
+
+   ONE STRUCTURAL REQUIREMENT. `view()` binds to the element's nearest SCROLL
+   CONTAINER, and `overflow: hidden` makes an element one. Every chapter and
+   every image wrapper clips its composition, so with `overflow-hidden` each
+   .scene-* bound to its own section instead of the viewport and froze: the
+   animation attached, reported a ViewTimeline, and its progress never
+   changed. They all use `overflow-clip` instead — identical clipping, no
+   scroll container, timelines resolve to the viewport. If a wrapper around a
+   .scene-* element is ever switched back to overflow-hidden, that element's
+   animation stops moving with no error anywhere.
    ========================================================================== */
 
 @layer components {
@@ -722,6 +789,25 @@
   .display-lg { font-size: clamp(2.5rem, 8.5vw, 7.5rem); }
   .display-md { font-size: clamp(2rem, 5.5vw, 4.5rem); }
 
+  .hero-wordmark {
+    font-size: clamp(2.25rem, 11vw, 11rem);
+    max-width: 100%;
+  }
+
+  .hero-wordmark > span:first-child {
+    letter-spacing: 0.04em;
+  }
+
+  @media (min-width: 640px) {
+    .hero-wordmark {
+      font-size: clamp(3rem, 12vw, 11rem);
+    }
+
+    .hero-wordmark > span:first-child {
+      letter-spacing: 0.16em;
+    }
+  }
+
   /* A single line of display type; each gets its own reveal delay. */
   .scene-line {
     display: block;
@@ -742,7 +828,7 @@
        * animation is tied to position rather than to time.
        */
       @keyframes scene-rise {
-        from { opacity: 0; transform: translateY(2.5rem); }
+        from { opacity: 0; transform: translateY(1rem); }
         to   { opacity: 1; transform: none; }
       }
 
@@ -753,20 +839,20 @@
 
       /* A slow push-in across the whole time the element is on screen. */
       @keyframes scene-zoom {
-        from { transform: scale(1.14); }
+        from { transform: scale(1.06); }
         to   { transform: scale(1); }
       }
 
       /* Wipe a photograph open from its lower edge. */
       @keyframes scene-wipe {
-        from { clip-path: inset(0 0 22% 0); opacity: 0.55; }
+        from { clip-path: inset(0 0 12% 0); opacity: 0.7; }
         to   { clip-path: inset(0 0 0 0); opacity: 1; }
       }
 
       /* Slow parallax drift — type moving against the image behind it. */
       @keyframes scene-drift {
-        from { transform: translateY(3.5rem); }
-        to   { transform: translateY(-3.5rem); }
+        from { transform: translateY(1rem); }
+        to   { transform: translateY(-1rem); }
       }
 
       /*
@@ -826,12 +912,12 @@
        */
       @keyframes hero-image {
         from { transform: scale(1); }
-        to   { transform: scale(1.12) translateY(3%); }
+        to   { transform: scale(1.08) translateY(2%); }
       }
 
       @keyframes hero-type {
         from { opacity: 1; transform: none; }
-        to   { opacity: 0; transform: translateY(-3rem); }
+        to   { opacity: 0; transform: translateY(-1.25rem); }
       }
 
       .hero-image {

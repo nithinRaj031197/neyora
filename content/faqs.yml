@@ -92,9 +92,10 @@ faqs:
     category: Orders
     sortOrder: 9
 
-  - question: Can I visit the farm?
+  - question: Can I contact NEYORA before ordering?
     answer: >-
-      In small groups, yes. Growing rooms need controlled conditions, so visits
-      are scheduled rather than open. Get in touch and we will arrange a time.
+      Yes. Message us with your quantity, timing and delivery area. We can help
+      with customer orders, kitchen supply and retail enquiries without forcing
+      you through a generic form.
     category: About NEYORA
     sortOrder: 10

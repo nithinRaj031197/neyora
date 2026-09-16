@@ -4,7 +4,7 @@ slug: storage
 eyebrow: Keep them at their best
 subtitle: Five days is achievable. Two days is where they are genuinely excellent.
 hero:
-  src: /images/mushrooms/cluster-closeup.svg
+  src: /images/mushrooms/cluster-closeup.webp
   alt: Fresh oyster mushroom clusters kept loosely covered in a cool place
   width: 1400
   height: 1750

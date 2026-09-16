@@ -17,7 +17,7 @@ export function Journey({ journey }: { journey: JourneyChapter }) {
   return (
     <section
       aria-labelledby="journey-heading"
-      className="overflow-hidden bg-beige-soft py-(--spacing-section)"
+      className="overflow-clip bg-beige-soft py-(--spacing-section)"
     >
       <div className="mx-auto w-full max-w-[88rem] px-5 sm:px-8 lg:px-12">
         {journey.eyebrow ? <Eyebrow>{journey.eyebrow}</Eyebrow> : null}
@@ -68,7 +68,7 @@ export function Journey({ journey }: { journey: JourneyChapter }) {
                   image={stage.image}
                   sizes="(max-width: 1024px) 100vw, 46vw"
                   aspect="4 / 5"
-                  wrapperClassName="scene-wipe overflow-hidden rounded-sm"
+                  wrapperClassName="scene-wipe overflow-clip rounded-sm"
                   className="scene-zoom"
                 />
               </div>

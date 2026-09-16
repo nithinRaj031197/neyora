@@ -21,7 +21,7 @@ hero:
     Fresh food grown with care. Harvested the morning it ships, graded by hand,
     and dated on every pack.
   image:
-    src: /images/hero/hero-desktop.svg
+    src: /images/hero/hero-desktop.webp
     alt: Clusters of fresh grey oyster mushrooms in low, directional morning light
     width: 2400
     height: 1350
@@ -29,7 +29,7 @@ hero:
   # real vertical crop here; the layout reserves space from the desktop file's
   # dimensions, so swapping it costs no layout shift.
   imageMobile:
-    src: /images/hero/hero-mobile.svg
+    src: /images/hero/hero-mobile.webp
     alt: Clusters of fresh grey oyster mushrooms in low, directional morning light
     width: 1200
     height: 1800
@@ -55,25 +55,25 @@ nature:
     and moved quickly, or it was not — and anyone who cooks can tell.
   frames:
     - image:
-        src: /images/mushrooms/cap-macro.svg
+        src: /images/mushrooms/cap-macro.webp
         alt: A single oyster mushroom cap, close enough to see the velvet on its edge
         width: 1600
         height: 2000
       caption: One cap
     - image:
-        src: /images/mushrooms/cluster.svg
+        src: /images/mushrooms/cluster.webp
         alt: A whole cluster of grey oyster mushrooms, cut and resting on linen
         width: 1800
         height: 1800
       caption: One cluster
     - image:
-        src: /images/farm/growing-room.svg
+        src: /images/farm/growing-room.webp
         alt: Rows of substrate bags fruiting in the NEYORA growing room
         width: 2000
         height: 1250
       caption: One room
     - image:
-        src: /images/farm/farm-wide.svg
+        src: /images/farm/farm-wide.webp
         alt: The NEYORA farm in early daylight
         width: 2400
         height: 1350
@@ -95,7 +95,7 @@ mushroom:
     grain. A faint sweetness, a little of aniseed. This is what two days old
     looks like — and what five days old does not.
   image:
-    src: /images/mushrooms/gills-macro.svg
+    src: /images/mushrooms/gills-macro.webp
     alt: Macro detail of oyster mushroom gills, each fold catching the light
     width: 2000
     height: 2500
@@ -112,7 +112,7 @@ journey:
         Pasteurised paddy straw and sawdust. Lab-sourced spawn, traceable by
         batch. No chemical supplementation, nothing added to force yield.
       image:
-        src: /images/journey/grown.svg
+        src: /images/journey/grown.webp
         alt: Young oyster mushrooms pinning from a substrate bag
         width: 1400
         height: 1750
@@ -122,7 +122,7 @@ journey:
         Picked the morning of dispatch, when the cap edge just begins to
         flatten. Cut as whole clusters, never picked apart.
       image:
-        src: /images/journey/harvested.svg
+        src: /images/journey/harvested.webp
         alt: A grower's hands lifting a cluster at harvest
         width: 1400
         height: 1750
@@ -132,7 +132,7 @@ journey:
         Graded by hand, one cluster at a time. Between 8% and 12% of a harvest
         never reaches a pack. The harvest date is printed on the one that does.
       image:
-        src: /images/journey/packed.svg
+        src: /images/journey/packed.webp
         alt: A 200 g pack of NEYORA oyster mushrooms being closed
         width: 1400
         height: 1750
@@ -142,7 +142,7 @@ journey:
         In a hot pan within days, not weeks. That is the whole point of the
         four steps above.
       image:
-        src: /images/journey/table.svg
+        src: /images/journey/table.webp
         alt: Seared oyster mushrooms plated and ready to eat
         width: 1400
         height: 1750
@@ -177,7 +177,7 @@ food:
 
 # ── 07 ─ THE FARM ───────────────────────────────── earthy, quiet, honest ───
 farm:
-  enabled: true
+  enabled: false
   eyebrow: Our farm
   lines:
     - GROWN WITH PATIENCE.
@@ -188,11 +188,11 @@ farm:
     the air, and picking at exactly the right moment. Spent substrate goes back
     to the soil as compost.
   images:
-    - src: /images/farm/harvest-hands.svg
+    - src: /images/farm/harvest-hands.webp
       alt: A grower's hands lifting a cluster of oyster mushrooms at harvest
       width: 1600
       height: 2000
-    - src: /images/farm/substrate.svg
+    - src: /images/farm/substrate.webp
       alt: Pasteurised paddy straw and sawdust substrate, close up
       width: 1400
       height: 1400
@@ -231,25 +231,25 @@ quality:
 # ── 09 ─ FINAL FRAME ────────────────────────────── dark, the closing shot ──
 finalCta:
   enabled: true
-  eyebrow: Start here
+  eyebrow: Talk to us
   lines:
-    - BRING
-    - GOODNESS
-    - HOME.
+    - READY
+    - TO COOK
+    - BETTER?
   body: >-
-    Order a pack, cook it the same week, and tell us what you thought. That
-    feedback is how we improve.
+    Questions, kitchen supply, retail enquiries or your first order — reach
+    NEYORA directly and we will help you choose what fits.
   image:
-    src: /images/hero/final-cta.svg
+    src: /images/hero/final-cta.webp
     alt: Fresh oyster mushrooms and a finished dish on a warm table
     width: 2400
     height: 1500
-  ctaLabel: Shop fresh mushrooms
-  ctaHref: /products
+  ctaLabel: Contact NEYORA
+  ctaHref: /contact
 
 seo:
   title: NEYORA — Fresh Natural Food, Grown For Life
   description: >-
     NEYORA grows fresh natural food with care. Premium oyster mushrooms
     harvested to order, plus simple recipes to cook them at their best.
-  ogImage: /images/hero/hero-desktop.svg
+  ogImage: /images/hero/neyora-og-card.webp

@@ -19,7 +19,7 @@ export function Hero({ hero }: { hero: HeroChapter }) {
   return (
     <section
       aria-labelledby="hero-heading"
-      className="chapter-full relative isolate flex flex-col justify-end overflow-hidden bg-ink"
+      className="chapter-full relative isolate flex flex-col justify-end overflow-clip bg-ink"
     >
       {/* The photograph fills the chapter and sits behind everything. */}
       <div className="absolute inset-0 -z-10">
@@ -60,19 +60,19 @@ export function Hero({ hero }: { hero: HeroChapter }) {
         had a moment to paint, so the type does not animate over a grey box.
       */}
       <div
-        className="hero-type enter-group relative mx-auto w-full max-w-[88rem] px-5 pb-16 sm:px-8 lg:px-12 lg:pb-24"
+        className="hero-type enter-group relative mx-auto box-border w-full max-w-[88rem] px-5 pb-16 sm:px-8 lg:px-12 lg:pb-24"
         style={{ ['--enter-offset' as string]: '120ms', ['--enter-step' as string]: '90ms' }}
       >
         {hero.eyebrow ? (
           <p className="eyebrow text-leaf">{hero.eyebrow}</p>
         ) : null}
 
-        <h1 id="hero-heading" className="enter-focus mt-6">
+        <h1 id="hero-heading" className="mt-6">
           <Wordmark
             as="span"
             brandName={hero.headline}
             invert
-            className="display display-xl block leading-[0.86]"
+            className="hero-wordmark display display-xl block leading-[0.86]"
           />
           {hero.tagline ? (
             <span className="mt-4 block font-display text-[clamp(1.1rem,3.2vw,2.4rem)] leading-none font-light tracking-[0.18em] text-ivory/85">
@@ -82,7 +82,7 @@ export function Hero({ hero }: { hero: HeroChapter }) {
         </h1>
 
         {hero.description ? (
-          <p className="mt-8 max-w-[44ch] text-[1.0625rem] leading-relaxed text-ivory/75 sm:text-[1.125rem]">
+          <p className="mt-8 max-w-[30ch] text-[1.0625rem] leading-relaxed text-ivory/75 [text-wrap:wrap] sm:max-w-[44ch] sm:text-[1.125rem]">
             {hero.description}
           </p>
         ) : null}
