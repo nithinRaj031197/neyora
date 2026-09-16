@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { Picture } from '@/components/ui/Picture'
 import { Icon } from '@/components/ui/Icon'
 import { formatDuration } from '@/lib/utils/format'
-import { packSizeLabel } from '@/lib/utils/scale'
 import { cn } from '@/lib/utils/cn'
 import type { Category, Recipe } from '@/types/content'
 
@@ -77,7 +76,7 @@ export function RecipeCard({
             ) : null}
             <li className="flex items-center gap-1.5">
               <Icon name="flame" size={15} />
-              {packSizeLabel(recipe.recommendedPackSize)}
+              {recipe.basePackGrams ?? 100} g base
             </li>
           </ul>
         </div>

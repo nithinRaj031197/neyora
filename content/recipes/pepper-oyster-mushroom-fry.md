@@ -7,31 +7,31 @@ excerpt: >-
 category: south-indian
 tags: [vegetarian, one-pan, spicy]
 cover:
-  src: /images/recipes/pepper-oyster-mushroom-fry.svg
+  src: /images/recipes/pepper-oyster-mushroom-fry.webp
   alt: Pepper oyster mushroom fry with curry leaves in a dark ceramic bowl
-  width: 1600
-  height: 1200
+  width: 2000
+  height: 1500
 prepTimeMinutes: 10
 cookTimeMinutes: 15
-servings: 3
-servingsLabel: as a side for 3
+servings: 1
+servingsLabel: as a side for 1
 difficulty: medium
 cuisine: South Indian
 course: Side
 recommendedPackSize: 200g
-basePackGrams: 200
+basePackGrams: 100
 isScalable: true
 ingredients:
-  - { qty: 200, unit: g, item: oyster mushrooms, note: torn into strips }
-  - { qty: 1.5, unit: tsp, item: black peppercorns, note: "coarsely crushed, freshly" }
-  - { qty: 1, unit: tbsp, item: coconut oil }
-  - { qty: 1, unit: medium, item: onion, note: sliced thin }
-  - { qty: 1, unit: sprig, item: curry leaves, group: Tempering }
-  - { qty: 2, unit: "", item: dried red chillies, note: broken, group: Tempering }
-  - { qty: 0.5, unit: tsp, item: mustard seeds, group: Tempering }
-  - { qty: 0.25, unit: tsp, item: turmeric }
-  - { qty: 2, unit: clove, item: garlic, note: crushed }
-  - { qty: null, unit: "", item: Salt, note: to taste, scalable: false }
+  - { qty: 100, unit: g, item: oyster mushrooms, note: torn into strips, shoppingQuery: fresh oyster mushrooms }
+  - { qty: 0.75, unit: tsp, item: black peppercorns, note: "coarsely crushed, freshly", shoppingQuery: black peppercorns }
+  - { qty: 0.5, unit: tbsp, item: coconut oil, shoppingQuery: coconut oil }
+  - { qty: 0.5, unit: medium, item: onion, note: sliced thin, shoppingQuery: onion }
+  - { qty: 0.5, unit: sprig, item: curry leaves, group: Tempering, shoppingQuery: curry leaves }
+  - { qty: 1, unit: "", item: dried red chilli, note: broken, group: Tempering, shoppingQuery: dried red chillies }
+  - { qty: 0.25, unit: tsp, item: mustard seeds, group: Tempering, shoppingQuery: mustard seeds }
+  - { qty: 0.125, unit: tsp, item: turmeric, shoppingQuery: turmeric powder }
+  - { qty: 1, unit: clove, item: garlic, note: crushed, shoppingQuery: garlic }
+  - { qty: null, unit: "", item: Salt, note: to taste, scalable: false, shoppingQuery: salt }
 steps:
   - title: Prep the mushrooms
     body: >-
@@ -64,15 +64,6 @@ steps:
       Add the crushed pepper and salt. Fry until the pan is dry and the edges
       are crisp.
     durationMinutes: 2
-nutrition:
-  basis: Per serving (recipe divided by 3)
-  per:
-    - { label: Energy, value: "96", unit: kcal }
-    - { label: Protein, value: "2.9", unit: g }
-    - { label: Carbohydrate, value: "7.8", unit: g }
-    - { label: Fat, value: "5.1", unit: g }
-    - { label: Fibre, value: "2.6", unit: g }
-  note: Estimated. Demo content — replace before publishing nutrition claims.
 equipment:
   - Kadai or wok
   - Mortar and pestle
@@ -84,11 +75,11 @@ sortOrder: 2
 status: published
 publishedAt: "2026-08-28"
 seo:
-  title: Pepper Oyster Mushroom Fry — South Indian Dry Fry (200 g)
+  title: Pepper Oyster Mushroom Fry — South Indian Dry Fry
   description: >-
     Coarse black pepper, curry leaves and coconut oil. A crisp, dry South Indian
-    oyster mushroom fry for one 200 g pack.
-isDemo: true
+    oyster mushroom fry with quantities that scale from 100 g.
+isDemo: false
 ---
 
 This is the one that convinces people who think they do not like mushrooms.
@@ -110,6 +101,6 @@ With rice and rasam, inside a dosa, or on its own with a wedge of lime.
 
 | Heat level | Adjust |
 | --- | --- |
-| Milder | 1 tsp pepper, 1 chilli |
-| As written | 1½ tsp pepper, 2 chillies |
-| Hotter | 2 tsp pepper, 3 chillies, add a slit green chilli |
+| Milder | 1/2 tsp pepper, no dried chilli |
+| As written | 3/4 tsp pepper, 1 dried chilli |
+| Hotter | 1 tsp pepper, 2 dried chillies, add a slit green chilli |

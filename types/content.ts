@@ -41,6 +41,9 @@ export interface Ingredient {
   unit: string
   item: string
   note?: string
+  displayText?: string
+  shoppingQuery?: string
+  optional?: boolean
   /** False for anything measured by taste; those must not be multiplied. */
   scalable: boolean
   group?: string

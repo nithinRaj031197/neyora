@@ -11,10 +11,10 @@ recipeCategories:
     name: Under 15 Minutes
     description: Weeknight cooking. Pan on, pack open, dinner done.
     image:
-      src: /images/recipes/category-quick.svg
+      src: /images/recipes/category-quick.webp
       alt: A pan of mushrooms cooking quickly over high heat
-      width: 1200
-      height: 800
+      width: 2000
+      height: 1250
     sortOrder: 1
     status: published
 

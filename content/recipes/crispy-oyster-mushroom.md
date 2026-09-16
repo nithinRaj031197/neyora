@@ -7,10 +7,10 @@ excerpt: >-
 category: snacks
 tags: [vegetarian, party-food]
 cover:
-  src: /images/recipes/crispy-oyster-mushroom.svg
+  src: /images/recipes/crispy-oyster-mushroom.webp
   alt: Crispy battered oyster mushrooms piled on brown paper with a lime wedge
   width: 1600
-  height: 1200
+  height: 2000
 prepTimeMinutes: 15
 cookTimeMinutes: 12
 servings: 3
@@ -75,7 +75,7 @@ tips: >-
   — paper steams the base soft.
 featured: false
 sortOrder: 3
-status: published
+status: draft
 publishedAt: "2026-09-04"
 seo:
   title: Crispy Oyster Mushroom — Shatteringly Crisp Starter (200 g)

@@ -56,7 +56,7 @@ describe('recipeJsonLd', () => {
    */
   it('flattens ingredients into readable strings', () => {
     const ingredients = json.recipeIngredient as string[]
-    expect(ingredients[0]).toBe('200 g oyster mushrooms (torn into finger-width strips)')
+    expect(ingredients[0]).toBe('100 g oyster mushrooms (torn into finger-width strips)')
     expect(ingredients).toContain('Salt (added at the end only)')
   })
 
@@ -67,7 +67,7 @@ describe('recipeJsonLd', () => {
       settings: SETTINGS,
     })
     expect(pepper.recipeIngredient as string[]).toContain(
-      '1½ tsp black peppercorns (coarsely crushed, freshly)',
+      '¾ tsp black peppercorns (coarsely crushed, freshly)',
     )
   })
 
@@ -79,10 +79,8 @@ describe('recipeJsonLd', () => {
     expect(steps[0]?.name).toBe('Clean gently')
   })
 
-  it('maps nutrition onto schema.org property names', () => {
-    const nutrition = json.nutrition as Record<string, string>
-    expect(nutrition.calories).toBe('118 kcal')
-    expect(nutrition.proteinContent).toBe('3.6 g')
+  it('omits nutrition when content does not provide verified nutrition data', () => {
+    expect(json.nutrition).toBeUndefined()
   })
 
   it('marks a vegetarian recipe with the matching diet', () => {

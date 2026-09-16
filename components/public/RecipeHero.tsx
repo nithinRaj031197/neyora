@@ -4,7 +4,6 @@ import { Container } from '@/components/ui/Container'
 import { Icon } from '@/components/ui/Icon'
 import { Badge } from '@/components/ui/Badge'
 import { formatDuration } from '@/lib/utils/format'
-import { packSizeLabel } from '@/lib/utils/scale'
 import type { Category, Recipe } from '@/types/content'
 
 const DIFFICULTY_LABEL = { easy: 'Easy', medium: 'Some skill', hard: 'Challenging' } as const
@@ -31,11 +30,7 @@ export function RecipeHero({
       value: recipe.servings ? String(recipe.servings) : '—',
       icon: 'users' as const,
     },
-    {
-      label: 'Pack',
-      value: packSizeLabel(recipe.recommendedPackSize).replace(' pack', ''),
-      icon: 'qr' as const,
-    },
+    { label: 'Base', value: `${recipe.basePackGrams ?? 100} g`, icon: 'qr' as const },
   ]
 
   return (
@@ -74,10 +69,12 @@ export function RecipeHero({
           </ol>
         </nav>
 
-        <div className="grid items-end gap-10 lg:grid-cols-[1fr_1.15fr] lg:gap-16">
-          <div className="pb-2 lg:pb-10">
+        <div className="grid min-w-0 items-end gap-10 lg:grid-cols-[1fr_1.15fr] lg:gap-16">
+          <div className="min-w-0 pb-2 lg:pb-10">
             {category ? <p className="eyebrow">{category.name}</p> : null}
-            <h1 className="mt-4 text-(length:--text-display-lg)">{recipe.title}</h1>
+            <h1 className="mt-4 text-(length:--text-display-lg) break-words">
+              {recipe.title}
+            </h1>
             {recipe.excerpt ? (
               <p className="mt-6 max-w-[52ch] text-[1.125rem] leading-relaxed text-earth-soft">
                 {recipe.excerpt}
@@ -103,22 +100,22 @@ export function RecipeHero({
             aspect="4 / 3"
             sizes="(max-width: 1024px) 100vw, 55vw"
             priority
-            wrapperClassName="rounded-t-sm"
+            wrapperClassName="max-w-full rounded-t-sm"
           />
         </div>
 
-        <dl className="grid grid-cols-2 border-t border-beige sm:grid-cols-4">
+        <dl className="grid min-w-0 grid-cols-2 border-t border-beige sm:grid-cols-4">
           {stats.map((stat, index) => (
             <div
               key={stat.label}
-              className={`flex items-center gap-3 px-1 py-5 sm:px-0 ${
+              className={`min-w-0 flex items-center gap-3 px-1 py-5 sm:px-0 ${
                 index < stats.length - 1 ? 'sm:border-r sm:border-beige' : ''
               } ${index < 2 ? 'border-b border-beige sm:border-b-0' : ''} ${
                 index % 2 === 0 ? 'border-r border-beige sm:border-r' : ''
               }`}
             >
               <Icon name={stat.icon} size={18} className="text-leaf" />
-              <div>
+              <div className="min-w-0">
                 <dt className="font-sans text-[0.6875rem] font-medium tracking-[0.14em] text-earth-muted uppercase">
                   {stat.label}
                 </dt>

@@ -5,6 +5,8 @@ import {
   packSizeLabel,
   packSizeToGrams,
   resolveIngredientsForPack,
+  resolveIngredientsForGrams,
+  sanitizeMushroomGrams,
   scaleIngredients,
 } from '@/lib/utils/scale'
 import type { Ingredient, PackVariant } from '@/types/content'
@@ -161,6 +163,74 @@ describe('resolveIngredientsForPack', () => {
     expect(result.factor).toBe(0.75)
     expect(result.ingredients[0]?.qty).toBe(150)
     expect(result.servings).toBe(2)
+  })
+})
+
+describe('resolveIngredientsForGrams', () => {
+  const ingredients: Ingredient[] = [
+    { qty: 100, unit: 'g', item: 'oyster mushrooms', scalable: true },
+    { qty: 12, unit: 'g', item: 'butter', scalable: true },
+    { qty: 6, unit: 'g', item: 'garlic', scalable: true },
+    { qty: null, unit: '', item: 'Salt', note: 'to taste', scalable: false },
+    { qty: 0.5, unit: 'tsp', item: 'chilli flakes', scalable: false },
+  ]
+
+  it.each([
+    [100, 100, 12, 6, 'base'],
+    [150, 150, 18, 9, 'scaled'],
+    [200, 200, 24, 12, 'scaled'],
+    [250, 250, 30, 15, 'scaled'],
+    [500, 500, 60, 30, 'scaled'],
+  ] as const)('scales cleanly for %i g mushrooms', (grams, mushrooms, butter, garlic, source) => {
+    const result = resolveIngredientsForGrams({
+      ingredients,
+      baseMushroomGrams: 100,
+      servings: 1,
+      isScalable: true,
+      selectedMushroomGrams: grams,
+    })
+
+    expect(result.source).toBe(source)
+    expect(result.ingredients[0]?.qty).toBe(mushrooms)
+    expect(result.ingredients[1]?.qty).toBe(butter)
+    expect(result.ingredients[2]?.qty).toBe(garlic)
+    expect(result.ingredients[3]?.qty).toBeNull()
+    expect(result.ingredients[4]?.qty).toBe(0.5)
+  })
+
+  it('supports a custom gram amount without ugly floating point output', () => {
+    const result = resolveIngredientsForGrams({
+      ingredients,
+      baseMushroomGrams: 100,
+      servings: 1,
+      isScalable: true,
+      selectedMushroomGrams: 333,
+    })
+
+    expect(result.ingredients[0]?.qty).toBe(335)
+    expect(result.ingredients[1]?.qty).toBe(40)
+    expect(result.ingredients[2]?.qty).toBe(20)
+    expect(String(result.ingredients[2]?.qty)).not.toContain('333333')
+  })
+
+  it('sanitizes unusable quantities to safe bounds', () => {
+    expect(sanitizeMushroomGrams(Number.NaN, 100)).toBe(100)
+    expect(sanitizeMushroomGrams(-10, 100)).toBe(25)
+    expect(sanitizeMushroomGrams(5000, 100)).toBe(1000)
+  })
+
+  it('does not scale when the recipe is marked non-scalable', () => {
+    const result = resolveIngredientsForGrams({
+      ingredients,
+      baseMushroomGrams: 100,
+      servings: 1,
+      isScalable: false,
+      selectedMushroomGrams: 250,
+    })
+
+    expect(result.source).toBe('base')
+    expect(result.ingredients).toEqual(ingredients)
+    expect(result.factor).toBe(1)
   })
 })
 

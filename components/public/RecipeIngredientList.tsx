@@ -1,15 +1,20 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Icon } from '@/components/ui/Icon'
 import { cn } from '@/lib/utils/cn'
+import { IngredientShoppingHelper } from '@/components/public/IngredientShoppingHelper'
 import { formatQuantity } from '@/lib/utils/format'
-import {
-  groupIngredients,
-  packSizeLabel,
-  resolveIngredientsForPack,
-} from '@/lib/utils/scale'
+import { groupIngredients, scaleIngredients } from '@/lib/utils/scale'
 import type { Ingredient, PackSize, PackVariant } from '@/types/content'
+
+const QUICK_MUSHROOM_GRAMS = [100, 150, 200, 250, 500] as const
+const MIN_MUSHROOM_GRAMS = 25
+const MAX_MUSHROOM_GRAMS = 1000
+
+function sanitizeMushroomGrams(value: number, fallback = 100): number {
+  if (!Number.isFinite(value)) return fallback
+  return Math.min(MAX_MUSHROOM_GRAMS, Math.max(MIN_MUSHROOM_GRAMS, Math.round(value)))
+}
 
 /**
  * Ingredient list with pack-size switching and tick-off.
@@ -40,20 +45,40 @@ export function RecipeIngredientList({
   availablePacks: PackSize[]
   variants: PackVariant[]
 }) {
-  const [pack, setPack] = useState<PackSize>(recommendedPack)
+  const baseMushroomGrams = basePackGrams ?? 100
+  const [selectedGrams, setSelectedGrams] = useState(baseMushroomGrams)
+  const [customValue, setCustomValue] = useState(String(baseMushroomGrams))
   const [checked, setChecked] = useState<Set<number>>(new Set())
 
   const resolved = useMemo(
-    () =>
-      resolveIngredientsForPack({
-        ingredients,
-        basePackGrams,
-        servings,
-        isScalable,
-        requestedPack: pack,
-        variants,
-      }),
-    [ingredients, basePackGrams, servings, isScalable, pack, variants],
+    () => {
+      const selected = sanitizeMushroomGrams(selectedGrams, baseMushroomGrams)
+      const canScale = isScalable && baseMushroomGrams > 0 && selected !== baseMushroomGrams
+      const factor = selected / baseMushroomGrams
+
+      if (!canScale) {
+        return {
+          ingredients,
+          source: 'base' as const,
+          factor: 1,
+          servings: servings ?? null,
+          note: null,
+          selectedMushroomGrams: selected,
+          baseMushroomGrams,
+        }
+      }
+
+      return {
+        ingredients: scaleIngredients(ingredients, factor),
+        source: 'scaled' as const,
+        factor,
+        servings: servings ? Math.max(1, Math.round(servings * factor)) : null,
+        note: null,
+        selectedMushroomGrams: selected,
+        baseMushroomGrams,
+      }
+    },
+    [ingredients, baseMushroomGrams, servings, isScalable, selectedGrams],
   )
 
   /*
@@ -72,11 +97,13 @@ export function RecipeIngredientList({
 
   if (ingredients.length === 0) return null
 
-  const showSwitcher = availablePacks.length > 1
+  const hasFutureOverrides =
+    availablePacks.length > 1 || variants.length > 0 || recommendedPack !== 'flexible'
 
-  function selectPack(next: PackSize) {
-    setPack(next)
-    // Ticks refer to the previous list's rows, so they must not carry over.
+  function selectGrams(next: number) {
+    const grams = sanitizeMushroomGrams(next, baseMushroomGrams)
+    setSelectedGrams(grams)
+    setCustomValue(String(grams))
     setChecked(new Set())
   }
 
@@ -93,57 +120,78 @@ export function RecipeIngredientList({
         ) : null}
       </div>
 
-      {showSwitcher ? (
-        <fieldset className="mt-6">
-          <legend className="eyebrow">Scale for pack size</legend>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {availablePacks.map((option) => {
-              const active = option === pack
-              const hasVariant = variants.some((v) => v.packSize === option)
-              return (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => selectPack(option)}
-                  aria-pressed={active}
-                  className={cn(
-                    'inline-flex h-10 items-center gap-1.5 rounded-xs border px-3.5',
-                    'text-[0.8125rem] font-medium tracking-[0.04em] uppercase transition-colors',
-                    active
-                      ? 'border-forest bg-forest text-ivory'
-                      : 'border-beige text-earth-soft hover:border-forest/50 hover:text-forest',
-                  )}
-                >
-                  {option === 'flexible' ? 'Any size' : option.replace('g', ' g')}
-                  {hasVariant && !active ? (
-                    <span
-                      aria-hidden="true"
-                      className="h-1.5 w-1.5 rounded-full bg-leaf"
-                      title="Hand-written for this pack"
-                    />
-                  ) : null}
-                </button>
-              )
-            })}
-          </div>
+      <fieldset className="mt-6">
+        <legend className="eyebrow">How much mushroom are you cooking?</legend>
+        <div className="mt-3 grid grid-cols-2 gap-2 min-[360px]:grid-cols-3 min-[520px]:grid-cols-5 lg:flex lg:flex-wrap">
+          {QUICK_MUSHROOM_GRAMS.map((grams) => {
+            const active = grams === selectedGrams
+            return (
+              <button
+                key={grams}
+                type="button"
+                onClick={() => selectGrams(grams)}
+                aria-pressed={active}
+                className={cn(
+                  'inline-flex min-h-11 items-center justify-center rounded-xs border px-2.5',
+                  'text-[0.8125rem] font-medium tracking-[0.04em] uppercase transition-colors',
+                  active
+                    ? 'border-forest bg-forest text-ivory'
+                    : 'border-beige text-earth-soft hover:border-forest/50 hover:text-forest',
+                )}
+              >
+                {grams} g
+              </button>
+            )
+          })}
+        </div>
 
-          <p className="mt-3 text-[0.8125rem] leading-relaxed text-earth-muted">
-            {resolved.source === 'variant' ? (
-              <>
-                <Icon name="check" size={13} className="mr-1 inline align-[-2px] text-botanical" />
-                Written specifically for a {packSizeLabel(pack).toLowerCase()}.
-              </>
-            ) : resolved.source === 'scaled' ? (
-              <>
-                Scaled ×{resolved.factor.toFixed(2).replace(/\.00$/, '')} from the{' '}
-                {basePackGrams} g version. Seasoning is a starting point — taste as you go.
-              </>
-            ) : (
-              <>Quantities as written, for a {packSizeLabel(pack).toLowerCase()}.</>
-            )}
-          </p>
-        </fieldset>
-      ) : null}
+        <label className="mt-4 block">
+          <span className="text-[0.8125rem] font-medium tracking-[0.08em] text-earth-muted uppercase">
+            Custom grams
+          </span>
+          <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+            <input
+              type="number"
+              inputMode="numeric"
+              min={MIN_MUSHROOM_GRAMS}
+              max={MAX_MUSHROOM_GRAMS}
+              step={25}
+              value={customValue}
+              onChange={(event) => setCustomValue(event.target.value)}
+              onBlur={() => selectGrams(Number(customValue))}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.currentTarget.blur()
+                }
+              }}
+              className="h-12 min-w-0 rounded-xs border border-beige bg-ivory px-3 text-[1rem] text-forest focus:border-forest"
+            />
+            <button
+              type="button"
+              onClick={() => selectGrams(Number(customValue))}
+              className="inline-flex h-12 items-center justify-center rounded-xs border border-forest/35 px-4 text-[0.8125rem] font-medium tracking-[0.04em] text-forest uppercase transition-colors hover:border-forest hover:bg-forest/5"
+            >
+              Update
+            </button>
+          </div>
+        </label>
+
+        <p className="mt-3 text-[0.8125rem] leading-relaxed text-earth-muted">
+          {resolved.source === 'scaled' ? (
+            <>
+              Scaled ×{resolved.factor.toFixed(2).replace(/\.00$/, '')} from the{' '}
+              {resolved.baseMushroomGrams} g recipe. Seasoning is a starting point — taste as you go.
+            </>
+          ) : (
+            <>Quantities as written for {resolved.baseMushroomGrams} g oyster mushrooms.</>
+          )}
+          {hasFutureOverrides ? (
+            <span className="mt-1 block">
+              Pack-specific overrides can be added later without changing this calculator.
+            </span>
+          ) : null}
+        </p>
+      </fieldset>
 
       {resolved.note ? (
         <p className="mt-5 border-l-2 border-leaf py-1 pl-4 text-[0.9375rem] leading-relaxed text-earth-soft">
@@ -164,7 +212,7 @@ export function RecipeIngredientList({
                 const isChecked = checked.has(i)
                 return (
                   <li key={`${ing.item}-${i}`} className="border-b border-beige/70 last:border-b-0">
-                    <label className="flex cursor-pointer items-start gap-3 py-3">
+                    <label className="flex min-h-12 cursor-pointer items-start gap-3 py-3">
                       <input
                         type="checkbox"
                         checked={isChecked}
@@ -176,11 +224,11 @@ export function RecipeIngredientList({
                             return next
                           })
                         }
-                        className="mt-1 h-4 w-4 shrink-0 accent-botanical"
+                        className="mt-1 h-5 w-5 shrink-0 accent-botanical"
                       />
                       <span
                         className={cn(
-                          'text-[1.0625rem] leading-snug transition-colors',
+                          'text-[1.0625rem] leading-snug transition-colors sm:text-[1.125rem]',
                           isChecked ? 'text-earth-muted line-through' : 'text-earth',
                         )}
                       >
@@ -191,9 +239,12 @@ export function RecipeIngredientList({
                           </strong>
                         ) : null}
                         {ing.qty !== null ? ' ' : ''}
-                        {ing.item}
+                        {ing.displayText ?? ing.item}
                         {ing.note ? (
                           <span className="text-earth-muted">, {ing.note}</span>
+                        ) : null}
+                        {ing.optional ? (
+                          <span className="text-earth-muted"> (optional)</span>
                         ) : null}
                       </span>
                     </label>
@@ -203,6 +254,10 @@ export function RecipeIngredientList({
             </ul>
           </div>
         ))}
+      </div>
+
+      <div className="mt-8">
+        <IngredientShoppingHelper ingredients={resolved.ingredients} />
       </div>
     </section>
   )

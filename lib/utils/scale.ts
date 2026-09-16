@@ -16,6 +16,9 @@
 import type { Ingredient, PackSize, PackVariant } from '@/types/content'
 
 export const PACK_SIZES: PackSize[] = ['150g', '200g', '250g', '500g', 'flexible']
+export const QUICK_MUSHROOM_GRAMS = [100, 150, 200, 250, 500] as const
+export const MIN_MUSHROOM_GRAMS = 25
+export const MAX_MUSHROOM_GRAMS = 1000
 
 const PACK_GRAMS: Record<Exclude<PackSize, 'flexible'>, number> = {
   '150g': 150,
@@ -45,6 +48,11 @@ export function scaleIngredients(ingredients: Ingredient[], factor: number): Ing
   return ingredients.map((ing) =>
     !ing.scalable || ing.qty === null ? ing : { ...ing, qty: roundForKitchen(ing.qty * factor) },
   )
+}
+
+export function sanitizeMushroomGrams(value: number, fallback = 100): number {
+  if (!Number.isFinite(value)) return fallback
+  return Math.min(MAX_MUSHROOM_GRAMS, Math.max(MIN_MUSHROOM_GRAMS, Math.round(value)))
 }
 
 export interface ResolvedIngredients {
@@ -96,6 +104,49 @@ export function resolveIngredientsForPack(args: {
     factor,
     servings: servings ? Math.max(1, Math.round(servings * factor)) : null,
     note: null,
+  }
+}
+
+export function resolveIngredientsForGrams(args: {
+  ingredients: Ingredient[]
+  baseMushroomGrams?: number
+  servings?: number
+  isScalable: boolean
+  selectedMushroomGrams: number
+}): ResolvedIngredients & { selectedMushroomGrams: number; baseMushroomGrams: number } {
+  const {
+    ingredients,
+    baseMushroomGrams = 100,
+    servings,
+    isScalable,
+    selectedMushroomGrams,
+  } = args
+
+  const base = sanitizeMushroomGrams(baseMushroomGrams, 100)
+  const selected = sanitizeMushroomGrams(selectedMushroomGrams, base)
+  const canScale = isScalable && base > 0 && selected !== base
+  const factor = selected / base
+
+  if (!canScale) {
+    return {
+      ingredients,
+      source: 'base',
+      factor: 1,
+      servings: servings ?? null,
+      note: null,
+      selectedMushroomGrams: selected,
+      baseMushroomGrams: base,
+    }
+  }
+
+  return {
+    ingredients: scaleIngredients(ingredients, factor),
+    source: 'scaled',
+    factor,
+    servings: servings ? Math.max(1, Math.round(servings * factor)) : null,
+    note: null,
+    selectedMushroomGrams: selected,
+    baseMushroomGrams: base,
   }
 }
 

@@ -84,6 +84,9 @@ export const ingredientSchema = z.strictObject({
   unit: z.string().default(''),
   item: z.string().min(1, 'Name the ingredient'),
   note: optionalString,
+  displayText: optionalString,
+  shoppingQuery: optionalString,
+  optional: z.boolean().default(false),
   // Defaults true: most ingredients scale. Authors opt out for seasoning.
   scalable: z.boolean().default(true),
   group: optionalString,

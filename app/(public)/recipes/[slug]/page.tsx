@@ -98,13 +98,25 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
       <RecipeHero recipe={recipe} category={category} />
 
       <Container size="wide" className="py-(--spacing-section-sm)">
-        <div className="grid gap-16 lg:grid-cols-[1fr_minmax(0,22rem)] lg:gap-20">
-          <div className="flex flex-col gap-16">
+        <div className="grid min-w-0 gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:gap-20">
+          <div className="flex min-w-0 flex-col gap-16">
             {/*
               Two representations of the same recipe: the structured steps
               (which also feed Recipe JSON-LD and the pack-size scaler), then
               the editorial Markdown body underneath.
             */}
+            <div className="lg:hidden">
+              <RecipeIngredientList
+                ingredients={recipe.ingredients}
+                basePackGrams={recipe.basePackGrams}
+                servings={recipe.servings}
+                isScalable={recipe.isScalable}
+                recommendedPack={recipe.recommendedPackSize}
+                availablePacks={availablePacks}
+                variants={recipe.packVariants}
+              />
+            </div>
+
             <RecipeSteps steps={recipe.steps} />
 
             {recipe.body.trim() ? (
@@ -138,16 +150,18 @@ export default async function RecipePage({ params }: { params: Promise<{ slug: s
             </div>
           </div>
 
-          <aside className="flex flex-col gap-12 lg:sticky lg:top-24 lg:self-start">
-            <RecipeIngredientList
-              ingredients={recipe.ingredients}
-              basePackGrams={recipe.basePackGrams}
-              servings={recipe.servings}
-              isScalable={recipe.isScalable}
-              recommendedPack={recipe.recommendedPackSize}
-              availablePacks={availablePacks}
-              variants={recipe.packVariants}
-            />
+          <aside className="flex min-w-0 flex-col gap-12 lg:sticky lg:top-24 lg:self-start">
+            <div className="hidden lg:block">
+              <RecipeIngredientList
+                ingredients={recipe.ingredients}
+                basePackGrams={recipe.basePackGrams}
+                servings={recipe.servings}
+                isScalable={recipe.isScalable}
+                recommendedPack={recipe.recommendedPackSize}
+                availablePacks={availablePacks}
+                variants={recipe.packVariants}
+              />
+            </div>
 
             {recipe.equipment.length > 0 ? (
               <section aria-labelledby="equipment-heading">
