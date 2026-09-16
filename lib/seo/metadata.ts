@@ -8,12 +8,33 @@ import 'server-only'
  * a missing one.
  */
 import type { Metadata } from 'next'
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import { absoluteUrl, publicEnv } from '@/lib/env'
 import { excerptFromMarkdown, truncate } from '@/lib/markdown/plain'
 import type { Image, Seo, SiteSettings } from '@/types/content'
 
 export const OG_IMAGE_WIDTH = 1200
 export const OG_IMAGE_HEIGHT = 630
+
+function publicAssetExists(src: string): boolean {
+  if (!src.startsWith('/') || src.includes('..')) return false
+  return existsSync(join(process.cwd(), 'public', src))
+}
+
+function resolveTemporaryImageFallback(src: string | undefined): string | undefined {
+  if (!src || !src.endsWith('.webp') || publicAssetExists(src)) return src
+
+  const sameNameSvg = src.replace(/\.webp$/, '.svg')
+  if (publicAssetExists(sameNameSvg)) return sameNameSvg
+
+  if (src === '/images/hero/neyora-og-card.webp') {
+    const legacyOgPlaceholder = '/images/hero/oyster-mushroom-hero.svg'
+    if (publicAssetExists(legacyOgPlaceholder)) return legacyOgPlaceholder
+  }
+
+  return src
+}
 
 export interface BuildMetadataArgs {
   title: string
@@ -59,7 +80,9 @@ export function buildMetadata({
 
   const canonical = seo?.canonicalUrl || absoluteUrl(path)
 
-  const ogSrc = seo?.ogImage ?? image?.src ?? settings.seo.defaultOgImage
+  const ogSrc = resolveTemporaryImageFallback(
+    seo?.ogImage ?? image?.src ?? settings.seo.defaultOgImage,
+  )
   const images = ogSrc
     ? [
         {
@@ -108,7 +131,7 @@ export function buildRootMetadata(settings: SiteSettings): Metadata {
   const title = settings.seo.defaultTitle || `${brand} — Fresh Natural Food`
   const description =
     settings.seo.defaultDescription || 'NEYORA grows fresh, natural food with care.'
-  const ogImage = settings.seo.defaultOgImage
+  const ogImage = resolveTemporaryImageFallback(settings.seo.defaultOgImage)
 
   return {
     metadataBase: new URL(env.siteUrl),

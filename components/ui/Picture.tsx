@@ -1,5 +1,25 @@
+import 'server-only'
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import { cn } from '@/lib/utils/cn'
 import type { Image as ContentImage } from '@/types/content'
+
+function publicAssetExists(src: string): boolean {
+  if (!src.startsWith('/') || src.includes('..')) return false
+  return existsSync(join(process.cwd(), 'public', src))
+}
+
+function withTemporaryPlaceholderFallback(image: ContentImage): ContentImage {
+  if (!image.src.endsWith('.webp') || publicAssetExists(image.src)) return image
+
+  const fallbackSrc = image.src.replace(/\.webp$/, '.svg')
+  if (!publicAssetExists(fallbackSrc)) return image
+
+  return {
+    ...image,
+    src: fallbackSrc,
+  }
+}
 
 /**
  * The one image component.
@@ -56,19 +76,28 @@ export function Picture({
     )
   }
 
+  const resolvedImage = withTemporaryPlaceholderFallback(image)
+  const resolvedMobileImage = mobileImage
+    ? withTemporaryPlaceholderFallback(mobileImage)
+    : mobileImage
   const resolvedAlt = alt !== undefined ? alt : image.alt
+  const isTemporaryPlaceholder = resolvedImage.src !== image.src
+  const isTemporaryMobilePlaceholder =
+    Boolean(mobileImage && resolvedMobileImage && resolvedMobileImage.src !== mobileImage.src)
 
   const picture = (
     <img
-      src={image.src}
+      src={resolvedImage.src}
       alt={resolvedAlt}
-      width={image.width}
-      height={image.height}
+      width={resolvedImage.width}
+      height={resolvedImage.height}
       sizes={sizes}
       loading={priority ? 'eager' : 'lazy'}
       // Tells the browser this is the LCP candidate.
       fetchPriority={priority ? 'high' : 'auto'}
       decoding={priority ? 'sync' : 'async'}
+      data-image-source={isTemporaryPlaceholder ? 'temporary-placeholder' : 'final'}
+      data-expected-src={isTemporaryPlaceholder ? image.src : undefined}
       className={cn(
         'block h-full w-full',
         fit === 'cover' ? 'object-cover' : 'object-contain',
@@ -85,7 +114,12 @@ export function Picture({
    */
   const img = mobileImage ? (
     <picture>
-      <source media={`(max-width: ${mobileUpTo}px)`} srcSet={mobileImage.src} />
+      <source
+        media={`(max-width: ${mobileUpTo}px)`}
+        srcSet={resolvedMobileImage!.src}
+        data-image-source={isTemporaryMobilePlaceholder ? 'temporary-placeholder' : 'final'}
+        data-expected-src={isTemporaryMobilePlaceholder ? mobileImage.src : undefined}
+      />
       {picture}
     </picture>
   ) : (
@@ -94,9 +128,20 @@ export function Picture({
 
   if (!aspect && !wrapperClassName) return img
 
+  /*
+   * `overflow-clip`, never `overflow-hidden`.
+   *
+   * Both clip identically, but `hidden` makes the element a SCROLL CONTAINER.
+   * A scroll-driven `view()` animation binds to its nearest scroll container,
+   * so a `hidden` wrapper silently captures the timeline of any .scene-*
+   * inside it and pins its progress — the animation attaches, reports a
+   * ViewTimeline, and never moves. `clip` creates no scroll container, so
+   * view() resolves past it to the viewport, which is what these animations
+   * are measured against. See globals.css §4.
+   */
   return (
     <div
-      className={cn('overflow-hidden bg-beige-soft', wrapperClassName)}
+      className={cn('overflow-clip bg-beige-soft', wrapperClassName)}
       style={aspect ? { aspectRatio: aspect } : undefined}
     >
       {img}
