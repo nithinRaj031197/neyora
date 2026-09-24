@@ -106,16 +106,36 @@ describe('EmptyState', () => {
   })
 })
 
+/*
+ * The wordmark is outlined artwork, not live text.
+ *
+ * It used to render the brand name as a styled <span>, which made it
+ * selectable but tied the logo to a webfont arriving. These tests now pin the
+ * contract that replaced it: a fixed image that still carries an accessible
+ * name, and that swaps artwork rather than restyling text.
+ */
 describe('Wordmark', () => {
-  it('renders the brand name as live, selectable text', () => {
+  it('exposes the brand name as its accessible name', () => {
     render(<Wordmark brandName="NEYORA" showTagline tagline="GROWN FOR LIFE." />)
-    expect(screen.getByText('NEYORA')).toBeInTheDocument()
-    expect(screen.getByText('GROWN FOR LIFE.')).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'NEYORA — GROWN FOR LIFE.' })).toBeInTheDocument()
   })
 
-  it('accepts a different brand name, since the CMS controls it', () => {
+  it('uses the lockup artwork only when the tagline is asked for', () => {
+    const { rerender } = render(<Wordmark brandName="NEYORA" showTagline />)
+    expect(screen.getByRole('img')).toHaveClass('brand-logo--lockup')
+
+    rerender(<Wordmark brandName="NEYORA" />)
+    expect(screen.getByRole('img')).toHaveClass('brand-logo--wordmark')
+  })
+
+  it('marks itself inverted so CSS can pick the light-on-dark artwork', () => {
+    render(<Wordmark brandName="NEYORA" invert />)
+    expect(screen.getByRole('img')).toHaveClass('brand-logo--invert')
+  })
+
+  it('uses brandName for the accessible name only — the letters are fixed', () => {
     render(<Wordmark brandName="OTHER" />)
-    expect(screen.getByText('OTHER')).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'OTHER' })).toBeInTheDocument()
   })
 })
 

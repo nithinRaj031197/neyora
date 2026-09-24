@@ -14,8 +14,8 @@ const TRAIL = [
   { name: 'Products', path: '/products' },
 ]
 
-export function generateMetadata(): Metadata {
-  const settings = getSiteSettings()
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings()
   return buildMetadata({
     title: 'Products',
     description:

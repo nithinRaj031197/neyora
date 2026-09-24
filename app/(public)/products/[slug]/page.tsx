@@ -11,6 +11,7 @@ import { JsonLd } from '@/components/ui/JsonLd'
 import { NutritionTable } from '@/components/public/NutritionTable'
 import { Breadcrumbs } from '@/components/public/Breadcrumbs'
 import { RecipeCard } from '@/components/public/RecipeCard'
+import { OrderForm } from '@/components/public/OrderForm'
 import {
   availabilityLabel,
   getProductBySlug,
@@ -37,7 +38,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const settings = getSiteSettings()
+  const settings = await getSiteSettings()
   const product = getProductBySlug(slug)
 
   if (!product) {
@@ -62,7 +63,7 @@ export async function generateMetadata({
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const settings = getSiteSettings()
+  const settings = await getSiteSettings()
   const product = getProductBySlug(slug)
 
   if (!product) notFound()
@@ -71,7 +72,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const recipeCategories = getRecipeCategories()
   const { recipes } = queryRecipes({ limit: 3 })
 
-  const whatsapp = whatsappLink(
+  const whatsapp = await whatsappLink(
     `Hi ${settings.brandName}, I would like to order ${product.name}${
       product.weightLabel ? ` (${product.weightLabel})` : ''
     }.`,
@@ -154,16 +155,31 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </div>
 
             {/*
-              No cart: NEYORA sells fresh produce through WhatsApp today.
-              Ordering is a conversation, so the CTA is a conversation.
+              Two ways to buy, deliberately. The form records the order so it
+              appears in the admin dashboard; WhatsApp stays because that is
+              how customers already order and taking it away would cost sales.
+              Either way the next step is the same: we phone to confirm.
             */}
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            {typeof product.price === 'number' ? (
+              <div className="mt-9">
+                <OrderForm
+                  productSlug={product.slug}
+                  productName={product.name}
+                  packLabel={product.weightLabel ?? product.unitLabel ?? 'pack'}
+                  unitPrice={product.price}
+                  currency={product.currency}
+                  whatsappHref={whatsapp?.href ?? null}
+                />
+              </div>
+            ) : null}
+
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
               {whatsapp ? (
                 <a
                   href={whatsapp.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-13 flex-1 items-center justify-center gap-2.5 rounded-xs border border-forest bg-forest px-7 text-[0.9375rem] font-medium tracking-[0.04em] text-ivory uppercase transition-colors hover:bg-forest-soft"
+                  className="press inline-flex h-13 flex-1 items-center justify-center gap-2.5 rounded-xs border border-forest/35 px-7 text-[0.9375rem] font-medium tracking-[0.04em] text-forest uppercase transition-colors hover:border-forest hover:bg-forest/5"
                 >
                   <Icon name="whatsapp" size={19} />
                   Order on WhatsApp
@@ -171,7 +187,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               ) : null}
               <Link
                 href="/contact"
-                className="inline-flex h-13 items-center justify-center rounded-xs border border-forest/35 px-7 text-[0.9375rem] font-medium tracking-[0.04em] text-forest uppercase transition-colors hover:border-forest hover:bg-forest/5"
+                className="press inline-flex h-13 items-center justify-center rounded-xs border border-forest/35 px-7 text-[0.9375rem] font-medium tracking-[0.04em] text-forest uppercase transition-colors hover:border-forest hover:bg-forest/5"
               >
                 Enquire
               </Link>

@@ -318,6 +318,17 @@ export interface HeroChapter extends ChapterBase {
   image?: Image
   /** A portrait crop for phones — a different composition, not a resize. */
   imageMobile?: Image
+  /**
+   * True when the DESKTOP artwork already carries the logo and headline.
+   *
+   * A finished campaign banner has its type baked into the pixels, so drawing
+   * the site's own wordmark over it produces two logos and two headlines. With
+   * this set, the desktop hero shows only the artwork and the buttons; the
+   * headline stays in the DOM for search engines and screen readers but is
+   * visually hidden. Phones still get live type, because a banner laid out for
+   * 16:9 is unreadable cropped to a 2:3 screen.
+   */
+  artworkIncludesType?: boolean
   ctaLabel?: string
   ctaHref?: string
   secondaryCtaLabel?: string
@@ -334,6 +345,16 @@ export interface NatureChapter extends ChapterBase {
   /** Rendered as separate lines of oversized display type. */
   lines: string[]
   body?: string
+  /**
+   * What the mushroom actually is, in plain terms.
+   *
+   * This chapter used to be four photographs with two-word captions, which
+   * looked considered and told a reader nothing. Someone who has never cooked
+   * an oyster mushroom needs to know what it tastes like, how it behaves in a
+   * pan and what it is worth eating — so the images now support prose rather
+   * than standing in for it.
+   */
+  facts?: { label: string; text: string }[]
   /** Ordered close → wide. Each becomes one frame of the reveal. */
   frames: { image: Image; caption?: string }[]
 }
@@ -349,7 +370,23 @@ export interface MushroomChapter extends ChapterBase {
 /** Chapter 4 — grown → harvested → packed → at your table. */
 export interface JourneyChapter extends ChapterBase {
   heading?: string
-  stages: { number: string; title: string; description?: string; image?: Image }[]
+  stages: {
+    number: string
+    title: string
+    description?: string
+    image?: Image
+    /**
+     * True when the stage artwork is a finished campaign card that already
+     * carries the number, the title and the description.
+     *
+     * Set per stage rather than per chapter so the cards can arrive one at a
+     * time: a stage with a card shows only the card, a stage still on a
+     * placeholder keeps its live text, and the chapter stays coherent
+     * throughout. The words remain in the DOM either way — a card is a
+     * picture, and a picture is not readable by a search engine.
+     */
+    artworkIncludesType?: boolean
+  }[]
 }
 
 /** Chapter 5 — the product, large. Pulled from content/products by slug. */

@@ -38,8 +38,8 @@ import { buildMetadata } from '@/lib/seo/metadata'
  * The Farm chapter remains implemented and content-driven, but is hidden from
  * the public V1 homepage until the farm story is ready to re-open.
  */
-export function generateMetadata(): Metadata {
-  const settings = getSiteSettings()
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings()
   const home = getHomepage()
 
   return buildMetadata({
@@ -53,8 +53,8 @@ export function generateMetadata(): Metadata {
   })
 }
 
-export default function HomePage() {
-  const settings = getSiteSettings()
+export default async function HomePage() {
+  const settings = await getSiteSettings()
   const home = getHomepage()
 
   // The featured product: the one named in the chapter, else the first
@@ -72,7 +72,11 @@ export default function HomePage() {
     <div className="neyora-home">
       {home.hero.enabled ? <Hero hero={home.hero} /> : null}
 
-      {home.nature.enabled ? <Nature nature={home.nature} /> : null}
+      {home.nature.enabled ? (
+        // Nutrition comes from the product, not a second copy in the
+        // homepage file — one place to correct when the lab report lands.
+        <Nature nature={home.nature} nutrition={product?.nutrition} />
+      ) : null}
 
       {home.mushroom.enabled ? <Mushroom mushroom={home.mushroom} /> : null}
 
@@ -82,7 +86,7 @@ export default function HomePage() {
         <ProductMoment
           chapter={home.product}
           product={product}
-          whatsapp={whatsappLink(
+          whatsapp={await whatsappLink(
             `Hi ${settings.brandName}, I would like to order ${product.name}${
               product.weightLabel ? ` (${product.weightLabel})` : ''
             }.`,

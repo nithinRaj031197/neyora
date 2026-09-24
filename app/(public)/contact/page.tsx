@@ -20,7 +20,7 @@ const TRAIL = [
   { name: 'Contact', path: '/contact' },
 ]
 
-export function generateMetadata(): Metadata {
+export async function generateMetadata(): Promise<Metadata> {
   const page = getPageBySlug('contact-intro')
   return buildMetadata({
     title: page?.title || 'Contact',
@@ -29,17 +29,17 @@ export function generateMetadata(): Metadata {
       'Reach NEYORA by WhatsApp, phone or email. Orders, kitchen supply and retail enquiries.',
     path: '/contact',
     seo: page?.seo,
-    settings: getSiteSettings(),
+    settings: await getSiteSettings(),
   })
 }
 
-export default function ContactPage() {
-  const settings = getSiteSettings()
-  const socials = getSocialLinks()
+export default async function ContactPage() {
+  const settings = await getSiteSettings()
+  const socials = await getSocialLinks()
   const page = getPageBySlug('contact-intro')
 
-  const whatsapp = whatsappLink()
-  const address = formattedAddress()
+  const whatsapp = await whatsappLink()
+  const address = await formattedAddress()
 
   /*
    * Every channel comes from content/site.yml. An empty setting removes the

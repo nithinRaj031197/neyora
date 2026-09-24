@@ -2,30 +2,38 @@
 name: Fresh Oyster Mushrooms
 slug: fresh-oyster-mushrooms-200g
 shortDescription: >-
-  Grey oyster mushrooms, hand-picked the morning they ship. Firm caps, clean
+  White oyster mushrooms, hand-picked the morning they ship. Firm caps, clean
   scent, 200 g pack.
 category: mushrooms
-variety: Pleurotus ostreatus (Grey Oyster)
+variety: Pleurotus ostreatus (White Oyster)
 origin: NEYORA farm, Karnataka
 weightGrams: 200
 weightLabel: 200 g
-price: 120
-mrp: 150
+price: 100
 currency: INR
 unitLabel: pack
+# Real photographs of the mushrooms themselves, not the pack.
+#
+# The first two slots used to be generated renders of a punnet that does not
+# exist yet. A customer deciding what to buy is better served by an honest
+# picture of the food than by an invented package — and showing packaging we
+# cannot actually ship is the kind of detail people notice on delivery.
+#
+# The pack shots stay on the shot list in docs/BRAND_GUIDELINES.md §5; add them
+# here once the real packaging has been photographed.
 images:
-  - src: /images/products/oyster-mushrooms-200g.webp
-    alt: A 200 g punnet of fresh NEYORA grey oyster mushrooms on a warm ivory surface
+  - src: /images/mushrooms/cluster.webp
+    alt: A whole cluster of fresh white oyster mushrooms resting on natural linen
     width: 1800
-    height: 2250
-  - src: /images/products/oyster-mushrooms-detail.webp
-    alt: Close detail of the NEYORA 200 g pack showing the harvest date panel
-    width: 1400
-    height: 1400
+    height: 1800
   - src: /images/mushrooms/cluster-closeup.webp
-    alt: Macro detail of oyster mushroom gills and cap edges
-    width: 1400
-    height: 1750
+    alt: Two hands cradling a cluster of oyster mushrooms, showing its size
+    width: 1600
+    height: 2000
+  - src: /images/mushrooms/cap-macro.webp
+    alt: Close detail of an oyster mushroom cap and the velvet along its edge
+    width: 1600
+    height: 2000
 highlights:
   - Harvested the morning of dispatch
   - Whole clusters, hand-graded
@@ -43,7 +51,7 @@ nutrition:
     - { label: Potassium, value: "420", unit: mg }
     - { label: Sodium, value: "18", unit: mg }
   note: >-
-    Indicative values for grey oyster mushrooms. Replace with your own lab
+    Indicative values for white oyster mushrooms. Replace with your own lab
     report before making any nutrition claim.
 storageNotes: >-
   Keep refrigerated at 2–4 °C. Leave the pack **unwashed and loosely covered** —
@@ -62,14 +70,14 @@ publishedAt: "2026-08-15"
 seo:
   title: Fresh Oyster Mushrooms 200 g — Harvested to Order
   description: >-
-    Grey oyster mushrooms hand-picked the morning they ship. Firm clusters,
+    White oyster mushrooms hand-picked the morning they ship. Firm clusters,
     clean scent, harvest date on every 200 g pack.
 isDemo: true
 ---
 
-Grey oyster mushrooms (*Pleurotus ostreatus*) grown on pasteurised agricultural
-substrate in a controlled room, then hand-picked as clusters at the moment the
-cap edge begins to flatten.
+White oyster mushrooms (*Pleurotus ostreatus*) grown on pasteurised sawdust
+biomass pellets in a controlled room, then hand-picked as clusters at the
+moment the cap edge begins to flatten.
 
 That timing matters more than anything else we do. Picked a day early and the
 yield is low; a day late and the flesh starts to soften and the mushroom loses
@@ -89,7 +97,7 @@ and they stew instead. Salt at the end.
 
 ## Growing notes
 
-- Substrate: pasteurised paddy straw and sawdust, no chemical supplementation
+- Substrate: pasteurised biomass pellets (sawdust based), no chemical supplementation
 - Spawn: sourced from a certified lab, traceable by batch
 - Water: filtered, tested quarterly
 - No pesticides, no growth regulators, no post-harvest washing

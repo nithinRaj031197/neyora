@@ -22,7 +22,10 @@ hero:
     and dated on every pack.
   image:
     src: /images/hero/hero-desktop.webp
-    alt: Clusters of fresh grey oyster mushrooms in low, directional morning light
+    alt: >-
+      NEYORA — Grown for life. Fresh oyster mushrooms: naturally grown,
+      delicately textured, incredibly versatile. A cluster of oyster mushrooms
+      growing on a mossy log in dappled forest light.
     width: 2400
     height: 1350
   # A portrait composition for phones — not a resize of the one above. Drop a
@@ -30,9 +33,12 @@ hero:
   # dimensions, so swapping it costs no layout shift.
   imageMobile:
     src: /images/hero/hero-mobile.webp
-    alt: Clusters of fresh grey oyster mushrooms in low, directional morning light
+    alt: Clusters of fresh white oyster mushrooms in low, directional morning light
     width: 1200
     height: 1800
+  # The desktop artwork is a finished campaign banner — logo, headline and
+  # strapline are part of the image. This stops the site drawing them again.
+  artworkIncludesType: true
   ctaLabel: Shop fresh mushrooms
   ctaHref: /products
   secondaryCtaLabel: Discover our recipes
@@ -53,31 +59,50 @@ nature:
     There is no way to fake a fresh mushroom. No long ripening window to hide
     behind, no waxing, no cold-chain trick. Either it was picked this morning
     and moved quickly, or it was not — and anyone who cooks can tell.
+  # Plain answers to what a first-time buyer actually wonders. Keep these
+  # concrete: "meaty enough to stand in for chicken" tells someone more than
+  # "premium quality" ever will.
+  facts:
+    - label: What it is
+      text: >-
+        The white oyster mushroom, Pleurotus ostreatus. It grows in fans rather
+        than the single button you know from the supermarket, in overlapping
+        shelves on pasteurised sawdust biomass pellets — no soil, no chemicals, and
+        ready to pick in a fortnight.
+    - label: How it tastes
+      text: >-
+        Mild and savoury, with a faint sweetness and none of the earthiness some
+        people dislike in button mushrooms. It takes on garlic, pepper and
+        butter readily, which is why it suits South Indian frying as easily as a
+        European pan sauce.
+    - label: How it behaves in a pan
+      text: >-
+        Tear it into strips along the grain rather than slicing. Give it a hot,
+        dry pan first so the water leaves, then add fat — crowd it early and it
+        steams instead of browning. The edges crisp; the centre stays meaty.
+    - label: Why it is worth eating
+      text: >-
+        Roughly 33 kcal per 100 g, with more protein and fibre than most
+        vegetables and almost no fat. It is one of the few non-animal foods that
+        makes vitamin D when grown in daylight.
+  # Two frames only: the cluster you receive, and the room it grew in. The
+  # cap macro moved out — chapter 03 already holds a full-bleed macro, and
+  # repeating it here weakened both.
   frames:
     - image:
-        src: /images/mushrooms/cap-macro.webp
-        alt: A single oyster mushroom cap, close enough to see the velvet on its edge
-        width: 1600
-        height: 2000
-      caption: One cap
-    - image:
         src: /images/mushrooms/cluster.webp
-        alt: A whole cluster of grey oyster mushrooms, cut and resting on linen
+        alt: A whole cluster of white oyster mushrooms, cut and resting on linen
         width: 1800
         height: 1800
-      caption: One cluster
+      caption: Picked as a whole cluster, never broken apart
     - image:
         src: /images/farm/growing-room.webp
-        alt: Rows of substrate bags fruiting in the NEYORA growing room
-        width: 2000
-        height: 1250
-      caption: One room
-    - image:
-        src: /images/farm/farm-wide.webp
-        alt: The NEYORA farm in early daylight
-        width: 2400
-        height: 1350
-      caption: One farm
+        alt: >-
+          Rows of substrate bags fruiting along both walls of the NEYORA growing
+          room in Bengaluru, with daylight at the far door
+        width: 1600
+        height: 1200
+      caption: Fruiting on pasteurised straw, no soil
 
 # ── 03 ─ THE MUSHROOM ─────────────────────────────── dark, macro, still ────
 mushroom:
@@ -109,43 +134,61 @@ journey:
     - number: "01"
       title: GROWN
       description: >-
-        Pasteurised paddy straw and sawdust. Lab-sourced spawn, traceable by
-        batch. No chemical supplementation, nothing added to force yield.
+        Pasteurised biomass pellets (sawdust based). Lab-sourced spawn,
+        traceable by batch. No chemical supplementation, nothing added to force
+        yield.
+      # A finished campaign card: the number, title and description are part
+      # of the artwork, so the chapter must not print them again beside it.
+      artworkIncludesType: true
       image:
         src: /images/journey/grown.webp
-        alt: Young oyster mushrooms pinning from a substrate bag
+        alt: >-
+          Stage one, grown — a bowl of pasteurised sawdust biomass pellets
+          beside a spawn-run substrate bag fruiting white oyster mushrooms
         width: 1400
-        height: 1750
+        height: 1680
     - number: "02"
       title: HARVESTED
       description: >-
         Picked the morning of dispatch, when the cap edge just begins to
         flatten. Cut as whole clusters, never picked apart.
+      # Finished campaign card — number, title and description are in the
+      # artwork, so the chapter must not print them again.
+      artworkIncludesType: true
       image:
         src: /images/journey/harvested.webp
-        alt: A grower's hands lifting a cluster at harvest
+        alt: >-
+          Stage two, harvested — gloved hands cutting a whole cluster of oyster mushrooms free from a substrate bag
         width: 1400
-        height: 1750
+        height: 1680
     - number: "03"
       title: PACKED
       description: >-
         Graded by hand, one cluster at a time. Between 8% and 12% of a harvest
         never reaches a pack. The harvest date is printed on the one that does.
+      # Finished campaign card — number, title and description are in the
+      # artwork, so the chapter must not print them again.
+      artworkIncludesType: true
       image:
         src: /images/journey/packed.webp
-        alt: A 200 g pack of NEYORA oyster mushrooms being closed
+        alt: >-
+          Stage three, packed — a graded cluster being placed into a moulded pulp punnet beside a NEYORA carton with its harvest-date label
         width: 1400
-        height: 1750
+        height: 1680
     - number: "04"
       title: AT YOUR TABLE
       description: >-
         In a hot pan within days, not weeks. That is the whole point of the
         four steps above.
+      # Finished campaign card — number, title and description are in the
+      # artwork, so the chapter must not print them again.
+      artworkIncludesType: true
       image:
         src: /images/journey/table.webp
-        alt: Seared oyster mushrooms plated and ready to eat
+        alt: >-
+          Stage four, at your table — oyster mushrooms searing in a pan with herbs scattered over them
         width: 1400
-        height: 1750
+        height: 1680
 
 # ── 05 ─ THE PRODUCT ──────────────────────────── warm ivory, large, buyable ─
 product:
@@ -193,7 +236,7 @@ farm:
       width: 1600
       height: 2000
     - src: /images/farm/substrate.webp
-      alt: Pasteurised paddy straw and sawdust substrate, close up
+      alt: Pasteurised sawdust biomass pellets, close up
       width: 1400
       height: 1400
   ctaLabel: Read our farm story

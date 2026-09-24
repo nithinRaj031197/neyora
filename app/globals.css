@@ -35,8 +35,8 @@
 
   /* Type */
   --font-display: var(--font-fraunces), 'Fraunces', 'Times New Roman', Georgia, serif;
-  --font-sans: var(--font-inter), 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+  --font-sans: var(--font-geist), 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: var(--font-geist-mono), 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
   /* Editorial scale. clamp() so a hero is large on desktop without being
      absurd on a 360px phone. */
@@ -187,6 +187,44 @@
     }
   }
 
+  /* ---- The logo ---------------------------------------------------------
+     The supplied artwork, lifted off its mockup background (paper, leaves and
+     shadows keyed out, the paper un-mixed back out of the edge pixels so the
+     mark does not halo on a dark ground). See scripts/brand/README.md.
+
+     Painted as a background image so the header can swap variants from CSS
+     while it floats over the hero. Height multipliers make each artwork's CAP
+     HEIGHT equal 1em, so a call site sizing it with `text-2xl` gets 24px
+     capitals, exactly as the old text wordmark did.
+       wordmark  1063 x 301, cap fraction 0.807  ->  1.239em
+       lockup    1063 x 368, cap fraction 0.660  ->  1.514em */
+  .brand-logo {
+    display: inline-block;
+    transition: opacity var(--duration-hover) var(--ease-out-soft);
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: contain;
+    flex-shrink: 0;
+  }
+  .brand-logo--wordmark {
+    height: 1.239em;
+    aspect-ratio: 1063 / 301;
+    background-image: url('/brand/neyora-wordmark.webp');
+  }
+  .brand-logo--lockup {
+    height: 1.514em;
+    aspect-ratio: 1063 / 368;
+    background-image: url('/brand/neyora-logo.webp');
+  }
+  /* On dark grounds the artwork's deep forest greens disappear, so the dark
+     variants are a single ivory with the leaf knocked out of the 'o'. */
+  .brand-logo--invert.brand-logo--wordmark {
+    background-image: url('/brand/neyora-wordmark-dark.webp');
+  }
+  .brand-logo--invert.brand-logo--lockup {
+    background-image: url('/brand/neyora-logo-dark.webp');
+  }
+
   /* Hairline section divider — the second sanctioned gradient use. */
   .neyora-rule {
     height: 1px;
@@ -265,14 +303,65 @@
     color: var(--color-ivory);
   }
 
-  body:has(.neyora-home) .site-header:not([data-scrolled='true']) .neyora-gradient-text {
-    background-image: linear-gradient(
-      100deg,
-      var(--color-ivory) 0%,
-      var(--color-beige) 42%,
-      var(--color-leaf) 78%,
-      var(--color-golden) 100%
-    );
+  /*
+     Over the hero the header has no ground of its own, so the logo needs the
+     light-on-dark artwork. This replaced a rule that re-tinted the old
+     background-clip text wordmark, which no longer exists.
+  */
+  /*
+     When the hero artwork carries its own logo, the header's would be a second
+     one stacked directly above it. Hidden until the reader scrolls past the
+     hero, at which point the header gains its ivory ground and the logo is
+     needed again. Visibility only — the link keeps its accessible name.
+  */
+  body:has(.neyora-hero-branded) .site-header:not([data-scrolled='true']) .brand-logo {
+    opacity: 0;
+    pointer-events: none;
+  }
+  /*
+     On a branded hero the header is not shown at all until the reader scrolls.
+     A finished banner is a closed composition, and a nav floating across its
+     brightest corner reads badly at any colour; withdrawing it entirely is
+     cleaner than fighting the artwork. It slides back in, with its own ivory
+     ground, the moment the page moves.
+
+     Hidden with transform + opacity rather than `display: none`, so it stays
+     in the accessibility tree and animates on the compositor. `:focus-within`
+     brings it straight back for anyone tabbing from the top of the page —
+     otherwise the navigation would be unreachable by keyboard until scroll.
+  */
+  body:has(.neyora-hero-branded) .site-header {
+    transition:
+      transform var(--duration-hover) var(--ease-out-soft),
+      opacity var(--duration-hover) var(--ease-out-soft);
+  }
+  body:has(.neyora-hero-branded) .site-header:not([data-scrolled='true']):not(:focus-within) {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+  /* Once it is shown it keeps its normal ivory ground and dark type. */
+  body:has(.neyora-hero-branded) .site-header::before {
+    opacity: 1;
+  }
+  body:has(.neyora-hero-branded) .site-header,
+  body:has(.neyora-hero-branded) .site-header a,
+  body:has(.neyora-hero-branded) .site-header button {
+    color: var(--color-earth-soft);
+  }
+  body:has(.neyora-hero-branded) .site-header a:hover,
+  body:has(.neyora-hero-branded) .site-header button:hover {
+    color: var(--color-forest);
+  }
+  /* The logo belongs in the bar once the banner has scrolled away. */
+  body:has(.neyora-hero-branded) .site-header[data-scrolled='true'] .brand-logo {
+    opacity: 1;
+  }
+  body:has(.neyora-home) .site-header:not([data-scrolled='true']) .brand-logo--wordmark {
+    background-image: url('/brand/neyora-wordmark-dark.webp');
+  }
+  body:has(.neyora-home) .site-header:not([data-scrolled='true']) .brand-logo--lockup {
+    background-image: url('/brand/neyora-logo-dark.webp');
   }
 
   body:has(.neyora-home) .site-header:not([data-scrolled='true']) .nav-settle {
@@ -677,6 +766,47 @@
     .hover-tone:hover::before,
     .hover-tone:focus-within::before {
       opacity: 1;
+    }
+  }
+
+  /*
+     .glass — a frosted, translucent surface.
+
+     NOTE: docs/BRAND_GUIDELINES.md §4 lists glassmorphism under "do not", and
+     this rule is a deliberate, requested exception for the hero's secondary
+     action. Kept deliberately restrained — a low-opacity wash and a hairline,
+     not the heavy frosted panel the pattern usually brings — so it still reads
+     as NEYORA rather than as a generic app.
+
+     backdrop-filter is expensive: it forces the browser to re-composite
+     everything behind the element. Confined to one small button; never put it
+     on a sticky header or a full-width panel.
+  */
+  .glass {
+    background-color: color-mix(in oklab, var(--color-ivory) 14%, transparent);
+    border-color: color-mix(in oklab, var(--color-ivory) 38%, transparent);
+    /* Standard property only. Writing the -webkit- alias alongside it made
+       the build emit ONLY the prefixed declaration, and current Chrome has
+       dropped that alias (CSS.supports('-webkit-backdrop-filter') is false),
+       so the effect vanished entirely. Let the build add prefixes if its
+       targets need them. */
+    backdrop-filter: blur(14px) saturate(130%);
+    transition:
+      background-color var(--duration-hover) var(--ease-out-soft),
+      border-color var(--duration-hover) var(--ease-out-soft);
+  }
+  @media (hover: hover) {
+    .glass:hover {
+      background-color: color-mix(in oklab, var(--color-ivory) 24%, transparent);
+      border-color: color-mix(in oklab, var(--color-ivory) 62%, transparent);
+    }
+  }
+  /* Without backdrop-filter the element would be a barely-visible wash over a
+     photograph, so it falls back to a solid, readable surface. */
+  @supports not (backdrop-filter: blur(1px)) {
+    .glass {
+      background-color: color-mix(in oklab, var(--color-ink) 55%, transparent);
+      border-color: color-mix(in oklab, var(--color-ivory) 55%, transparent);
     }
   }
 

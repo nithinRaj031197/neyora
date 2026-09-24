@@ -42,7 +42,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const settings = getSiteSettings()
+  const settings = await getSiteSettings()
   const recipe = getRecipeBySlug(slug)
 
   if (!recipe) {
@@ -70,7 +70,7 @@ export async function generateMetadata({
 
 export default async function RecipePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const settings = getSiteSettings()
+  const settings = await getSiteSettings()
   const recipe = getRecipeBySlug(slug)
 
   if (!recipe) notFound()

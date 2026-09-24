@@ -14,9 +14,9 @@ import { publicEnv } from '@/lib/env'
  * every URL carries the entity graph and per-page schemas can reference it by
  * @id instead of repeating it.
  */
-export default function PublicLayout({ children }: { children: ReactNode }) {
-  const settings = getSiteSettings()
-  const socials = getSocialLinks()
+export default async function PublicLayout({ children }: { children: ReactNode }) {
+  const settings = await getSiteSettings()
+  const socials = await getSocialLinks()
   const { analyticsProvider, analyticsScriptUrl, analyticsSiteId } = publicEnv()
 
   const analyticsEnabled =

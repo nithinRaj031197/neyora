@@ -7,7 +7,7 @@ import { PageView, generatePageMetadata } from '@/components/public/PageView'
  * All copy, the hero image and the SEO fields live in that file. Edit it,
  * commit, deploy.
  */
-export function generateMetadata(): Metadata {
+export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('privacy', '/privacy', 'Privacy Policy')
 }
 

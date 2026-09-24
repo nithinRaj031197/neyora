@@ -20,13 +20,13 @@ const TRAIL = [
   { name: 'Recipes', path: '/recipes' },
 ]
 
-export function generateMetadata(): Metadata {
+export async function generateMetadata(): Promise<Metadata> {
   return buildMetadata({
     title: 'Recipes',
     description:
       'Simple, well-tested ways to cook fresh oyster mushrooms while they are at their best. Most take under twenty minutes.',
     path: '/recipes',
-    settings: getSiteSettings(),
+    settings: await getSiteSettings(),
   })
 }
 

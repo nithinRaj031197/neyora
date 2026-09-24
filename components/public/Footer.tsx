@@ -12,11 +12,11 @@ import { formattedAddress, getSiteSettings, getSocialLinks, whatsappLink } from 
  * holder — comes from content/site.yml. Changing the Instagram URL is a
  * one-line edit, not a code change.
  */
-export function Footer() {
-  const settings = getSiteSettings()
-  const socials = getSocialLinks()
-  const whatsapp = whatsappLink()
-  const address = formattedAddress()
+export async function Footer() {
+  const settings = await getSiteSettings()
+  const socials = await getSocialLinks()
+  const whatsapp = await whatsappLink()
+  const address = await formattedAddress()
   const year = new Date().getFullYear()
 
   const linkClass = 'transition-colors hover:text-ivory'

@@ -14,14 +14,14 @@ const TRAIL = [
   { name: 'FAQ', path: '/faq' },
 ]
 
-export function generateMetadata(): Metadata {
+export async function generateMetadata(): Promise<Metadata> {
   const page = getPageBySlug('faq-intro')
   return buildMetadata({
     title: page?.title || 'Frequently Asked Questions',
     description: page?.subtitle || 'Answers about freshness, storage, cooking and how we grow.',
     path: '/faq',
     seo: page?.seo,
-    settings: getSiteSettings(),
+    settings: await getSiteSettings(),
   })
 }
 

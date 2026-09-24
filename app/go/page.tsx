@@ -28,9 +28,9 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export default function GoPage() {
-  const settings = getSiteSettings()
-  const destination = getQrDestination()
+export default async function GoPage() {
+  const settings = await getSiteSettings()
+  const destination = await getQrDestination()
 
   // Optional interstitial: useful for a seasonal note that would otherwise
   // flash past. Blank title means redirect immediately.

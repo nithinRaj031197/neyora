@@ -12,6 +12,7 @@ import 'server-only'
  */
 import { cache } from 'react'
 import { loadMarkdownDir, loadYaml, once } from './loader'
+import { readSettingsOverride } from '@/lib/settings/repository'
 import {
   categoriesFileSchema,
   faqsFileSchema,
@@ -55,13 +56,55 @@ function isPublished(item: { status: string; publishedAt?: string }): boolean {
 
 const loadSite = once((): SiteSettings => loadYaml('site.yml', siteSchema) as SiteSettings)
 
-export const getSiteSettings = cache((): SiteSettings => loadSite())
+/** The file only — the defaults, before any admin override. */
+export const getSiteSettingsFromFile = (): SiteSettings => loadSite()
 
-export const getSocialLinks = cache((): SocialLink[] =>
+/**
+ * Site settings: the file, with any admin overrides laid on top.
+ *
+ * Async because the override lives in MongoDB. Every caller is a server
+ * component or a server function, so this costs an `await` and nothing else —
+ * and `cache()` collapses the dozen calls a single page makes into one read.
+ *
+ * `readSettingsOverride` never throws: if the database is down or was never
+ * configured, this returns the file unchanged and the site carries on. The
+ * whole point of keeping site.yml as the default is that ordering, contact
+ * details and the footer survive a database outage.
+ */
+export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
+  const file = loadSite()
+  const override = await readSettingsOverride()
+
+  // Only defined keys override; an empty field in the admin form clears the
+  // override and falls back to the file rather than blanking the site.
+  const pick = <K extends keyof SiteSettings>(key: K, value: string | undefined) =>
+    value === undefined ? file[key] : (value as SiteSettings[K])
+
+  return {
+    ...file,
+    contactEmail: pick('contactEmail', override.contactEmail),
+    contactPhone: pick('contactPhone', override.contactPhone),
+    whatsappNumber: pick('whatsappNumber', override.whatsappNumber),
+    whatsappMessage: pick('whatsappMessage', override.whatsappMessage),
+    businessHours: pick('businessHours', override.businessHours),
+    address: {
+      ...file.address,
+      line1: override.addressLine1 ?? file.address.line1,
+      line2: override.addressLine2 ?? file.address.line2,
+      city: override.addressCity ?? file.address.city,
+      state: override.addressState ?? file.address.state,
+      postalCode: override.addressPostalCode ?? file.address.postalCode,
+      country: override.addressCountry ?? file.address.country,
+    },
+  }
+})
+
+export const getSocialLinks = cache(async (): Promise<SocialLink[]> => {
+  const settings = await getSiteSettings()
   // A link with no URL would render as a dead link, so it is filtered here
   // rather than left for each component to remember.
-  getSiteSettings().social.filter((link) => link.enabled && link.url.trim() !== ''),
-)
+  return settings.social.filter((link) => link.enabled && link.url.trim() !== '')
+})
 
 const loadHomepage = once((): Homepage => loadYaml('homepage.yml', homepageSchema) as Homepage)
 
@@ -75,12 +118,12 @@ export const getHomepage = cache((): Homepage => loadHomepage())
  * destination can be changed from the dashboard in seconds — no redeploy, no
  * database, and no reprinting a single label.
  */
-export function getQrDestination(): string {
+export async function getQrDestination(): Promise<string> {
   const override = process.env.NEYORA_QR_DESTINATION?.trim()
   if (override && override.startsWith('/') && !override.startsWith('//')) {
     return override
   }
-  return getSiteSettings().qr.destination
+  return (await getSiteSettings()).qr.destination
 }
 
 // ---------------------------------------------------------------------------
@@ -261,8 +304,8 @@ export interface WhatsAppLink {
 }
 
 /** Returns null when no number is set, so callers hide the button entirely. */
-export function whatsappLink(messageOverride?: string): WhatsAppLink | null {
-  const settings = getSiteSettings()
+export async function whatsappLink(messageOverride?: string): Promise<WhatsAppLink | null> {
+  const settings = await getSiteSettings()
   const digits = settings.whatsappNumber?.replace(/\D/g, '')
   if (!digits) return null
 
@@ -273,8 +316,8 @@ export function whatsappLink(messageOverride?: string): WhatsAppLink | null {
   }
 }
 
-export function formattedAddress(): string[] {
-  const { address } = getSiteSettings()
+export async function formattedAddress(): Promise<string[]> {
+  const { address } = await getSiteSettings()
   return [
     address.line1,
     address.line2,

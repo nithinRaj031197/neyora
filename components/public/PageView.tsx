@@ -17,8 +17,8 @@ import { articleJsonLd, breadcrumbJsonLd } from '@/lib/seo/jsonld'
  * its slug and breadcrumb trail, and all the layout, SEO and structured data
  * live here. Adding a page is a Markdown file plus a three-line route.
  */
-export function generatePageMetadata(slug: string, path: string, fallbackTitle: string): Metadata {
-  const settings = getSiteSettings()
+export async function generatePageMetadata(slug: string, path: string, fallbackTitle: string): Promise<Metadata> {
+  const settings = await getSiteSettings()
   const page = getPageBySlug(slug)
 
   if (!page) {
@@ -39,7 +39,7 @@ export function generatePageMetadata(slug: string, path: string, fallbackTitle: 
   })
 }
 
-export function PageView({
+export async function PageView({
   slug,
   path,
   trail,
@@ -51,7 +51,7 @@ export function PageView({
   /** Extra content after the Markdown body — e.g. the FAQ accordion. */
   children?: React.ReactNode
 }) {
-  const settings = getSiteSettings()
+  const settings = await getSiteSettings()
   const page = getPageBySlug(slug)
 
   // A missing or unpublished page is an honest 404 — better than an empty

@@ -16,14 +16,14 @@ publishedAt: "2026-08-01"
 seo:
   title: About NEYORA — A Natural Food Brand, Grown For Life
   description: >-
-    NEYORA grows fresh natural food with care, starting with grey oyster
+    NEYORA grows fresh natural food with care, starting with white oyster
     mushrooms. Our story, our standards, and what comes next.
 isDemo: true
 ---
 
 NEYORA grows food. That is the whole of it.
 
-We began with grey oyster mushrooms for a specific reason: mushrooms are
+We began with white oyster mushrooms for a specific reason: mushrooms are
 unforgiving. There is no long ripening window to hide behind, no waxing, no
 cold-chain trick that makes a three-day-old mushroom taste like a fresh one.
 Either you picked it this morning and moved it quickly, or you did not — and

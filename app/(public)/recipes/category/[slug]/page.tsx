@@ -22,7 +22,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const settings = getSiteSettings()
+  const settings = await getSiteSettings()
   const category = getRecipeCategoryBySlug(slug)
 
   if (!category) {

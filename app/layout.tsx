@@ -1,13 +1,16 @@
 import type { Metadata, Viewport } from 'next'
-import { Fraunces, Inter } from 'next/font/google'
+import { Fraunces, Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { getSiteSettings } from '@/lib/content'
 import { buildRootMetadata } from '@/lib/seo/metadata'
 
 /**
+ * Three faces, no more.
+ *
  * Fraunces for display: a variable serif with real optical sizing, warm and
  * organic rather than the Playfair look every food site already has.
- * Inter for body and UI.
+ * Geist for body and UI, Geist Mono for anything that must align in columns
+ * (harvest dates, batch codes, admin tables).
  *
  * `display: 'swap'` and self-hosting via next/font mean no layout shift and no
  * request to Google at runtime.
@@ -25,15 +28,22 @@ const fraunces = Fraunces({
   fallback: ['Times New Roman', 'Georgia', 'serif'],
 })
 
-const inter = Inter({
+const geist = Geist({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-inter',
+  variable: '--font-geist',
   fallback: ['system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
 })
 
-export function generateMetadata(): Metadata {
-  return buildRootMetadata(getSiteSettings())
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-geist-mono',
+  fallback: ['ui-monospace', 'SF Mono', 'Menlo', 'monospace'],
+})
+
+export async function generateMetadata(): Promise<Metadata> {
+  return buildRootMetadata(await getSiteSettings())
 }
 
 export const viewport: Viewport = {
@@ -51,7 +61,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${inter.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${fraunces.variable} ${geist.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <body className="min-h-dvh bg-ivory font-sans text-earth antialiased">{children}</body>
     </html>
   )

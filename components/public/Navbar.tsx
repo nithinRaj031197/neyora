@@ -20,9 +20,9 @@ import { HeaderFrame } from './HeaderFrame'
  * the page. That is a tone change, not a backdrop-filter — see globals.css §4.
  * A reading-progress rule runs along the very top on the same timeline.
  */
-export function Navbar() {
-  const settings = getSiteSettings()
-  const whatsapp = whatsappLink()
+export async function Navbar() {
+  const settings = await getSiteSettings()
+  const whatsapp = await whatsappLink()
   const announcement = settings.announcement
 
   return (

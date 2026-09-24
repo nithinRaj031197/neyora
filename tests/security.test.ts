@@ -144,7 +144,7 @@ describe('the packaging QR route', () => {
 
   it('validates the environment override before trusting it', () => {
     const content = readFileSync(join(ROOT, 'lib/content/index.ts'), 'utf8')
-    const fn = content.slice(content.indexOf('export function getQrDestination'))
+    const fn = content.slice(content.indexOf('function getQrDestination'))
     expect(fn).toContain("startsWith('/')")
     expect(fn).toContain("startsWith('//')")
   })

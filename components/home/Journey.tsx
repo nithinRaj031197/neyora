@@ -1,4 +1,5 @@
 import { Picture } from '@/components/ui/Picture'
+import { cn } from '@/lib/utils/cn'
 import { Eyebrow } from './Display'
 import type { JourneyChapter } from '@/types/content'
 
@@ -32,18 +33,44 @@ export function Journey({ journey }: { journey: JourneyChapter }) {
       </div>
 
       <ol className="mt-16 lg:mt-24">
-        {journey.stages.map((stage) => (
+        {journey.stages.map((stage) => {
+          /*
+           * A finished card already carries the number, title and description
+           * in its pixels. Printing them again beside it is the same mistake
+           * the hero made. The words stay in the DOM — a card is a picture,
+           * and a search engine cannot read one — but are visually hidden, and
+           * the card takes the full width rather than half of it.
+           */
+          const carded = stage.artworkIncludesType === true
+          return (
           <li
             key={stage.number}
             className="mx-auto w-full max-w-[88rem] px-5 sm:px-8 lg:px-12"
           >
-            <div className="border-t border-earth/12 py-10 lg:grid lg:grid-cols-12 lg:gap-10 lg:py-0">
+            <div
+              className={cn(
+                'border-t border-earth/12 py-10 lg:py-0',
+                carded ? 'lg:py-16' : 'lg:grid lg:grid-cols-12 lg:gap-10',
+              )}
+            >
               {/*
                 The label column sticks while its image scrolls past it.
                 `h-fit` keeps the sticky box the height of its content, which
                 is what lets the next stage push it out of the way.
               */}
-              <div className="lg:col-span-5 lg:sticky lg:top-28 lg:h-fit lg:py-24">
+              {/*
+                When the card carries the type, this column is ONLY `sr-only`.
+                Keeping the layout classes alongside it does not work: sr-only
+                sets position:absolute, but `lg:sticky lg:py-24 lg:h-fit` win at
+                the lg breakpoint, so the hidden column stayed in flow and
+                reserved 192px of padding — a band of empty ground above every
+                carded stage.
+              */}
+              <div
+                className={
+                  carded ? 'sr-only' : 'lg:col-span-5 lg:sticky lg:top-28 lg:h-fit lg:py-24'
+                }
+              >
                 <div className="flex items-baseline gap-5">
                   <span
                     aria-hidden="true"
@@ -63,18 +90,28 @@ export function Journey({ journey }: { journey: JourneyChapter }) {
                 ) : null}
               </div>
 
-              <div className="mt-8 lg:col-span-6 lg:col-start-7 lg:mt-0 lg:py-24">
+              <div
+                className={cn(
+                  'mt-8 lg:mt-0',
+                  carded
+                    ? 'mx-auto max-w-[46rem]'
+                    : 'lg:col-span-6 lg:col-start-7 lg:py-24',
+                )}
+              >
                 <Picture
                   image={stage.image}
-                  sizes="(max-width: 1024px) 100vw, 46vw"
-                  aspect="4 / 5"
+                  sizes={carded ? '(max-width: 1024px) 100vw, 46rem' : '(max-width: 1024px) 100vw, 46vw'}
+                  /* A card is a composition — cropping it to a fixed ratio
+                     clips its own margins. Let it keep its natural shape. */
+                  aspect={carded ? undefined : '4 / 5'}
                   wrapperClassName="scene-wipe overflow-clip rounded-sm"
-                  className="scene-zoom"
+                  className={carded ? undefined : 'scene-zoom'}
                 />
               </div>
             </div>
           </li>
-        ))}
+          )
+        })}
       </ol>
     </section>
   )

@@ -145,8 +145,24 @@ export function loadMarkdownDir<S extends z.ZodType>(
     })
 }
 
-/** Memoises a loader for the lifetime of the process. */
+/**
+ * Memoises a loader for the lifetime of the process — in production only.
+ *
+ * In development the content files are the thing being edited, and caching
+ * them for the life of the process means an edit to a price, a headline or an
+ * image path simply never appears: the dev server keeps serving whatever it
+ * read at boot, with no error and no warning. That cost real time once — a
+ * price was changed on disk and the running dev server showed the old one for
+ * a day.
+ *
+ * So in development the loader runs on every call. It re-reads and re-validates
+ * a few dozen small YAML and Markdown files, which is far cheaper than the
+ * confusion of stale content. Production keeps the cache, where it matters:
+ * `next build` calls these loaders once per page across two dozen pages.
+ */
 export function once<T>(fn: () => T): () => T {
+  if (process.env.NODE_ENV !== 'production') return fn
+
   let cached: T | undefined
   let done = false
   return () => {

@@ -392,6 +392,9 @@ export const homepageSchema = z.object({
     // A portrait crop for phones. Optional: without it the desktop image is
     // used everywhere, cropped by object-fit.
     imageMobile: imageSchema.optional(),
+    // True when the desktop artwork already carries the logo and headline, so
+    // the site must not draw its own on top. See types/content.ts.
+    artworkIncludesType: z.boolean().optional(),
     ctaLabel: optionalString,
     ctaHref: optionalString,
     secondaryCtaLabel: optionalString,
@@ -403,6 +406,12 @@ export const homepageSchema = z.object({
     ...chapterBase,
     lines: displayLines,
     body: optionalString,
+    // Plain-language notes on the mushroom itself. Capped at six: past that a
+    // reader skims instead of reading, and the section becomes a spec sheet.
+    facts: z
+      .array(z.object({ label: z.string().trim().min(1), text: z.string().trim().min(1) }))
+      .max(6)
+      .optional(),
     /*
      * Ordered close → wide. Two is the minimum for the reveal to read as a
      * progression rather than a single image that happens to move.
@@ -430,6 +439,8 @@ export const homepageSchema = z.object({
           title: z.string().min(1),
           description: optionalString,
           image: imageSchema.optional(),
+          // See types/content.ts — set per stage, not per chapter.
+          artworkIncludesType: z.boolean().optional(),
         }),
       )
       .min(2),

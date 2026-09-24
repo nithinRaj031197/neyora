@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Picture } from '@/components/ui/Picture'
 import { Wordmark } from '@/components/ui/Wordmark'
 import { Icon } from '@/components/ui/Icon'
+import { cn } from '@/lib/utils/cn'
 import type { HeroChapter } from '@/types/content'
 
 /**
@@ -16,10 +17,26 @@ import type { HeroChapter } from '@/types/content'
  * no JavaScript, and no motion at all under `prefers-reduced-motion`.
  */
 export function Hero({ hero }: { hero: HeroChapter }) {
+  /*
+   * When the artwork already carries the branding, the desktop hero must not
+   * repeat it. The headline stays in the DOM — an <h1> is how the page tells a
+   * search engine what it is — but is visually hidden from `lg` up, where the
+   * banner's own lettering takes over. Phones keep the live type, because the
+   * banner's 16:9 layout is unreadable cropped to a phone.
+   */
+  const artworkIncludesType = hero.artworkIncludesType === true
+  const typeHidden = artworkIncludesType ? 'lg:sr-only' : ''
+
   return (
     <section
       aria-labelledby="hero-heading"
-      className="chapter-full relative isolate flex flex-col justify-end overflow-clip bg-ink"
+      className={cn(
+        'chapter-full relative isolate flex flex-col justify-end overflow-clip bg-ink',
+        // Flags the page so the header can hide its own logo over this hero.
+        // The aspect override lets the full banner show instead of being
+        // cropped to the viewport's shape.
+        artworkIncludesType && 'neyora-hero-branded lg:aspect-[1672/941] lg:min-h-0',
+      )}
     >
       {/* The photograph fills the chapter and sits behind everything. */}
       <div className="absolute inset-0 -z-10">
@@ -34,24 +51,38 @@ export function Hero({ hero }: { hero: HeroChapter }) {
           position="center 40%"
         />
         {/*
-          Two scrims, crossed.
-
-          The vertical one darkens top and bottom so the header and the CTAs
-          always have a ground. On its own it left the headline stranded: the
-          middle of the frame is its lightest point, and that is exactly where
-          a pale subject — a mushroom cap, a bowl, a hand — lands. So a second
-          scrim runs left to right, protecting the column the type occupies
-          regardless of what the photograph turns out to be. It fades out
-          entirely by 60%, leaving the subject side untouched.
+          Scrims exist to give live type a contrast floor. A finished banner
+          has its own — adding ours on top only greys out the artwork — so when
+          the image carries the type, only a light top wash remains, enough to
+          keep the header legible.
         */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-gradient-to-t from-ink/88 via-ink/35 to-ink/55"
-        />
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-gradient-to-r from-ink/80 via-ink/25 to-transparent to-60%"
-        />
+        {artworkIncludesType ? (
+          <>
+            {/* Phones keep the full scrim — they show live type over a
+                text-free crop, so they need the contrast floor as much as
+                ever. From `lg` up the banner supplies its own lettering and a
+                heavy scrim would only grey the artwork out. */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-gradient-to-t from-ink/88 via-ink/35 to-ink/55 lg:hidden"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 hidden bg-gradient-to-b from-ink/12 via-transparent to-ink/15 lg:block"
+            />
+          </>
+        ) : (
+          <>
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-gradient-to-t from-ink/88 via-ink/35 to-ink/55"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-gradient-to-r from-ink/80 via-ink/25 to-transparent to-60%"
+            />
+          </>
+        )}
       </div>
 
       {/*
@@ -64,10 +95,10 @@ export function Hero({ hero }: { hero: HeroChapter }) {
         style={{ ['--enter-offset' as string]: '120ms', ['--enter-step' as string]: '90ms' }}
       >
         {hero.eyebrow ? (
-          <p className="eyebrow text-leaf">{hero.eyebrow}</p>
+          <p className={cn('eyebrow text-leaf', typeHidden)}>{hero.eyebrow}</p>
         ) : null}
 
-        <h1 id="hero-heading" className="mt-6">
+        <h1 id="hero-heading" className={cn('mt-6', typeHidden)}>
           <Wordmark
             as="span"
             brandName={hero.headline}
@@ -82,7 +113,12 @@ export function Hero({ hero }: { hero: HeroChapter }) {
         </h1>
 
         {hero.description ? (
-          <p className="mt-8 max-w-[30ch] text-[1.0625rem] leading-relaxed text-ivory/75 [text-wrap:wrap] sm:max-w-[44ch] sm:text-[1.125rem]">
+          <p
+            className={cn(
+              'mt-8 max-w-[30ch] text-[1.0625rem] leading-relaxed text-ivory/75 [text-wrap:wrap] sm:max-w-[44ch] sm:text-[1.125rem]',
+              typeHidden,
+            )}
+          >
             {hero.description}
           </p>
         ) : null}
@@ -100,7 +136,7 @@ export function Hero({ hero }: { hero: HeroChapter }) {
           {hero.secondaryCtaLabel && hero.secondaryCtaHref ? (
             <Link
               href={hero.secondaryCtaHref}
-              className="press inline-flex h-14 items-center rounded-xs border border-ivory/35 px-7 text-[0.875rem] font-medium tracking-[0.06em] text-ivory uppercase transition-colors hover:border-ivory hover:bg-ivory/10"
+              className="press glass inline-flex h-14 items-center rounded-xs border px-7 text-[0.875rem] font-medium tracking-[0.06em] text-ivory uppercase"
             >
               {hero.secondaryCtaLabel}
             </Link>

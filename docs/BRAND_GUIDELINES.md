@@ -72,12 +72,16 @@ Never on: buttons, cards, backgrounds, icons, badges, whole sections.
 | Role | Face | Notes |
 | --- | --- | --- |
 | Display | **Fraunces** (variable) | Weight 300–600, optical size high. Warm, organic, editorial. |
-| Body & UI | **Inter** (variable) | Weight 400–600. |
+| Body & UI | **Geist** (variable) | Weight 400–600. |
+| Numeric & code | **Geist Mono** | Harvest dates, batch codes, admin tables — anything that must align in a column. |
+
+These three, and nothing else. A fourth face is a decision to re-open this
+table, not something to add inline.
 
 Rules:
 - Display type is set **tight** (`-0.02em` to `-0.03em`) and **large**. A hero
   headline at 16px in a serif looks cheap; at 72px it looks like a brand.
-- The eyebrow/kicker style is Inter, 12px, uppercase, `letter-spacing: 0.18em`,
+- The eyebrow/kicker style is Geist, 12px, uppercase, `letter-spacing: 0.18em`,
   Botanical Green. Use it once per section, maximum.
 - Body copy maxes out at **68ch**. Long measure reads as a blog, not a brand.
 - Never use more than two type sizes in a single card.
@@ -92,7 +96,7 @@ Rules:
 - Hairline borders (`1px` Mushroom Beige) instead of drop shadows.
 - Sharp-ish corners: `2px`–`6px`. Images may be `0px`.
 - One clear action per section.
-- Editorial captions under images (Inter, 12–13px, 60% Earth).
+- Editorial captions under images (Geist, 12–13px, 60% Earth).
 
 **Do not**
 - Rounded-2xl cards with heavy shadows in a 3-up grid. That is the generic
@@ -124,7 +128,7 @@ substrate. No marble, no slate boards, no chalkboards.
 ### Prompts (for reference / placeholder generation)
 
 **Hero**
-> Fresh grey oyster mushroom clusters arranged on a raw linen cloth, natural
+> Fresh white oyster mushroom clusters arranged on a raw linen cloth, natural
 > farm setting, soft directional morning sunlight from the left, warm ivory and
 > deep green tones, shallow depth of field, editorial food photography,
 > generous negative space on the right, no text, no packaging, photorealistic.
@@ -142,7 +146,7 @@ substrate. No marble, no slate boards, no chalkboards.
 > earthy palette, steam just visible.
 
 **Product**
-> Fresh grey oyster mushrooms in a clear recyclable 200 g punnet on a warm ivory
+> Fresh white oyster mushrooms in a clear recyclable 200 g punnet on a warm ivory
 > surface, minimal deep-green label, soft even daylight, realistic
 > supermarket-quality product photography, three-quarter angle, subtle shadow.
 
@@ -171,7 +175,7 @@ the layout.
 | 06 Food | `recipes/pepper-oyster-mushroom-fry` | 4:5 | Curry leaves, coarse pepper, dark ceramic |
 | 06 Food | `recipes/crispy-oyster-mushroom` | 4:3 | Shattering crust, lime, brown paper |
 | 07 Farm | `farm/harvest-hands` | 4:5 | Hands at work. No face, no posing |
-| 07 Farm | `farm/substrate` | 1:1 | Paddy straw and sawdust, close |
+| 07 Farm | `farm/substrate` | 1:1 | Sawdust biomass pellets, close — dry pellets beside hydrated, expanded ones |
 | 09 Final | `hero/final-cta` | 8:5 | The closing frame. Warm, full table, someone's home. **Subject right of centre** |
 
 Export as `.webp` at roughly twice the displayed width, under ~300 KB each.

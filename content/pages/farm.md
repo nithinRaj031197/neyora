@@ -26,11 +26,10 @@ routine is deliberate.
 
 ## Substrate
 
-We grow on pasteurised paddy straw and hardwood sawdust — agricultural waste
-that would otherwise be burned. It is chopped, hydrated to roughly 65% moisture,
-and pasteurised at 65–70 °C for several hours. Not sterilised: pasteurisation
-leaves beneficial organisms alive to compete with contaminants, which is why it
-works better here.
+We grow on pasteurised biomass pellets, made from compressed sawdust. They are
+hydrated to roughly 65% moisture, which expands the pellets back into a loose
+substrate, then pasteurised at 65–70 °C for several hours. Not sterilised: pasteurisation leaves beneficial organisms alive to
+compete with contaminants, which is why it works better here.
 
 No chemical supplementation. Nothing added to force yield.
 
