@@ -22,6 +22,16 @@ cloudflare-env.d.ts
 .env.local
 .env.production
 
+# Credential files that arrive as downloads and get dropped in the repo by
+# accident. A Google service-account key is a JSON file called something like
+# neyora-123456-abcdef.json; it belongs in a password manager, never here.
+*-credentials.env
+service-account*.json
+*-service-account*.json
+gcp-*.json
+*.pem
+*.p12
+
 # misc
 .DS_Store
 *.pem
