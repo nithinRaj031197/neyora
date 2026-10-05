@@ -255,27 +255,20 @@ export function sheetNeedsAttention(sync: SheetSync | undefined): boolean {
  * actually navigates by, and `landmark` because half of Bengaluru is found
  * that way rather than by number.
  */
-export const addressSchema = z.strictObject({
-  line1: z
-    .string()
-    .trim()
-    .min(3, 'House, flat or building — we cannot deliver without it')
-    .max(120),
-  line2: z.string().trim().max(120).optional(),
-  area: z.string().trim().min(2, 'Which area should we deliver to?').max(120),
-  city: z.literal(DELIVERY_CITY, `We currently deliver in ${DELIVERY_CITY} only`),
-  pincode: z
-    .string()
-    .trim()
-    .transform(normalisePincode)
-    // The rule itself lives in ./delivery, so moving from a regional prefix to
-    // an explicit supported-pincode list never touches this schema.
-    .refine(isDeliverablePincode, PINCODE_ERROR),
-  landmark: z.string().trim().max(120).optional(),
-})
-
-export const customerSchema = z.strictObject({
+/**
+ * The rules for one field, defined once.
+ *
+ * The browser validates a FLAT form and the server validates a NESTED order,
+ * so the two schemas cannot be the same object — but they must not be two
+ * different opinions either. A field that the form accepts and the server
+ * rejects is the worst outcome: the customer fills everything in correctly and
+ * is told to check the highlighted fields, with nothing highlighted.
+ *
+ * So every rule lives here and both schemas are composed from it.
+ */
+export const FIELD = {
   name: z.string().trim().min(2, 'Please enter your name').max(80),
+
   phone: z
     .string()
     .trim()
@@ -284,9 +277,81 @@ export const customerSchema = z.strictObject({
     // Store one canonical form, so the same person typed two ways is one
     // customer when you look up their history.
     .transform((d) => d.slice(-10)),
-  address: addressSchema,
+
+  /*
+   * One character is enough.
+   *
+   * This used to require three, which rejected "23" — an ordinary Bengaluru
+   * house number. The customer had filled the form in correctly and was told
+   * to check the highlighted fields. A door number can be "4", "23" or "A1";
+   * there is no minimum length that is both safe and correct, so the rule is
+   * simply that it is not empty.
+   */
+  line1: z.string().trim().min(1, 'Enter your house, flat or building').max(120),
+
+  line2: z.string().trim().max(120).optional(),
+  area: z.string().trim().min(2, 'Which area should we deliver to?').max(120),
+
+  pincode: z
+    .string()
+    .trim()
+    .transform(normalisePincode)
+    // The rule itself lives in ./delivery, so moving from a regional prefix to
+    // an explicit supported-pincode list never touches this schema.
+    .refine(isDeliverablePincode, PINCODE_ERROR),
+
+  landmark: z.string().trim().max(120).optional(),
   note: z.string().trim().max(500).optional(),
+} as const
+
+export const addressSchema = z.strictObject({
+  line1: FIELD.line1,
+  line2: FIELD.line2,
+  area: FIELD.area,
+  city: z.literal(DELIVERY_CITY, `We currently deliver in ${DELIVERY_CITY} only`),
+  pincode: FIELD.pincode,
+  landmark: FIELD.landmark,
 })
+
+export const customerSchema = z.strictObject({
+  name: FIELD.name,
+  phone: FIELD.phone,
+  address: addressSchema,
+  note: FIELD.note,
+})
+
+/**
+ * What the checkout form validates in the browser.
+ *
+ * Flat, because that is the shape of the form. Built from the same FIELD rules
+ * the server uses, so the two can never disagree.
+ *
+ * The browser's copy is a convenience, not a security boundary: the server
+ * re-validates everything, looks the price up itself, and is reachable by
+ * direct POST regardless of what this does.
+ */
+export const checkoutFormSchema = z.object({
+  name: FIELD.name,
+  phone: FIELD.phone,
+  line1: FIELD.line1,
+  area: FIELD.area,
+  pincode: FIELD.pincode,
+  /*
+   * The optional fields are typed as plain strings here, not `.optional()`.
+   *
+   * A text input always holds a string — empty is "" and never undefined — so
+   * an optional type would make every value `string | undefined` and force the
+   * whole form to be typed around a case that cannot occur. The server schema
+   * keeps them genuinely optional, and the action drops the empty ones before
+   * they reach it.
+   */
+  line2: z.string().trim().max(120),
+  landmark: z.string().trim().max(120),
+  note: z.string().trim().max(500),
+})
+
+/** Every field a string, because that is what an input holds. */
+export type CheckoutFormValues = z.output<typeof checkoutFormSchema>
 
 /**
  * What was bought, written down in full.
