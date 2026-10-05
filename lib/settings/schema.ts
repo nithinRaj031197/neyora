@@ -45,9 +45,16 @@ export const settingsOverrideSchema = z.strictObject({
    * it fails by opening a broken chat rather than erroring, so it is worth
    * being strict here.
    */
+  /*
+   * Must START with a country code. `^\d{10,15}$` was too loose: a bare
+   * 10-digit Indian mobile passed validation, and wa.me then opened a broken
+   * chat rather than erroring — so every order button on the site was dead
+   * and nothing said so. 91 followed by a 10-digit mobile beginning 6-9 is
+   * the shape that actually works.
+   */
   whatsappNumber: overridable.refine(
-    (v) => v === undefined || /^\d{10,15}$/.test(v),
-    'Digits only, including country code — e.g. 919876543210',
+    (v) => v === undefined || /^(?:91[6-9]\d{9}|[1-9]\d{9,14})$/.test(v),
+    'Include the country code — e.g. 919876543210, not 9876543210',
   ),
   whatsappMessage: overridable,
   businessHours: overridable,
@@ -70,7 +77,7 @@ export type SettingsOverride = Partial<z.infer<typeof settingsOverrideSchema>>
 export const SETTINGS_FIELDS = [
   { name: 'contactEmail', label: 'Contact email', type: 'email', hint: 'Shown in the footer and on the contact page.' },
   { name: 'contactPhone', label: 'Phone number', type: 'tel', hint: 'As you want it displayed, e.g. +91 98765 43210.' },
-  { name: 'whatsappNumber', label: 'WhatsApp number', type: 'tel', hint: 'Digits only with country code, e.g. 919876543210. Every WhatsApp button uses this.' },
+  { name: 'whatsappNumber', label: 'WhatsApp number', type: 'tel', hint: 'Digits only with country code, Must start with the country code, e.g. 919876543210 — not 9876543210. Every WhatsApp button uses this.' },
   { name: 'whatsappMessage', label: 'WhatsApp opening message', type: 'text', hint: 'Pre-filled when a customer taps a WhatsApp button.' },
   { name: 'businessHours', label: 'Business hours', type: 'text', hint: '' },
   { name: 'addressLine1', label: 'Address line 1', type: 'text', hint: '' },

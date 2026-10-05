@@ -188,7 +188,17 @@ export const productFrontmatterSchema = z
     shortDescription: z.string().max(320).optional(),
 
     category: slug.optional(),
+    /** Botanical, e.g. "Pleurotus ostreatus (White Oyster)". */
     variety: optionalString,
+    /**
+     * The short human name for the variety, e.g. "White oyster".
+     *
+     * Separate from `variety` because that one is a species label for the
+     * product page, and this one is a chip in a picker and a line on an order.
+     * Deriving it from `variety` with a regex would break the first time a
+     * product is named differently.
+     */
+    varietyLabel: optionalString,
     origin: optionalString,
 
     weightGrams: z.number().int().positive().optional(),

@@ -145,6 +145,8 @@ export interface Product {
 
   category?: string
   variety?: string
+  /** Short human variety name, e.g. "White oyster". Drives the variety picker. */
+  varietyLabel?: string
   origin?: string
 
   weightGrams?: number

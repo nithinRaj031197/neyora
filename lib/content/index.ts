@@ -13,6 +13,12 @@ import 'server-only'
 import { cache } from 'react'
 import { loadMarkdownDir, loadYaml, once } from './loader'
 import { readSettingsOverride } from '@/lib/settings/repository'
+import { readHomepageOverride } from '@/lib/homepage/repository'
+import {
+  HOMEPAGE_SECTION_KEYS,
+  type HomepageSectionKey,
+} from '@/lib/homepage/schema'
+import { readProductOverrides } from '@/lib/products/repository'
 import {
   categoriesFileSchema,
   faqsFileSchema,
@@ -109,6 +115,28 @@ export const getSocialLinks = cache(async (): Promise<SocialLink[]> => {
 const loadHomepage = once((): Homepage => loadYaml('homepage.yml', homepageSchema) as Homepage)
 
 export const getHomepage = cache((): Homepage => loadHomepage())
+
+/**
+ * Which homepage chapters are shown: the file, with any admin toggle on top.
+ *
+ * Separate from `getHomepage()` so that reading the content stays synchronous.
+ * Only one caller — the homepage itself — needs the database, and making every
+ * reader of the homepage content await a Mongo round trip to learn the brand
+ * eyebrow would be the wrong trade.
+ *
+ * `readHomepageOverride` never throws: with no database, or before anyone has
+ * saved, this is exactly what homepage.yml says.
+ */
+export const getHomepageVisibility = cache(
+  async (): Promise<Record<HomepageSectionKey, boolean>> => {
+    const home = loadHomepage()
+    const override = await readHomepageOverride()
+
+    return Object.fromEntries(
+      HOMEPAGE_SECTION_KEYS.map((key) => [key, override[key] ?? home[key].enabled]),
+    ) as Record<HomepageSectionKey, boolean>
+  },
+)
 
 /**
  * Where the packaging QR code leads.
@@ -235,22 +263,54 @@ const loadProducts = once(
   (): Product[] => loadMarkdownDir('products', productFrontmatterSchema) as Product[],
 )
 
-export const getPublishedProducts = cache((): Product[] =>
+/** The files only — the defaults, before any admin override. */
+export const getPublishedProductsFromFiles = (): Product[] =>
   loadProducts()
     .filter(isPublished)
     .sort((a, b) => {
       if (a.featured !== b.featured) return a.featured ? -1 : 1
       if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder
       return a.name.localeCompare(b.name)
-    }),
-)
+    })
+
+/**
+ * Published products, with any admin overrides laid on top.
+ *
+ * Async because the overrides live in MongoDB. `readProductOverrides` never
+ * throws, so a database outage serves the Markdown files unchanged — the shop
+ * keeps working, it just stops reflecting the last edit. `cache()` collapses
+ * the several calls a page makes into one read.
+ *
+ * Images are not overridable (see lib/products/schema.ts), so dimensions —
+ * and therefore layout stability — always come from the file.
+ */
+export const getPublishedProducts = cache(async (): Promise<Product[]> => {
+  const files = getPublishedProductsFromFiles()
+  const overrides = await readProductOverrides()
+
+  return files.map((product) => {
+    const o = overrides[product.slug]
+    if (!o) return product
+    return {
+      ...product,
+      name: o.name ?? product.name,
+      shortDescription: o.shortDescription ?? product.shortDescription,
+      price: o.price ?? product.price,
+      mrp: o.mrp ?? product.mrp,
+      availability: o.availability ?? product.availability,
+    }
+  })
+})
 
 export const getProductBySlug = cache(
-  (slug: string): Product | null => getPublishedProducts().find((p) => p.slug === slug) ?? null,
+  async (slug: string): Promise<Product | null> =>
+    (await getPublishedProducts()).find((p) => p.slug === slug) ?? null,
 )
 
-export function queryProducts(options: { category?: string; limit?: number } = {}): Product[] {
-  let results = getPublishedProducts()
+export async function queryProducts(
+  options: { category?: string; limit?: number } = {},
+): Promise<Product[]> {
+  let results = await getPublishedProducts()
   if (options.category) results = results.filter((p) => p.category === options.category)
   return options.limit ? results.slice(0, options.limit) : results
 }
