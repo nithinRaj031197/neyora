@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getCurrentAdmin } from '@/lib/auth/session'
 import { signOut } from '@/lib/auth/actions'
+import { AdminNav } from '@/components/admin/AdminNav'
+import { ToastProvider } from '@/components/ui/Toast'
 import '../globals.css'
 
 /**
@@ -28,26 +30,55 @@ export default async function AdminLayout({ children }: { children: React.ReactN
    */
   const admin = await getCurrentAdmin()
 
+  if (!admin) {
+    /*
+     * Signed out there is only the login screen, which is full-bleed artwork
+     * and needs to reach the edges — so it is rendered unwrapped rather than
+     * being given a way to break out of a container that should not have been
+     * there.
+     */
+    return (
+      <div className="min-h-screen">
+        <main>{children}</main>
+      </div>
+    )
+  }
+
   return (
-    <div className={admin ? 'min-h-screen bg-ivory-soft' : 'min-h-screen'}>
-      {admin ? (
-        <header className="border-b border-beige bg-ivory">
-          <div className="mx-auto flex h-16 w-full max-w-[72rem] items-center justify-between gap-6 px-5 sm:px-8">
-            <div className="flex items-center gap-6">
-              <Link href="/admin" className="brand-logo brand-logo--wordmark text-[1rem]" aria-label="NEYORA admin" />
-              <nav className="flex items-center gap-5 text-[0.875rem]">
-                <Link href="/admin" className="text-earth-soft hover:text-forest">Orders</Link>
-                <Link href="/admin/settings" className="text-earth-soft hover:text-forest">Settings</Link>
-              </nav>
+    <ToastProvider>
+      <div className="min-h-screen bg-ivory-soft">
+        {/*
+          Sticky, translucent, hairline-bottomed. The admin scrolls long lists
+          of orders; a header that leaves the screen costs a scroll to the top
+          every time they want to switch section.
+        */}
+        <header className="sticky top-0 z-40 border-b border-beige bg-ivory/85 backdrop-blur-md">
+          <div className="mx-auto flex h-16 w-full max-w-[72rem] items-center justify-between gap-4 px-5 sm:px-8">
+            <div className="flex items-center gap-7">
+              <Link
+                href="/admin"
+                className="brand-logo brand-logo--wordmark text-[1rem]"
+                aria-label="NEYORA admin"
+              />
+              <div className="hidden sm:block">
+                <AdminNav variant="rail" />
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="hidden text-[0.8125rem] text-earth-muted sm:inline">
+
+            <div className="flex items-center gap-3">
+              <span
+                aria-hidden
+                className="grid size-8 place-items-center rounded-full bg-forest text-[0.8125rem] font-medium text-ivory"
+              >
+                {admin.name.trim().charAt(0).toUpperCase()}
+              </span>
+              <span className="hidden text-[0.8125rem] text-earth-muted md:inline">
                 {admin.name} · {admin.role}
               </span>
               <form action={signOut}>
                 <button
                   type="submit"
-                  className="press h-9 rounded-xs border border-forest/30 px-3.5 text-[0.8125rem] text-forest hover:bg-forest/5"
+                  className="press h-9 rounded-xs border border-forest/25 px-3.5 text-[0.8125rem] text-forest transition-colors duration-200 ease-(--ease-out-soft) hover:border-forest hover:bg-forest/5"
                 >
                   Sign out
                 </button>
@@ -55,18 +86,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </div>
           </div>
         </header>
-      ) : null}
-      {/*
-        Signed in, the shell constrains and pads its pages. Signed out there is
-        only the login screen, which is full-bleed artwork and needs to reach
-        the edges — so it is rendered unwrapped rather than being given a way
-        to break out of a container that should not have been there.
-      */}
-      {admin ? (
-        <main className="mx-auto w-full max-w-[72rem] px-5 py-10 sm:px-8">{children}</main>
-      ) : (
-        <main>{children}</main>
-      )}
-    </div>
+
+        {/* pb-24 on a phone clears the fixed bottom nav. */}
+        <main className="mx-auto w-full max-w-[72rem] px-5 pt-8 pb-24 sm:px-8 sm:pt-10 sm:pb-16">
+          {children}
+        </main>
+
+        <div className="sm:hidden">
+          <AdminNav variant="bar" />
+        </div>
+      </div>
+    </ToastProvider>
   )
 }

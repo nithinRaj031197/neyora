@@ -22,17 +22,26 @@ export const dynamic = 'force-dynamic'
 export default async function LoginPage() {
   if (await getCurrentAdmin()) redirect('/admin')
 
-  // A first run with no accounts is a setup problem, not a wrong password.
-  // Saying so saves an hour of guessing.
+  /*
+   * A first run with no accounts is a setup problem, not a wrong password.
+   * Saying so saves an hour of guessing.
+   *
+   * "Not configured" and "configured but unreachable" are different failures
+   * with different fixes, and collapsing them into one message sent someone to
+   * check a .env.local file that was perfectly correct. They are now separate.
+   */
+  type DbState = 'ok' | 'not-configured' | 'unreachable'
+  let dbState: DbState = 'ok'
   let noAccounts = false
-  let dbError = false
+
   if (!isDatabaseConfigured()) {
-    dbError = true
+    dbState = 'not-configured'
   } else {
     try {
       noAccounts = (await countAdmins()) === 0
-    } catch {
-      dbError = true
+    } catch (error) {
+      dbState = 'unreachable'
+      console.error('[admin] database unreachable at sign-in', error)
     }
   }
 
@@ -72,10 +81,19 @@ export default async function LoginPage() {
             Orders, settings and the content behind neyora.
           </p>
 
-          {dbError ? (
-            <p className="mt-6 rounded-xs bg-danger/10 px-3.5 py-3 text-[0.875rem] text-danger">
-              No database connection. Check <code className="font-mono">MONGODB_URI</code> in{' '}
-              <code className="font-mono">.env.local</code>.
+          {dbState === 'not-configured' ? (
+            <p className="mt-6 rounded-xs bg-danger/10 px-3.5 py-3 text-[0.875rem] leading-relaxed text-danger">
+              <code className="font-mono">MONGODB_URI</code> is not set. Add it to{' '}
+              <code className="font-mono">.env.local</code> — see{' '}
+              <code className="font-mono">docs/ORDERS.md</code>.
+            </p>
+          ) : dbState === 'unreachable' ? (
+            <p className="mt-6 rounded-xs bg-danger/10 px-3.5 py-3 text-[0.875rem] leading-relaxed text-danger">
+              <strong>Cannot reach the database.</strong> The connection string is
+              set, so this is not a configuration problem — the server is refusing
+              the connection. The usual cause is this machine&rsquo;s IP address
+              missing from Atlas &rarr; Network Access, which happens whenever your
+              IP changes. A paused cluster does the same.
             </p>
           ) : noAccounts ? (
             <p className="mt-6 rounded-xs bg-warning/10 px-3.5 py-3 text-[0.875rem] text-earth">
