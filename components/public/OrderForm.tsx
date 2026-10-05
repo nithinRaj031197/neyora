@@ -1,12 +1,16 @@
 'use client'
 
-import { useActionState, useId, useRef, useState } from 'react'
+import { useActionState, useEffect, useId, useRef, useState } from 'react'
+import { useForm, type FieldErrors } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { placeOrder, type OrderFormState } from '@/lib/orders/actions'
 import {
   BULK_ORDER_MESSAGE,
+  checkoutFormSchema,
   DELIVERY_CITY,
   DELIVERY_NOTICE,
   MAX_PACKS_PER_ORDER,
+  type CheckoutFormValues,
 } from '@/lib/orders/schema'
 import { Icon } from '@/components/ui/Icon'
 import { formatPrice } from '@/lib/utils/format'
@@ -25,8 +29,61 @@ import { cn } from '@/lib/utils/cn'
  * someone looks back to check what they entered — and invisible to anyone
  * using a screen reader after the first keystroke.
  *
+ * ── VALIDATION ───────────────────────────────────────────────────────────
+ *
+ * react-hook-form with the SAME Zod rules the server uses, composed from the
+ * shared `FIELD` definitions — so a value the form accepts can never be one
+ * the server rejects. That mismatch is what produced "Please check the
+ * highlighted fields" with nothing highlighted.
+ *
+ * `onTouched` + revalidate `onChange` is the combination that matters: a field
+ * is not marked wrong while you are still typing it for the first time, only
+ * once you leave it — and once it IS wrong, the message clears the instant you
+ * fix it rather than waiting for another blur.
+ *
+ * None of this is a security boundary. The server re-validates everything,
+ * looks the price up itself, and is reachable by direct POST regardless.
+ *
  * No price is submitted. The server looks it up from the product by slug.
  */
+
+/** Every field starts empty and stays a string: a form has no undefined. */
+const EMPTY: CheckoutFormValues = {
+  name: '',
+  phone: '',
+  line1: '',
+  line2: '',
+  area: '',
+  pincode: '',
+  landmark: '',
+  note: '',
+}
+
+/** Field names as a customer would say them, for the summary line. */
+const LABELS: Record<keyof CheckoutFormValues, string> = {
+  name: 'name',
+  phone: 'mobile number',
+  line1: 'house or building',
+  line2: 'street',
+  area: 'area',
+  pincode: 'pincode',
+  landmark: 'landmark',
+  note: 'note',
+}
+
+/**
+ * Which fields need attention, by name.
+ *
+ * "Please check the highlighted fields" is useless on a phone, where the
+ * highlighted field is three scrolls away.
+ */
+function summarise(errors: FieldErrors<CheckoutFormValues>): string {
+  const fields = (Object.keys(errors) as (keyof CheckoutFormValues)[]).map((key) => LABELS[key])
+  if (fields.length === 0) return 'Please check the form and try again.'
+  if (fields.length === 1) return `Please check your ${fields[0]}.`
+  const last = fields.pop()
+  return `Please check your ${fields.join(', ')} and ${last}.`
+}
 
 interface Props {
   productSlug: string
@@ -72,6 +129,36 @@ function Checkout({
   const [quantity, setQuantity] = useState(1)
   const id = useId()
 
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, submitCount, isValid },
+  } = useForm<CheckoutFormValues>({
+    resolver: zodResolver(checkoutFormSchema),
+    defaultValues: EMPTY,
+    // Do not shout at someone who has not finished typing their name: a field
+    // is marked wrong when they LEAVE it, then re-checked on every keystroke so
+    // the message clears the moment it is fixed.
+    mode: 'onTouched',
+    reValidateMode: 'onChange',
+  })
+
+  /*
+   * The server is the authority. If it rejects a field the browser accepted —
+   * a rule this bundle does not know yet, or a stale deploy — that message is
+   * attached to the field rather than left as a banner pointing at nothing,
+   * which is exactly how this form failed before.
+   */
+  useEffect(() => {
+    if (state.status !== 'error' || !state.fieldErrors) return
+    for (const [field, message] of Object.entries(state.fieldErrors)) {
+      if (field in EMPTY) {
+        setError(field as keyof CheckoutFormValues, { type: 'server', message })
+      }
+    }
+  }, [state, setError])
+
   /*
    * One token per mount, sent with the submission.
    *
@@ -95,18 +182,33 @@ function Checkout({
    * a ref write. The ref keeps its value across the re-render that follows a
    * validation error, so a corrected resubmission carries the same token.
    */
-  const submit = (formData: FormData) => {
+  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    // The ref is read HERE, in the event handler, and the token is then closed
+    // over as a plain string. Reading it inside the callback handed to
+    // `handleSubmit` would be a ref access that React cannot prove happens
+    // outside render.
     submissionId.current ||= globalThis.crypto.randomUUID()
-    formData.set('submissionId', submissionId.current)
-    action(formData)
+    const token = submissionId.current
+
+    void handleSubmit((values) => {
+      const formData = new FormData()
+      formData.set('productSlug', productSlug)
+      formData.set('quantity', String(quantity))
+      formData.set('submissionId', token)
+      for (const [key, value] of Object.entries(values)) formData.set(key, value ?? '')
+
+      action(formData)
+    })(event)
   }
 
-  const err = state.status === 'error' ? state.fieldErrors : undefined
-
   return (
-    <form action={submit} className="rounded-sm border border-beige bg-ivory-soft p-5 sm:p-6">
-      <input type="hidden" name="productSlug" value={productSlug} />
-      <input type="hidden" name="quantity" value={quantity} />
+    <form
+      onSubmit={onSubmit}
+      // `noValidate`: the browser's own bubbles would fire before Zod runs and
+      // say something different from what the server would say.
+      noValidate
+      className="rounded-sm border border-beige bg-ivory-soft p-5 sm:p-6"
+    >
 
       <p className="eyebrow text-botanical">Place an order</p>
 
@@ -181,11 +283,14 @@ function Checkout({
       {/* 2 — Who ---------------------------------------------------------- */}
       <Legend>Your details</Legend>
       <div className="grid gap-4">
-        <Field id={`${id}-name`} label="Full name" error={err?.name}>
+        <Field id={`${id}-name`} label="Full name" error={errors.name?.message}>
           <input
-            id={`${id}-name`} name="name" required autoComplete="name"
+            id={`${id}-name`} autoComplete="name"
             autoCapitalize="words" enterKeyHint="next"
-            className={input(err?.name)}
+            className={input(errors.name)}
+            aria-invalid={Boolean(errors.name) || undefined}
+            aria-describedby={errors.name ? `${id}-name-error` : undefined}
+            {...register('name')}
           />
         </Field>
 
@@ -193,13 +298,16 @@ function Checkout({
           id={`${id}-phone`}
           label="Mobile number"
           hint="We call this number to confirm your order."
-          error={err?.phone}
+          error={errors.phone?.message}
         >
           <input
-            id={`${id}-phone`} name="phone" required type="tel"
+            id={`${id}-phone`} type="tel"
             inputMode="numeric" autoComplete="tel-national" enterKeyHint="next"
             placeholder="98765 43210"
-            className={input(err?.phone)}
+            className={input(errors.phone)}
+            aria-invalid={Boolean(errors.phone) || undefined}
+            aria-describedby={errors.phone ? `${id}-phone-error` : undefined}
+            {...register('phone')}
           />
         </Field>
       </div>
@@ -207,28 +315,37 @@ function Checkout({
       {/* 3 — Where -------------------------------------------------------- */}
       <Legend>Delivery address</Legend>
       <div className="grid gap-4">
-        <Field id={`${id}-line1`} label="House / flat / building" error={err?.line1}>
+        <Field id={`${id}-line1`} label="House / flat / building" error={errors.line1?.message}>
           <input
-            id={`${id}-line1`} name="line1" required
+            id={`${id}-line1`} 
             autoComplete="address-line1" autoCapitalize="words" enterKeyHint="next"
-            className={input(err?.line1)}
+            className={input(errors.line1)}
+            aria-invalid={Boolean(errors.line1) || undefined}
+            aria-describedby={errors.line1 ? `${id}-line1-error` : undefined}
+            {...register('line1')}
           />
         </Field>
 
-        <Field id={`${id}-line2`} label="Street" optional error={err?.line2}>
+        <Field id={`${id}-line2`} label="Street" optional error={errors.line2?.message}>
           <input
-            id={`${id}-line2`} name="line2"
+            id={`${id}-line2`}
             autoComplete="address-line2" autoCapitalize="words" enterKeyHint="next"
-            className={input(err?.line2)}
+            className={input(errors.line2)}
+            aria-invalid={Boolean(errors.line2) || undefined}
+            aria-describedby={errors.line2 ? `${id}-line2-error` : undefined}
+            {...register('line2')}
           />
         </Field>
 
-        <Field id={`${id}-area`} label="Area" error={err?.area}>
+        <Field id={`${id}-area`} label="Area" error={errors.area?.message}>
           <input
-            id={`${id}-area`} name="area" required
+            id={`${id}-area`} 
             autoComplete="address-level3" autoCapitalize="words" enterKeyHint="next"
             placeholder="e.g. Koramangala"
-            className={input(err?.area)}
+            className={input(errors.area)}
+            aria-invalid={Boolean(errors.area) || undefined}
+            aria-describedby={errors.area ? `${id}-area-error` : undefined}
+            {...register('area')}
           />
         </Field>
 
@@ -248,12 +365,15 @@ function Checkout({
             />
           </Field>
 
-          <Field id={`${id}-pincode`} label="Pincode" error={err?.pincode}>
+          <Field id={`${id}-pincode`} label="Pincode" error={errors.pincode?.message}>
             <input
-              id={`${id}-pincode`} name="pincode" required
+              id={`${id}-pincode`} 
               inputMode="numeric" autoComplete="postal-code" enterKeyHint="next"
               maxLength={6} pattern="\d{6}" placeholder="560034"
-              className={input(err?.pincode)}
+              className={input(errors.pincode)}
+            aria-invalid={Boolean(errors.pincode) || undefined}
+            aria-describedby={errors.pincode ? `${id}-pincode-error` : undefined}
+            {...register('pincode')}
             />
           </Field>
         </div>
@@ -267,19 +387,25 @@ function Checkout({
           label="Landmark"
           optional
           hint="Anything that helps us find you quickly."
-          error={err?.landmark}
+          error={errors.landmark?.message}
         >
           <input
-            id={`${id}-landmark`} name="landmark"
+            id={`${id}-landmark`}
             autoCapitalize="sentences" enterKeyHint="next"
-            className={input(err?.landmark)}
+            className={input(errors.landmark)}
+            aria-invalid={Boolean(errors.landmark) || undefined}
+            aria-describedby={errors.landmark ? `${id}-landmark-error` : undefined}
+            {...register('landmark')}
           />
         </Field>
 
-        <Field id={`${id}-note`} label="Order note" optional error={err?.note}>
+        <Field id={`${id}-note`} label="Order note" optional error={errors.note?.message}>
           <textarea
-            id={`${id}-note`} name="note" rows={2} enterKeyHint="done"
+            id={`${id}-note`} rows={2} enterKeyHint="done"
             className="w-full rounded-xs border border-beige bg-ivory px-3.5 py-3 text-[1rem] leading-relaxed text-earth focus-visible:border-leaf focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-leaf"
+            aria-invalid={Boolean(errors.note) || undefined}
+            aria-describedby={errors.note ? `${id}-note-error` : undefined}
+            {...register('note')}
           />
         </Field>
       </div>
@@ -296,11 +422,17 @@ function Checkout({
         </div>
       </div>
 
-      {state.status === 'error' ? (
-        <p
-          role="alert"
-          className="mt-5 rounded-xs bg-danger/10 px-3.5 py-3 text-[0.875rem] text-danger"
-        >
+      {/*
+        One banner, and only for what is not already shown against a field.
+        Naming the fields beats "check the highlighted ones", which on a phone
+        points at something three scrolls away.
+      */}
+      {submitCount > 0 && !isValid ? (
+        <p role="alert" className="mt-5 rounded-xs bg-danger/10 px-3.5 py-3 text-[0.875rem] text-danger">
+          {summarise(errors)}
+        </p>
+      ) : state.status === 'error' && Object.keys(errors).length === 0 ? (
+        <p role="alert" className="mt-5 rounded-xs bg-danger/10 px-3.5 py-3 text-[0.875rem] text-danger">
           {state.message}
         </p>
       ) : null}
@@ -407,7 +539,7 @@ function Confirmation({
 
 // ---------------------------------------------------------------------------
 
-const input = (error?: string) =>
+const input = (error?: unknown) =>
   cn(
     // 1rem, not 0.9375 — iOS Safari zooms the whole page on focus for anything
     // under 16px, and the zoom does not come back when the field blurs.
@@ -448,10 +580,21 @@ function Field({
         {optional ? <span className="text-[0.6875rem] text-earth-muted">optional</span> : null}
       </label>
       {children}
+      {/*
+        `role="alert"` so the message is announced when it appears, rather than
+        sitting silently below a field someone cannot see. The error REPLACES
+        the hint: two descriptions read back to back is how a screen-reader
+        user hears the formatting advice they already followed before they hear
+        what actually went wrong.
+      */}
       {error ? (
-        <p className="mt-1.5 text-[0.8125rem] text-danger">{error}</p>
+        <p id={`${id}-error`} role="alert" className="mt-1.5 text-[0.8125rem] text-danger">
+          {error}
+        </p>
       ) : hint ? (
-        <p className="mt-1.5 text-[0.8125rem] text-earth-muted">{hint}</p>
+        <p id={`${id}-hint`} className="mt-1.5 text-[0.8125rem] text-earth-muted">
+          {hint}
+        </p>
       ) : null}
     </div>
   )
