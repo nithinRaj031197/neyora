@@ -34,6 +34,7 @@ export type IconName =
   | 'qr'
   | 'alert'
   | 'leaf'
+  | 'close'
 
 const PATHS: Record<IconName, React.ReactNode> = {
   instagram: (
@@ -63,6 +64,8 @@ const PATHS: Record<IconName, React.ReactNode> = {
     </>
   ),
   x: <path d="M4 4l7 8.5M20 20l-7-8.5M4 4h3l13 16h-3zM4.5 20L10 13.5M19.5 4L14 10.5" />,
+  // A dismiss cross. Distinct from `x`, which is the X/Twitter logo.
+  close: <path d="M6 6l12 12M18 6L6 18" />,
   'arrow-right': <path d="M4 12h15m0 0-5.5-5.5M19 12l-5.5 5.5" />,
   'arrow-up-right': <path d="M7 17 17 7m0 0h-7m7 0v7" />,
   clock: (

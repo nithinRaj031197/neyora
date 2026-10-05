@@ -1142,3 +1142,49 @@
     }
   }
 }
+
+/* ==========================================================================
+   §9  TOASTS
+   --------------------------------------------------------------------------
+   Radix drives these with data-state / data-swipe-direction attributes; all we
+   supply is the motion. Transform and opacity only, so a toast arriving can
+   never reflow the page underneath it.
+
+   The swipe-end case is deliberately a separate, faster keyframe: a dismissal
+   the user has already committed to with their thumb should leave immediately,
+   not play a decorative exit.
+   -------------------------------------------------------------------------- */
+@layer components {
+  .toast-root[data-swipe='move'] {
+    transform: translateX(var(--radix-toast-swipe-move-x));
+  }
+  .toast-root[data-swipe='cancel'] {
+    transform: translateX(0);
+    transition: transform 200ms var(--ease-out-soft);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @layer components {
+    @keyframes toast-in {
+      from { transform: translateX(0.75rem) scale(0.98); opacity: 0; }
+      to   { transform: translateX(0) scale(1);          opacity: 1; }
+    }
+    @keyframes toast-out {
+      to { transform: translateX(0.5rem) scale(0.98); opacity: 0; }
+    }
+    @keyframes toast-swipe-out {
+      to { transform: translateX(var(--radix-toast-swipe-end-x)); opacity: 0; }
+    }
+
+    .toast-root[data-state='open'] {
+      animation: toast-in var(--duration-enter) var(--ease-spring-soft) both;
+    }
+    .toast-root[data-state='closed'] {
+      animation: toast-out var(--duration-micro) var(--ease-out-soft) both;
+    }
+    .toast-root[data-swipe='end'] {
+      animation: toast-swipe-out 160ms var(--ease-out-soft) both;
+    }
+  }
+}
