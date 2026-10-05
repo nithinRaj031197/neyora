@@ -47,3 +47,11 @@ yarn-error.log*
 
 # wrangler local vars
 .dev.vars
+
+# Vercel CLI link state. Holds the project and org id — not a secret, but
+# machine-specific and no use to anyone else.
+.vercel
+
+# Added by the Vercel CLI. Broader than the rules above and harmless, but it is
+# the one that catches a .env variant nobody thought to name.
+.env*
