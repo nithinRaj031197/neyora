@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   BULK_ORDER_MESSAGE,
   canTransition,
+  checkoutFormSchema,
   DELIVERY_CITY,
   DELIVERY_NOTICE,
   MAX_PACKS_PER_ORDER,
@@ -523,5 +524,93 @@ describe('cursor pagination', () => {
   it('round-trips a cursor', () => {
     const cursor = encode(sameInstant, 'NEY-0012')
     expect(decode(cursor)).toEqual({ createdAt: sameInstant, reference: 'NEY-0012' })
+  })
+})
+
+describe('checkout form validation', () => {
+  /*
+   * The browser and the server must never disagree. A value the form accepts
+   * and the server rejects produces "please check the highlighted fields" with
+   * nothing highlighted — which is exactly the bug this suite now guards.
+   */
+  const valid = {
+    name: 'Nithin Raj',
+    phone: '9019274278',
+    line1: '23',
+    line2: '',
+    area: 'Vijayanagar (Bangalore)',
+    pincode: '560040',
+    landmark: '',
+    note: '',
+  }
+
+  /* The payload from the real failure report. */
+  it('accepts a bare door number as the building line', () => {
+    const result = checkoutFormSchema.safeParse(valid)
+    expect(result.success).toBe(true)
+  })
+
+  it.each(['4', '23', 'A1', '12/3', '#7'])('accepts the door number %s', (line1) => {
+    expect(checkoutFormSchema.safeParse({ ...valid, line1 }).success).toBe(true)
+  })
+
+  it('still requires the building line to be non-empty', () => {
+    expect(checkoutFormSchema.safeParse({ ...valid, line1: '' }).success).toBe(false)
+    expect(checkoutFormSchema.safeParse({ ...valid, line1: '   ' }).success).toBe(false)
+  })
+
+  /*
+   * The property that matters most: every value the form accepts must survive
+   * the server's own schema. They are composed from the same FIELD rules, and
+   * this asserts that stays true.
+   */
+  it.each([
+    ['a bare door number', { line1: '23' }],
+    ['a long area name', { area: 'Vijayanagar (Bangalore)' }],
+    ['a spaced phone number', { phone: '+91 90192 74278' }],
+    ['a spaced pincode', { pincode: '560 040' }],
+    ['no street or landmark', { line2: '', landmark: '' }],
+  ])('what the form accepts, the server accepts: %s', (_label, patch) => {
+    const form = checkoutFormSchema.safeParse({ ...valid, ...patch })
+    expect(form.success).toBe(true)
+    if (!form.success) return
+
+    const server = newOrderSchema.safeParse({
+      customer: {
+        name: form.data.name,
+        phone: form.data.phone,
+        address: {
+          line1: form.data.line1,
+          ...(form.data.line2 ? { line2: form.data.line2 } : {}),
+          area: form.data.area,
+          city: DELIVERY_CITY,
+          pincode: form.data.pincode,
+          ...(form.data.landmark ? { landmark: form.data.landmark } : {}),
+        },
+        ...(form.data.note ? { note: form.data.note } : {}),
+      },
+      items: [whiteOyster],
+    })
+    expect(server.success).toBe(true)
+  })
+
+  it.each([
+    ['an empty name', { name: '' }],
+    ['a short name', { name: 'A' }],
+    ['a landline', { phone: '0801234567' }],
+    ['a Chennai pincode', { pincode: '600001' }],
+    ['an empty area', { area: '' }],
+  ])('rejects %s in the browser, before a round trip', (_label, patch) => {
+    expect(checkoutFormSchema.safeParse({ ...valid, ...patch }).success).toBe(false)
+  })
+
+  /* Optional fields are plain strings: an input holds "" and never undefined. */
+  it('treats blank optional fields as valid', () => {
+    const result = checkoutFormSchema.safeParse(valid)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.line2).toBe('')
+      expect(result.data.landmark).toBe('')
+    }
   })
 })
