@@ -21,6 +21,31 @@ import { findAdmin, type AdminProfile, type Role } from './admins'
 const COOKIE = 'neyora_admin'
 const TTL_DAYS = 14
 
+/**
+ * The most sessions one admin may hold at once.
+ *
+ * ── WHY PER ADMIN, NOT A GLOBAL COUNT ────────────────────────────────────
+ *
+ * A cap on the whole collection would sign out whoever happened to be oldest
+ * when somebody else logged in — one person's sign-in logging out another, for
+ * no reason they could see. Capped per admin, the only session ever removed
+ * belongs to the same person who just signed in, and it is always their least
+ * recent one. That is the familiar "you have been signed out because you
+ * signed in on too many devices", and it is predictable.
+ *
+ * ── THIS IS TIDINESS, NOT SECURITY ───────────────────────────────────────
+ *
+ * The TTL index below already deletes every session fourteen days after it is
+ * created, so the collection cannot grow without bound. This bounds how many
+ * devices stay signed in at once, which is a different and smaller promise. An
+ * attacker with the password is not stopped by it — revoking on a password
+ * change is what does that.
+ *
+ * Ten is generous for a two-person farm: a laptop, a phone and a tablet each
+ * for two people is six, with room for a browser reinstall.
+ */
+const MAX_SESSIONS_PER_ADMIN = 10
+
 interface SessionRow {
   tokenHash: string
   email: string
@@ -35,6 +60,9 @@ async function sessions(): Promise<Collection<SessionRow>> {
     col.createIndex({ tokenHash: 1 }, { unique: true }),
     // MongoDB deletes expired sessions on its own — no cleanup job to forget.
     col.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
+    // Serves the prune's sort-and-skip, and revoking one admin's sessions.
+    // Without it both are a collection scan followed by an in-memory sort.
+    col.createIndex({ email: 1, createdAt: -1 }),
   ])
   return col
 }
@@ -72,6 +100,7 @@ export async function createSession(email: string): Promise<void> {
 
   const col = await sessions()
   await col.insertOne({ tokenHash: hashToken(token), email, createdAt: new Date(), expiresAt })
+  await pruneSessions(email)
 
   const jar = await cookies()
   jar.set(COOKIE, token, {
@@ -81,6 +110,45 @@ export async function createSession(email: string): Promise<void> {
     path: '/',
     expires: expiresAt,
   })
+}
+
+/**
+ * Keep only this admin's most recent sessions.
+ *
+ * Runs after a successful sign-in, so the session just created is always among
+ * the newest and can never prune itself — signing in and being signed out by
+ * the same action would be absurd, and it is worth being structurally
+ * impossible rather than merely unlikely.
+ *
+ * Deliberately best-effort. A failure here means one stale row survives, which
+ * matters to nobody; failing the sign-in over it would matter a great deal.
+ */
+async function pruneSessions(email: string): Promise<void> {
+  try {
+    const col = await sessions()
+    const stale = await col
+      .find({ email }, { projection: { tokenHash: 1, _id: 0 } })
+      .sort({ createdAt: -1 })
+      .skip(MAX_SESSIONS_PER_ADMIN)
+      .toArray()
+
+    if (stale.length === 0) return
+    await col.deleteMany({ tokenHash: { $in: stale.map((row) => row.tokenHash) } })
+  } catch (error) {
+    console.error('[auth] could not prune old sessions', error)
+  }
+}
+
+/**
+ * Sign out every device for one admin.
+ *
+ * The reason sessions live in the database rather than in a signed token: this
+ * is a delete. Call it when a password changes, or when a laptop goes missing.
+ */
+export async function revokeAllSessions(email: string): Promise<number> {
+  const col = await sessions()
+  const result = await col.deleteMany({ email })
+  return result.deletedCount
 }
 
 export async function destroySession(): Promise<void> {

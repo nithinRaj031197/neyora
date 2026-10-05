@@ -198,3 +198,68 @@ describe('external links', () => {
     }
   })
 })
+
+describe('session retention', () => {
+  /*
+   * The prune keeps the N most recent sessions for ONE admin. These test the
+   * selection rule itself — which rows are chosen and which are spared —
+   * because that is where the harm would be: signing out the wrong person, or
+   * signing out the session that was just created.
+   */
+  const MAX = 10
+
+  const session = (email: string, minutesAgo: number) => ({
+    email,
+    tokenHash: `${email}-${minutesAgo}`,
+    createdAt: new Date(Date.now() - minutesAgo * 60_000),
+  })
+
+  /** The same sort-and-skip the repository hands to MongoDB. */
+  const toPrune = <T extends { email: string; createdAt: Date }>(rows: T[], email: string) =>
+    rows
+      .filter((row) => row.email === email)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(MAX)
+
+  it('keeps everything while under the cap', () => {
+    const rows = Array.from({ length: MAX }, (_, i) => session('a@neyora.in', i))
+    expect(toPrune(rows, 'a@neyora.in')).toHaveLength(0)
+  })
+
+  it('removes only what is beyond the cap', () => {
+    const rows = Array.from({ length: 14 }, (_, i) => session('a@neyora.in', i))
+    expect(toPrune(rows, 'a@neyora.in')).toHaveLength(4)
+  })
+
+  it('removes the OLDEST, never the newest', () => {
+    const rows = Array.from({ length: 12 }, (_, i) => session('a@neyora.in', i))
+    const pruned = toPrune(rows, 'a@neyora.in').map((r) => r.tokenHash)
+    // minutesAgo 10 and 11 are the two oldest.
+    expect(pruned).toEqual(['a@neyora.in-10', 'a@neyora.in-11'])
+  })
+
+  /*
+   * The session just created is always the newest, so it can never prune
+   * itself. Signing in and being signed out by the same action would be
+   * absurd, and it is worth being structurally impossible.
+   */
+  it('never prunes the session that was just created', () => {
+    const rows = [session('a@neyora.in', 0), ...Array.from({ length: 20 }, (_, i) => session('a@neyora.in', i + 1))]
+    const pruned = toPrune(rows, 'a@neyora.in').map((r) => r.tokenHash)
+    expect(pruned).not.toContain('a@neyora.in-0')
+  })
+
+  /*
+   * THE REASON THE CAP IS PER ADMIN. A global cap would let one person's
+   * sign-in sign out somebody else — for no reason they could see.
+   */
+  it('never touches another admin', () => {
+    const rows = [
+      ...Array.from({ length: 20 }, (_, i) => session('a@neyora.in', i)),
+      ...Array.from({ length: 3 }, (_, i) => session('b@neyora.in', i)),
+    ]
+    const pruned = toPrune(rows, 'a@neyora.in')
+    expect(pruned.every((r) => r.email === 'a@neyora.in')).toBe(true)
+    expect(toPrune(rows, 'b@neyora.in')).toHaveLength(0)
+  })
+})
