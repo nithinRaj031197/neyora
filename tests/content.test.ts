@@ -58,10 +58,10 @@ function contentImageExists(path: string): boolean {
 describe('content loads', () => {
   it('parses every file without throwing', async () => {
     await expect(getSiteSettings()).resolves.toBeDefined()
+    await expect(getPublishedProducts()).resolves.toBeDefined()
     expect(() => {
       getHomepage()
       getAllRecipes()
-      getPublishedProducts()
       getAllPages()
       getFaqs()
       getTestimonials()
@@ -73,7 +73,7 @@ describe('content loads', () => {
 
   it('ships enough content that a fresh clone is not an empty site', async () => {
     expect(getPublishedRecipes().length).toBeGreaterThanOrEqual(2)
-    expect(getPublishedProducts().length).toBeGreaterThanOrEqual(1)
+    expect((await getPublishedProducts()).length).toBeGreaterThanOrEqual(1)
     expect(getAllPages().length).toBeGreaterThanOrEqual(9)
     expect(getFaqs().length).toBeGreaterThanOrEqual(5)
   })
@@ -119,7 +119,7 @@ describe('referential integrity', () => {
     const categories = new Set(
       [...getProductCategories().map((c) => c.slug), 'mushrooms', 'fresh-produce'],
     )
-    for (const product of getPublishedProducts()) {
+    for (const product of await getPublishedProducts()) {
       if (!product.category) continue
       expect(categories).toContain(product.category)
     }
@@ -164,7 +164,7 @@ describe('images', () => {
     for (const recipe of getAllRecipes()) {
       if (recipe.cover) found.push({ path: recipe.cover.src, where: `recipe ${recipe.slug}` })
     }
-    for (const product of getPublishedProducts()) {
+    for (const product of await getPublishedProducts()) {
       for (const image of product.images) {
         found.push({ path: image.src, where: `product ${product.slug}` })
       }
@@ -187,11 +187,11 @@ describe('images', () => {
     expect(missing, `missing image files: ${JSON.stringify(missing)}`).toEqual([])
   })
 
-  it('gives every image real alt text', () => {
+  it('gives every image real alt text', async () => {
     for (const recipe of getAllRecipes()) {
       if (recipe.cover) expect(recipe.cover.alt.length).toBeGreaterThan(5)
     }
-    for (const product of getPublishedProducts()) {
+    for (const product of await getPublishedProducts()) {
       for (const image of product.images) expect(image.alt.length).toBeGreaterThan(5)
     }
   })
@@ -299,7 +299,7 @@ describe('the packaging QR destination', () => {
       '/recipes',
       '/products',
       ...getPublishedRecipes().map((r) => `/recipes/${r.slug}`),
-      ...getPublishedProducts().map((p) => `/products/${p.slug}`),
+      ...(await getPublishedProducts()).map((p) => `/products/${p.slug}`),
       ...getRecipeCategories().map((c) => `/recipes/category/${c.slug}`),
       ...getAllPages().map((p) => `/${p.slug}`),
     ]
@@ -349,17 +349,17 @@ describe('FAQs', () => {
 })
 
 describe('products', () => {
-  it('never advertises an MRP below the selling price', () => {
-    for (const product of getPublishedProducts()) {
+  it('never advertises an MRP below the selling price', async () => {
+    for (const product of await getPublishedProducts()) {
       if (product.mrp !== undefined && product.price !== undefined) {
         expect(product.mrp).toBeGreaterThanOrEqual(product.price)
       }
     }
   })
 
-  it('filters by category', () => {
-    expect(queryProducts({ category: 'mushrooms' }).length).toBeGreaterThan(0)
-    expect(queryProducts({ category: 'does-not-exist' })).toEqual([])
+  it('filters by category', async () => {
+    expect((await queryProducts({ category: 'mushrooms' })).length).toBeGreaterThan(0)
+    expect(await queryProducts({ category: 'does-not-exist' })).toEqual([])
   })
 })
 

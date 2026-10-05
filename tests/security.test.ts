@@ -110,11 +110,38 @@ describe('secrets', () => {
     expect(gitignore).toMatch(/\.env\*?\.local|\.env\.local/)
   })
 
+  /*
+   * The PEM pattern requires the header AND a real base64 body.
+   *
+   * Matching the header alone flagged `lib/sheets/auth.ts`, which has to name
+   * the delimiter in order to strip it — a parser, not a key. Requiring 40+
+   * base64 characters after it keeps every genuine leaked key caught (the
+   * shortest real PKCS#8 body is hundreds of characters) while letting code
+   * that merely talks about the format through. The case below proves the
+   * tightened pattern still catches a key.
+   */
+  const PRIVATE_KEY_PATTERN =
+    /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\\n"']*[A-Za-z0-9+/]{40,}/
+
+  it('still recognises an actual private key', () => {
+    const realistic =
+      '-----BEGIN PRIVATE KEY-----\n' +
+      'MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDaLKJhGfdsaPQw\n' +
+      '-----END PRIVATE KEY-----'
+    expect(PRIVATE_KEY_PATTERN.test(realistic)).toBe(true)
+    // ...including the single-line form an env var holds.
+    expect(
+      PRIVATE_KEY_PATTERN.test(
+        '"-----BEGIN PRIVATE KEY-----\\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDaLKJhGfds\\n"',
+      ),
+    ).toBe(true)
+  })
+
   it('contains no API-key-shaped strings in the source tree', () => {
     const patterns = [
       /sb_secret_[A-Za-z0-9]{16,}/,
       /gh[pousr]_[A-Za-z0-9]{20,}/,
-      /-----BEGIN [A-Z ]*PRIVATE KEY-----/,
+      PRIVATE_KEY_PATTERN,
     ]
     for (const file of [...SOURCES, ...walk(join(ROOT, 'content'))]) {
       const content = readFileSync(file, 'utf8')
