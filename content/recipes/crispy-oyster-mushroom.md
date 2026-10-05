@@ -18,7 +18,7 @@ servingsLabel: as a starter for 3
 difficulty: medium
 cuisine: Indo-Chinese
 course: Starter
-recommendedPackSize: 200g
+recommendedPackSize: 250g
 basePackGrams: 200
 isScalable: true
 ingredients:
@@ -78,10 +78,10 @@ sortOrder: 3
 status: draft
 publishedAt: "2026-09-04"
 seo:
-  title: Crispy Oyster Mushroom — Shatteringly Crisp Starter (200 g)
+  title: Crispy Oyster Mushroom — Shatteringly Crisp Starter (250 g)
   description: >-
     A rice-flour and cornflour crust that shatters. Double-fried crispy oyster
-    mushrooms from one 200 g pack, with chaat masala and lime.
+    mushrooms from one 250 g pack, with chaat masala and lime.
 isDemo: true
 ---
 

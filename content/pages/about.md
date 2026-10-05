@@ -6,10 +6,12 @@ subtitle: >-
   A natural-food brand that started with mushrooms because mushrooms are the
   hardest thing to fake.
 hero:
-  src: /images/farm/harvest-hands.webp
-  alt: A grower's hands lifting a cluster of oyster mushrooms at harvest
-  width: 1400
-  height: 1050
+  src: /images/about/growing-room-cluster.webp
+  alt: >-
+    A cluster of white oyster mushrooms fruiting from a substrate block in the
+    NEYORA growing room, morning light behind them
+  width: 1255
+  height: 941
 sortOrder: 1
 status: published
 publishedAt: "2026-08-01"

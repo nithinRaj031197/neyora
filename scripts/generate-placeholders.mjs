@@ -20,6 +20,10 @@
  *
  * They are NOT brand photography. Shoot direction: docs/BRAND_GUIDELINES.md §5.
  *
+ * Only the slots STILL AWAITING a photograph are listed below. As each real
+ * .webp lands, delete its placeholder and its entry here — otherwise this
+ * script quietly resurrects files the site no longer serves.
+ *
  *   node scripts/generate-placeholders.mjs
  */
 import { mkdir, writeFile } from 'node:fs/promises'
@@ -488,61 +492,22 @@ const SPECS = [
    * has to honour the same framing — it is written into the shot list in
    * docs/BRAND_GUIDELINES.md §5.
    */
-  { file: 'images/hero/hero-desktop.svg', W: 2400, H: 1350, ...dark, scene: 'cluster',
-    label: 'Oyster mushroom cluster', subject: 0.27, count: 11, focusX: 0.78, focusY: 0.42,
-    lightX: '14%', lightY: '18%' },
-  { file: 'images/hero/hero-mobile.svg', W: 1200, H: 1800, ...dark, scene: 'cluster',
-    label: 'Oyster mushroom cluster', subject: 0.3, count: 9, focusX: 0.54, focusY: 0.22,
-    lightX: '22%', lightY: '12%' },
 
-  // --- Chapter 2: close → cluster → growing room → farm
-  { file: 'images/mushrooms/cap-macro.svg', W: 1600, H: 2000, ...dark, scene: 'cluster',
-    label: 'A single oyster mushroom cap', subject: 0.62, count: 4, focusX: 0.46, focusY: 0.52,
-    lightX: '18%', lightY: '22%' },
-  { file: 'images/mushrooms/cluster.svg', W: 1800, H: 1800, ...dark, scene: 'cluster',
-    label: 'A whole oyster mushroom cluster', subject: 0.3, count: 12, focusX: 0.5, focusY: 0.5,
-    lightX: '20%', lightY: '16%' },
-  { file: 'images/farm/growing-room.svg', W: 2000, H: 1250, ...earthy, scene: 'farm',
-    label: 'Substrate bags in the growing room', rows: 4, lightX: '12%', lightY: '10%' },
   { file: 'images/farm/farm-wide.svg', W: 2400, H: 1350, ...earthy, scene: 'farm',
     label: 'The farm, wide', rows: 5, lightX: '86%', lightY: '12%' },
 
-  // --- Chapter 3: the macro moment. Gills, texture, moisture.
-  { file: 'images/mushrooms/gills-macro.svg', W: 2000, H: 2500, ...dark, scene: 'cluster',
-    label: 'Oyster mushroom gills in macro', subject: 0.82, count: 3, focusX: 0.44, focusY: 0.5,
-    lightX: '88%', lightY: '26%' },
 
-  // --- Chapter 4: the journey
-  { file: 'images/journey/grown.svg', W: 1400, H: 1750, ...forest, scene: 'farm',
-    label: 'Mushrooms growing on substrate', rows: 3, lightX: '16%', lightY: '14%' },
-  { file: 'images/journey/harvested.svg', W: 1400, H: 1750, ...earthy, scene: 'cluster',
-    label: 'A freshly harvested cluster', subject: 0.38, count: 8, focusX: 0.48, focusY: 0.56,
-    lightX: '78%', lightY: '18%' },
-  { file: 'images/journey/packed.svg', W: 1400, H: 1750, ...pale, scene: 'pack',
-    label: 'The packed 200 g pack', lightX: '24%', lightY: '14%' },
-  { file: 'images/journey/table.svg', W: 1400, H: 1750, ...dark, scene: 'food',
-    label: 'Cooked mushrooms at the table', lightX: '30%', lightY: '20%' },
 
   // --- Chapter 5: product
   { file: 'images/products/oyster-mushrooms-200g.svg', W: 1800, H: 2250, ...pale, scene: 'pack',
     label: 'Fresh oyster mushrooms, 200 g pack', lightX: '20%', lightY: '12%' },
   { file: 'images/products/oyster-mushrooms-detail.svg', W: 1400, H: 1400, ...pale, scene: 'pack',
     label: 'Pack detail', lightX: '76%', lightY: '18%' },
-  { file: 'images/mushrooms/cluster-closeup.svg', W: 1400, H: 1750, ...dark, scene: 'cluster',
-    label: 'A cluster held in the hand', subject: 0.46, count: 7, focusX: 0.5, focusY: 0.54,
-    lightX: '24%', lightY: '20%' },
 
-  // --- Chapter 6: food
-  { file: 'images/recipes/garlic-butter-oyster-mushrooms.svg', W: 2000, H: 1500, ...dark, scene: 'food',
-    label: 'Garlic butter oyster mushrooms in a pan', lightX: '26%', lightY: '16%' },
-  { file: 'images/recipes/pepper-oyster-mushroom-fry.svg', W: 1600, H: 2000, ...earthy, scene: 'food',
-    label: 'Pepper oyster mushroom fry', lightX: '74%', lightY: '18%' },
   { file: 'images/recipes/crispy-oyster-mushroom.svg', W: 2000, H: 1500, ...dark, scene: 'food',
     label: 'Crispy oyster mushrooms', lightX: '68%', lightY: '14%' },
   { file: 'images/recipes/category-quick.svg', W: 1600, H: 1000, ...earthy, scene: 'food',
     label: 'Quick mushroom cooking', lightX: '18%', lightY: '16%' },
-  { file: 'images/food/food-wide.svg', W: 2400, H: 1200, ...dark, scene: 'food',
-    label: 'The table', lightX: '50%', lightY: '12%' },
 
   // --- Chapter 7: farm detail
   { file: 'images/farm/harvest-hands.svg', W: 1600, H: 2000, ...earthy, scene: 'cluster',

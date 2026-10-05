@@ -121,7 +121,8 @@ Journey: preserve the verified desktop sticky storytelling behaviour. Disable
 sticky behaviour on mobile and recompose into clean stacked story blocks. Do
 not introduce horizontal overflow or long empty viewports.
 
-Product: Fresh Oyster Mushrooms, 200 g. Keep the section premium and commercial
+Products: Fresh White Oyster Mushrooms and Fresh Grey Oyster Mushrooms, 250 g.
+Keep the section premium and commercial
 without turning it into a conventional ecommerce card. Do not invent packaging
 details.
 

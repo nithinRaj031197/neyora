@@ -20,7 +20,7 @@ const SLUG_TO_PATH: Record<string, string> = {
   'contact-intro': '/contact',
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date()
 
   const entries: MetadataRoute.Sitemap = [
@@ -40,7 +40,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })
   }
 
-  for (const product of getPublishedProducts()) {
+  for (const product of await getPublishedProducts()) {
     entries.push({
       url: absoluteUrl(`/products/${product.slug}`),
       lastModified: now,

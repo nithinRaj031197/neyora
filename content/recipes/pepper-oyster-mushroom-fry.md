@@ -18,7 +18,7 @@ servingsLabel: as a side for 1
 difficulty: medium
 cuisine: South Indian
 course: Side
-recommendedPackSize: 200g
+recommendedPackSize: 250g
 basePackGrams: 100
 isScalable: true
 ingredients:
