@@ -14,7 +14,14 @@ export function generateStaticParams() {
   return getRecipeCategories().map((category) => ({ slug: category.slug }))
 }
 
-export const dynamicParams = false
+/*
+ * `dynamicParams = true` for the same reason as the product route: a path that
+ * is ever revalidated cannot be regenerated when this is false, and answers
+ * `NoFallbackError` instead. Recipes are not revalidated today, but the cost of
+ * the safe setting is nothing — known slugs are still prerendered, and an
+ * unknown one reaches `notFound()`.
+ */
+export const dynamicParams = true
 
 export async function generateMetadata({
   params,

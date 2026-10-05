@@ -27,14 +27,20 @@ import { availablePacksFor } from '@/lib/utils/scale'
 
 /**
  * Content is known at build time, so every recipe is prerendered as static
- * HTML. `dynamicParams: false` makes an unknown slug a 404 rather than an
- * attempted render.
+ * HTML.
  */
 export function generateStaticParams() {
   return getPublishedRecipes().map((recipe) => ({ slug: recipe.slug }))
 }
 
-export const dynamicParams = false
+/*
+ * `dynamicParams = true` for the same reason as the product route: a path that
+ * is ever revalidated cannot be regenerated when this is false, and answers
+ * `NoFallbackError` instead. Recipes are not revalidated today, but the cost of
+ * the safe setting is nothing — known slugs are still prerendered, and an
+ * unknown one reaches `notFound()`.
+ */
+export const dynamicParams = true
 
 export async function generateMetadata({
   params,
