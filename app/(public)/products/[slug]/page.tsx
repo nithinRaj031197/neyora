@@ -12,6 +12,7 @@ import { NutritionTable } from '@/components/public/NutritionTable'
 import { Breadcrumbs } from '@/components/public/Breadcrumbs'
 import { RecipeCard } from '@/components/public/RecipeCard'
 import { OrderForm } from '@/components/public/OrderForm'
+import { VarietyPicker } from '@/components/public/VarietyPicker'
 import {
   availabilityLabel,
   getProductBySlug,
@@ -26,11 +27,24 @@ import { buildMetadata } from '@/lib/seo/metadata'
 import { breadcrumbJsonLd, productJsonLd } from '@/lib/seo/jsonld'
 import { formatPrice } from '@/lib/utils/format'
 
-export function generateStaticParams() {
-  return getPublishedProducts().map((product) => ({ slug: product.slug }))
+export async function generateStaticParams() {
+  return (await getPublishedProducts()).map((product) => ({ slug: product.slug }))
 }
 
-export const dynamicParams = false
+/*
+ * `dynamicParams = true`, even though every slug is known at build time.
+ *
+ * It must be true because this route is revalidated: an admin saving a product
+ * calls `revalidatePath`, and with `dynamicParams = false` the invalidated
+ * path has no way to be regenerated — Next answers `NoFallbackError` and the
+ * page 404s until the next deploy. That was real: saving any product in the
+ * admin took BOTH product pages down.
+ *
+ * Nothing is lost by allowing it. Every known slug is still prerendered by
+ * `generateStaticParams`, and an unknown one reaches `notFound()` a few lines
+ * below — which is the same 404, arrived at honestly.
+ */
+export const dynamicParams = true
 
 export async function generateMetadata({
   params,
@@ -39,7 +53,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params
   const settings = await getSiteSettings()
-  const product = getProductBySlug(slug)
+  const product = await getProductBySlug(slug)
 
   if (!product) {
     return buildMetadata({
@@ -64,7 +78,7 @@ export async function generateMetadata({
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const settings = await getSiteSettings()
-  const product = getProductBySlug(slug)
+  const product = await getProductBySlug(slug)
 
   if (!product) notFound()
 
@@ -72,11 +86,30 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const recipeCategories = getRecipeCategories()
   const { recipes } = queryRecipes({ limit: 3 })
 
+  /*
+   * Support, not ordering.
+   *
+   * Every order now goes through the form, so this opens a question — not a
+   * basket. A WhatsApp "order" produced nothing the admin could see: no row,
+   * no reference, no payment state, no notification. One canonical path means
+   * one place to look for what was sold.
+   */
   const whatsapp = await whatsappLink(
-    `Hi ${settings.brandName}, I would like to order ${product.name}${
+    `Hi ${settings.brandName}, I have a question about ${product.name}${
       product.weightLabel ? ` (${product.weightLabel})` : ''
     }.`,
   )
+
+  /*
+   * The sibling varieties, for the picker. Same category, and each one carries
+   * a short variety label — which is what distinguishes "two varieties of the
+   * same thing" from "two unrelated products".
+   */
+  const varieties = (await getPublishedProducts())
+    .filter((p) => p.varietyLabel && p.category === product.category)
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+
+  const orderable = product.availability === 'in_stock' || product.availability === 'low_stock'
 
   const price = formatPrice(product.price ?? null, product.currency)
   const showMrp =
@@ -154,44 +187,54 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               </Badge>
             </div>
 
+            <VarietyPicker varieties={varieties} currentSlug={product.slug} />
+
             {/*
-              Two ways to buy, deliberately. The form records the order so it
-              appears in the admin dashboard; WhatsApp stays because that is
-              how customers already order and taking it away would cost sales.
-              Either way the next step is the same: we phone to confirm.
+              One way to buy. The form is the canonical order path: it records
+              the order, assigns a reference, sets payment to pending and
+              notifies the admin. The ordering form is shown only when the
+              variety can actually be picked — the server re-checks the same
+              rule, so a stale tab cannot order a sold-out pack.
             */}
-            {typeof product.price === 'number' ? (
+            {orderable && typeof product.price === 'number' ? (
               <div className="mt-9">
                 <OrderForm
                   productSlug={product.slug}
                   productName={product.name}
+                  varietyLabel={product.varietyLabel}
                   packLabel={product.weightLabel ?? product.unitLabel ?? 'pack'}
                   unitPrice={product.price}
                   currency={product.currency}
                   whatsappHref={whatsapp?.href ?? null}
                 />
               </div>
-            ) : null}
-
-            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-              {whatsapp ? (
-                <a
-                  href={whatsapp.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="press inline-flex h-13 flex-1 items-center justify-center gap-2.5 rounded-xs border border-forest/35 px-7 text-[0.9375rem] font-medium tracking-[0.04em] text-forest uppercase transition-colors hover:border-forest hover:bg-forest/5"
-                >
-                  <Icon name="whatsapp" size={19} />
-                  Order on WhatsApp
-                </a>
-              ) : null}
-              <Link
-                href="/contact"
-                className="press inline-flex h-13 items-center justify-center rounded-xs border border-forest/35 px-7 text-[0.9375rem] font-medium tracking-[0.04em] text-forest uppercase transition-colors hover:border-forest hover:bg-forest/5"
-              >
-                Enquire
-              </Link>
-            </div>
+            ) : (
+              <div className="mt-9 rounded-sm border border-beige bg-ivory-soft p-6">
+                <p className="text-[0.9375rem] leading-relaxed text-earth-soft">
+                  {product.name} is not available to order right now. Message us
+                  and we will tell you the day the next crop is ready.
+                </p>
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                  {whatsapp ? (
+                    <a
+                      href={whatsapp.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="press inline-flex h-13 flex-1 items-center justify-center gap-2.5 rounded-xs border border-forest/35 px-7 text-[0.9375rem] font-medium tracking-[0.04em] text-forest uppercase transition-colors hover:border-forest hover:bg-forest/5"
+                    >
+                      <Icon name="whatsapp" size={19} />
+                      Ask on WhatsApp
+                    </a>
+                  ) : null}
+                  <Link
+                    href="/contact"
+                    className="press inline-flex h-13 items-center justify-center rounded-xs border border-forest/35 px-7 text-[0.9375rem] font-medium tracking-[0.04em] text-forest uppercase transition-colors hover:border-forest hover:bg-forest/5"
+                  >
+                    Enquire
+                  </Link>
+                </div>
+              </div>
+            )}
 
             {product.highlights.length > 0 ? (
               <ul className="mt-10 flex flex-col gap-3 border-t border-beige pt-8">

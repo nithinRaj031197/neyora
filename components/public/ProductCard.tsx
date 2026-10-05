@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Picture } from '@/components/ui/Picture'
 import { Badge } from '@/components/ui/Badge'
+import { Icon } from '@/components/ui/Icon'
 import { formatPrice } from '@/lib/utils/format'
 import { availabilityLabel } from '@/lib/content'
 import type { Category, Product } from '@/types/content'
@@ -70,6 +71,30 @@ export function ProductCard({
           </p>
         ) : null}
       </Link>
+
+      {/*
+        Outside the <Link> on purpose: an anchor inside an anchor is invalid
+        HTML, and browsers resolve it by breaking one of the two.
+
+        This used to be a quantity stepper that opened WhatsApp with the order
+        written out. It was removed because those orders never reached the
+        database: no reference, no payment state, no admin notification, no
+        record that the sale happened. Ordering now has one path, and it is the
+        product page.
+      */}
+      {unavailable ? (
+        <p className="mt-4 text-[0.875rem] text-earth-muted">
+          Out of stock — the next crop is on its way.
+        </p>
+      ) : (
+        <Link
+          href={`/products/${product.slug}`}
+          className="press cta-arrow mt-4 inline-flex h-11 items-center justify-center gap-2 rounded-xs border border-forest/35 px-5 text-[0.8125rem] font-medium tracking-[0.06em] text-forest uppercase transition-colors hover:border-forest hover:bg-forest/5"
+        >
+          Order {product.weightLabel ? `· ${product.weightLabel}` : ''}
+          <Icon name="arrow-right" size={16} />
+        </Link>
+      )}
     </article>
   )
 }

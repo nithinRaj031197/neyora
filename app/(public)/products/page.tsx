@@ -33,7 +33,7 @@ export default async function ProductsPage({
 }) {
   const { category } = await searchParams
   const categories = getProductCategories()
-  const products = queryProducts({ category })
+  const products = await queryProducts({ category })
 
   const chipClass = (active: boolean) =>
     `inline-flex h-9 items-center rounded-xs border px-3.5 text-[0.8125rem] font-medium tracking-[0.04em] uppercase transition-colors ${
@@ -52,8 +52,9 @@ export default async function ProductsPage({
             Harvested to order, never to stock
           </h1>
           <p className="mt-6 max-w-[58ch] text-[1.125rem] leading-relaxed text-earth-soft">
-            One crop today, more to come. Everything here is picked the morning it ships and graded
-            by hand before it goes into a pack.
+            Two varieties of oyster mushroom, grown in the same room to the same
+            routine. Everything here is picked the morning it ships and graded by
+            hand before it goes into a pack.
           </p>
         </Container>
       </header>

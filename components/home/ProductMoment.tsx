@@ -3,6 +3,7 @@ import { Picture } from '@/components/ui/Picture'
 import { Icon } from '@/components/ui/Icon'
 import { Badge } from '@/components/ui/Badge'
 import { Eyebrow } from './Display'
+import { VarietyPicker } from '@/components/public/VarietyPicker'
 import { formatPrice } from '@/lib/utils/format'
 import { availabilityLabel } from '@/lib/content'
 import type { Product, ProductChapter } from '@/types/content'
@@ -21,10 +22,19 @@ import type { WhatsAppLink } from '@/lib/content'
 export function ProductMoment({
   chapter,
   product,
+  varieties,
   whatsapp,
 }: {
   chapter: ProductChapter
   product: Product
+  /**
+   * Every variety on sale, not just the featured one.
+   *
+   * The chapter headline is the only place on the homepage that names what we
+   * grow, and naming one variety there left the second discoverable only by
+   * going to the shop — which most visitors never do.
+   */
+  varieties: Product[]
   whatsapp: WhatsAppLink | null
 }) {
   const price = formatPrice(product.price ?? null, product.currency)
@@ -113,25 +123,38 @@ export function ProductMoment({
                 </Badge>
               </div>
 
+              {/*
+                Ordering goes to the product page, not to WhatsApp. A wa.me
+                "order" produced no row, no reference, no payment state and no
+                admin alert — so the website is now the one path, and WhatsApp
+                is where questions go.
+              */}
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href={`/products/${product.slug}`}
+                  className="press cta-arrow inline-flex h-14 flex-1 items-center justify-center gap-2.5 rounded-xs border border-forest bg-forest px-7 text-[0.875rem] font-medium tracking-[0.06em] text-ivory uppercase transition-colors hover:bg-forest-soft"
+                >
+                  {chapter.ctaLabel ?? 'Order now'}
+                  <Icon name="arrow-right" size={18} />
+                </Link>
                 {whatsapp ? (
                   <a
                     href={whatsapp.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="press cta-arrow inline-flex h-14 flex-1 items-center justify-center gap-2.5 rounded-xs border border-forest bg-forest px-7 text-[0.875rem] font-medium tracking-[0.06em] text-ivory uppercase transition-colors hover:bg-forest-soft"
+                    className="press inline-flex h-14 items-center justify-center gap-2.5 rounded-xs border border-forest/35 px-7 text-[0.875rem] font-medium tracking-[0.06em] text-forest uppercase transition-colors hover:border-forest hover:bg-forest/5"
                   >
                     <Icon name="whatsapp" size={19} />
-                    {chapter.ctaLabel ?? 'Order on WhatsApp'}
+                    Ask a question
                   </a>
                 ) : null}
-                <Link
-                  href={`/products/${product.slug}`}
-                  className="press inline-flex h-14 items-center justify-center rounded-xs border border-forest/35 px-7 text-[0.875rem] font-medium tracking-[0.06em] text-forest uppercase transition-colors hover:border-forest hover:bg-forest/5"
-                >
-                  Full details
-                </Link>
               </div>
+
+              {/*
+                Both varieties, on the homepage. Neither is marked current —
+                this is a first introduction, not a selection.
+              */}
+              <VarietyPicker varieties={varieties} currentSlug="" />
             </div>
 
             {product.highlights.length > 0 ? (

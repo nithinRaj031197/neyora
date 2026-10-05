@@ -201,8 +201,10 @@ product:
     Whole clusters, not loose caps. Firm enough to squeak when you tear them.
     A clean, faintly sweet scent. Harvest date on the pack, so you are never
     guessing.
-  productSlug: fresh-oyster-mushrooms-200g
-  ctaLabel: Order on WhatsApp
+  productSlug: fresh-oyster-mushrooms-250g
+  # Ordering happens on the product page, which records the order. WhatsApp is
+  # for questions.
+  ctaLabel: Order now
 
 # ── 06 ─ FOOD ─────────────────────────────────── dark, cinematic, appetite ─
 food:

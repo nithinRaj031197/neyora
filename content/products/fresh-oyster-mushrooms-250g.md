@@ -1,15 +1,17 @@
 ---
-name: Fresh Oyster Mushrooms
-slug: fresh-oyster-mushrooms-200g
+name: Fresh White Oyster Mushrooms
+slug: fresh-oyster-mushrooms-250g
 shortDescription: >-
   White oyster mushrooms, hand-picked the morning they ship. Firm caps, clean
-  scent, 200 g pack.
+  scent, 250 g pack.
 category: mushrooms
 variety: Pleurotus ostreatus (White Oyster)
+varietyLabel: White oyster
 origin: NEYORA farm, Karnataka
-weightGrams: 200
-weightLabel: 200 g
+weightGrams: 250
+weightLabel: 250 g
 price: 100
+mrp: 150
 currency: INR
 unitLabel: pack
 # Real photographs of the mushrooms themselves, not the pack.
@@ -22,10 +24,10 @@ unitLabel: pack
 # The pack shots stay on the shot list in docs/BRAND_GUIDELINES.md §5; add them
 # here once the real packaging has been photographed.
 images:
-  - src: /images/mushrooms/cluster.webp
-    alt: A whole cluster of fresh white oyster mushrooms resting on natural linen
-    width: 1800
-    height: 1800
+  - src: /images/products/white-oyster-250g.webp
+    alt: A cluster of fresh white oyster mushrooms fruiting from pasteurised substrate
+    width: 1600
+    height: 1600
   - src: /images/mushrooms/cluster-closeup.webp
     alt: Two hands cradling a cluster of oyster mushrooms, showing its size
     width: 1600
@@ -68,10 +70,10 @@ sortOrder: 1
 status: published
 publishedAt: "2026-08-15"
 seo:
-  title: Fresh Oyster Mushrooms 200 g — Harvested to Order
+  title: Fresh White Oyster Mushrooms 250 g — Harvested to Order
   description: >-
     White oyster mushrooms hand-picked the morning they ship. Firm clusters,
-    clean scent, harvest date on every 200 g pack.
+    clean scent, harvest date on every 250 g pack.
 isDemo: true
 ---
 
@@ -85,7 +87,7 @@ the meaty bite it is prized for.
 
 ## What you get
 
-A 200 g pack of whole clusters — not loose caps. Clusters keep better, and they
+A 250 g pack of whole clusters — not loose caps. Clusters keep better, and they
 tear beautifully along the grain, which is exactly what you want for a hard
 sear.
 

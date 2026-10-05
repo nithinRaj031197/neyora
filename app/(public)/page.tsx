@@ -9,6 +9,7 @@ import { Quality } from '@/components/home/Quality'
 import { FinalFrame } from '@/components/home/FinalFrame'
 import {
   getHomepage,
+  getHomepageVisibility,
   getProductBySlug,
   getPublishedProducts,
   getRecipeCategories,
@@ -57,35 +58,49 @@ export default async function HomePage() {
   const settings = await getSiteSettings()
   const home = getHomepage()
 
+  /*
+   * Visibility is a separate read because an admin can switch a chapter off
+   * without a deploy. The file's own `enabled` flag is still the default; this
+   * only overrides it, so the page renders correctly with no database.
+   */
+  const show = await getHomepageVisibility()
+
   // The featured product: the one named in the chapter, else the first
   // featured one, else simply the first published. Never an empty chapter.
   const product =
-    (home.product.productSlug ? getProductBySlug(home.product.productSlug) : null) ??
-    getPublishedProducts()[0] ??
+    (home.product.productSlug ? await getProductBySlug(home.product.productSlug) : null) ??
+    (await getPublishedProducts())[0] ??
     null
 
-  const recipes = home.food.enabled ? queryRecipes({ limit: 3 }).recipes : []
+  // Every variety on sale, so the homepage can introduce both rather than
+  // leaving the second one to be found in the shop.
+  const varieties = (await getPublishedProducts())
+    .filter((p) => p.varietyLabel && p.category === product?.category)
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+
+  const recipes = show.food ? queryRecipes({ limit: 3 }).recipes : []
   const recipeCategories = getRecipeCategories()
   const testimonial = getTestimonials({ featuredOnly: true, limit: 1 })[0]
 
   return (
     <div className="neyora-home">
-      {home.hero.enabled ? <Hero hero={home.hero} /> : null}
+      {show.hero ? <Hero hero={home.hero} /> : null}
 
-      {home.nature.enabled ? (
+      {show.nature ? (
         // Nutrition comes from the product, not a second copy in the
         // homepage file — one place to correct when the lab report lands.
         <Nature nature={home.nature} nutrition={product?.nutrition} />
       ) : null}
 
-      {home.mushroom.enabled ? <Mushroom mushroom={home.mushroom} /> : null}
+      {show.mushroom ? <Mushroom mushroom={home.mushroom} /> : null}
 
-      {home.journey.enabled ? <Journey journey={home.journey} /> : null}
+      {show.journey ? <Journey journey={home.journey} /> : null}
 
-      {home.product.enabled && product ? (
+      {show.product && product ? (
         <ProductMoment
           chapter={home.product}
           product={product}
+          varieties={varieties}
           whatsapp={await whatsappLink(
             `Hi ${settings.brandName}, I would like to order ${product.name}${
               product.weightLabel ? ` (${product.weightLabel})` : ''
@@ -94,15 +109,15 @@ export default async function HomePage() {
         />
       ) : null}
 
-      {home.food.enabled && recipes.length > 0 ? (
+      {show.food && recipes.length > 0 ? (
         <Food food={home.food} recipes={recipes} categories={recipeCategories} />
       ) : null}
 
-      {home.quality.enabled ? (
+      {show.quality ? (
         <Quality quality={home.quality} testimonial={testimonial} />
       ) : null}
 
-      {home.finalCta.enabled ? (
+      {show.finalCta ? (
         <FinalFrame
           finalCta={home.finalCta}
           brandName={settings.brandName}
