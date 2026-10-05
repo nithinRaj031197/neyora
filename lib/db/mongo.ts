@@ -53,7 +53,27 @@ function connect(): Promise<MongoClient> {
     appName: 'neyora',
   })
 
-  const promise = client.connect()
+  /*
+   * A FAILED connection must not be cached.
+   *
+   * Caching the promise is what keeps one client per process. But if that
+   * first connect() rejects — Atlas briefly unreachable, an IP not yet in the
+   * access list, a laptop that was asleep — the rejected promise is what every
+   * later request receives, forever. The database comes back and the site does
+   * not, until someone restarts the server. That cost an afternoon: Atlas was
+   * fixed and the admin page kept insisting it could not connect.
+   *
+   * So on failure the cache entry is dropped and the socket closed, and the
+   * next request builds a fresh client and tries again.
+   */
+  const promise = client.connect().catch((error: unknown) => {
+    if (globalCache[GLOBAL_KEY]?.client === client) {
+      globalCache[GLOBAL_KEY] = undefined
+    }
+    void client.close().catch(() => {})
+    throw error
+  })
+
   globalCache[GLOBAL_KEY] = { client, promise }
   return promise
 }
