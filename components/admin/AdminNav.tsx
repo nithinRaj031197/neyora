@@ -27,6 +27,7 @@ import { cn } from '@/lib/utils/cn'
 const LINKS: { href: string; label: string; icon: IconName }[] = [
   { href: '/admin', label: 'Orders', icon: 'clock' },
   { href: '/admin/products', label: 'Products', icon: 'leaf' },
+  { href: '/admin/farm', label: 'Farm', icon: 'flame' },
   { href: '/admin/settings', label: 'Settings', icon: 'phone' },
 ]
 
