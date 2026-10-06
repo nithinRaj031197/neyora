@@ -1,4 +1,5 @@
 import 'server-only'
+import { googleCredentials, normalisePrivateKey } from '@/lib/google/credentials'
 
 /**
  * Google Sheets credentials.
@@ -24,47 +25,21 @@ export interface SheetsConfig {
 
 const read = (name: string): string | undefined => process.env[name]?.trim() || undefined
 
-/**
- * Put the newlines back into a PEM key.
- *
- * A PKCS#8 key is multi-line, and almost every way of getting one into an
- * environment variable mangles that: `.env` files collapse it to a single line
- * with literal `\n`, dashboards sometimes add surrounding quotes, and copy and
- * paste adds carriage returns. All three produce the same symptom — a key that
- * imports with an opaque DOMException at the first sync and nowhere else.
- */
-export function normalisePrivateKey(raw: string): string {
-  return raw
-    .trim()
-    // A value pasted with its surrounding quotes still intact.
-    .replace(/^["']|["']$/g, '')
-    // The literal two-character sequence backslash-n, not a newline.
-    .replace(/\\n/g, '\n')
-    .replace(/\r/g, '')
-}
+/** Re-exported so existing callers and tests keep one import site. */
+export { normalisePrivateKey }
 
 export function sheetsConfig(): SheetsConfig | null {
   const spreadsheetId = read('GOOGLE_SHEETS_ID')
-  const clientEmail = read('GOOGLE_SERVICE_ACCOUNT_EMAIL')
-  const rawKey = read('GOOGLE_PRIVATE_KEY')
-  if (!spreadsheetId || !clientEmail || !rawKey) return null
-
-  const privateKey = normalisePrivateKey(rawKey)
-  // A key that is not PEM will fail at import with a message that says nothing
-  // useful. Better to notice the shape here, where it can be explained.
-  if (!privateKey.includes('BEGIN PRIVATE KEY')) {
-    console.error(
-      '[sheets] GOOGLE_PRIVATE_KEY does not look like a PKCS#8 PEM key ' +
-        '(expected a "-----BEGIN PRIVATE KEY-----" block). Sheets sync is disabled.',
-    )
-    return null
-  }
+  // One service account, many spreadsheets: the credentials are shared with
+  // the farm workbook, only the spreadsheet id differs.
+  const credentials = googleCredentials()
+  if (!spreadsheetId || !credentials) return null
 
   return {
     spreadsheetId,
     sheetName: read('GOOGLE_SHEETS_TAB') ?? 'Orders',
-    clientEmail,
-    privateKey,
+    clientEmail: credentials.clientEmail,
+    privateKey: credentials.privateKey,
   }
 }
 
