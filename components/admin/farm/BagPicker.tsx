@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, useTransition } from 'react'
 import { loadBagsAction, type BagsState } from '@/lib/farm/actions'
 import type { PickerBag } from '@/lib/farm/repository'
+import { LoadingBar } from '@/components/ui/LoadingBar'
 import { cn } from '@/lib/utils/cn'
 
 /**
@@ -91,7 +92,17 @@ export function BagPicker({
     : bags
 
   if (pending && bags.length === 0) {
-    return <Shell>Loading bags…</Shell>
+    /*
+     * Fetching this batch's bags is a second spreadsheet read, and the admin
+     * has just tapped "Select specific bags" — so this is the one moment they
+     * are definitely waiting on Google. Same bar as the page fallback, so the
+     * wait reads the same wherever it happens.
+     */
+    return (
+      <Shell>
+        <LoadingBar label="Fetching this batch's bags…" />
+      </Shell>
+    )
   }
 
   if (error) {

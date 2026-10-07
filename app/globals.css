@@ -1188,3 +1188,57 @@
     }
   }
 }
+
+/* --------------------------------------------------------------------------
+   INDETERMINATE PROGRESS — "we are waiting on Google Sheets"
+
+   Indeterminate on purpose. A spreadsheet read takes somewhere between a few
+   hundred milliseconds and several seconds depending on how much history the
+   workbook holds and how Google feels, and there is no progress event to
+   count. A determinate bar would therefore have to invent its percentage,
+   which is worse than saying nothing: it sets an expectation the app cannot
+   keep, and a bar that sits at 90% for four seconds reads as broken.
+
+   A sweep says only "still working", which is the honest claim.
+
+   Pure CSS, so it runs inside a `loading.tsx` server component with no client
+   JavaScript — the fallback is streamed as part of the HTML and starts
+   animating before React has hydrated anything.
+   -------------------------------------------------------------------------- */
+@layer components {
+  .progress-linear {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--color-beige-soft);
+  }
+
+  /* Under reduced motion the track alone remains: visible, still, and paired
+     with the "Loading…" text that carries the same meaning for anyone who
+     cannot see it. Motion is the garnish here, never the message. */
+  .progress-linear::after { content: none; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @layer components {
+    @keyframes progress-sweep {
+      /* Enters from off-left, leaves off-right, so the bar never appears to
+         stall at either end while a slow request is still in flight. */
+      from { transform: translateX(-100%); }
+      to   { transform: translateX(400%); }
+    }
+    .progress-linear::after {
+      content: '';
+      position: absolute;
+      inset-block: 0;
+      inline-size: 25%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--color-botanical) 45%,
+        var(--color-botanical) 55%,
+        transparent
+      );
+      animation: progress-sweep 1.15s ease-in-out infinite;
+    }
+  }
+}
